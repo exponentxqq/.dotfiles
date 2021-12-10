@@ -23,10 +23,10 @@
 	nnoremap <C-k> <C-w>k
 	nnoremap <C-h> <C-w>h
 	nnoremap <C-l> <C-w>l
-	nnoremap <up> :res +1<CR>
-	nnoremap <down> :res -1<CR>
-	nnoremap <left> :vertical resize-1<CR>
-	nnoremap <right> :vertical resize+1<CR>
+	nnoremap <S-up> :res +1<CR>
+	nnoremap <S-down> :res -1<CR>
+	nnoremap <S-left> :vertical resize-1<CR>
+	nnoremap <S-right> :vertical resize+1<CR>
 " }}}
 " 缩进连续键设置：使用tab键缩进 {{{
     nnoremap <Tab> V>
@@ -74,6 +74,7 @@
 	inoremap ;f <Esc>/<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
     inoremap ;s <++><Esc>F<i
     inoremap ;d <Esc>A
+    nnoremap gp %
 " }}}
 " 代码块收起/展开 {{{
 	noremap + za
