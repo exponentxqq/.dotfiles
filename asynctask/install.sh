@@ -18,7 +18,7 @@ if [ ! -f ~/.config/asynctask/tasks.ini ]; then
     if [ ! -d ~/.config/asynctask ]; then
         mkdir ~/.config/asynctask
     fi
-    cp $BASEDIR/tasks.ini ~/.config/asynctask/tasks.ini || echo tasks.ini already exists.
+    ln -s $BASEDIR/config ~/.config/asynctask || echo tasks.ini already exists
 fi
 
 sh $BASEDIR/../tool.sh fzf

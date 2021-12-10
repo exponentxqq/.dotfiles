@@ -1,0 +1,72 @@
+"" Source your .vimrc
+source ~/.vim/vimrc
+source ~/.vim/config/shortcut.vim
+
+"" -- Suggested options --
+" Show a few lines of context around the cursor. Note that this makes the
+" text scroll if you mouse-click near the start or end of the window.
+set scrolloff=4
+set keep-english-in-normal
+set surround
+
+" Do incremental searching.
+set incsearch
+map <leader>r <Action>(IdeaVim.ReloadVimRc.reload)
+
+" tab config {{{
+  map t1 <Action>(GoToTab1)
+  map t2 <Action>(GoToTab2)
+  map t3 <Action>(GoToTab3)
+  map t4 <Action>(GoToTab4)
+  map t5 <Action>(GoToTab5)
+  map t6 <Action>(GoToTab6)
+  map t7 <Action>(GoToTab7)
+  map t8 <Action>(GoToTab8)
+  map t9 <Action>(GoToTab9)
+  map tl <Action>(GoToLastTab)
+  map tt <Action>(GoToTab1)
+  map tn <Action>(NextTab)
+  map tp <Action>(PreviousTab)
+  map tc <Action>(CloseAllEditorsButActive)
+" }}}
+
+" file config {{{
+  map <leader>of <Action>(OpenFile)
+  map <leader>or <Action>(ManageRecentProjects)
+  map <leader>cp <Action>(CloseProject)
+" }}}
+" Don't use Ex mode, use Q for formatting.
+map Q gq
+
+" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+" Map \r to the Reformat Code action
+map <leader>f <Action>(OptimizeImports)<Action>(ReformatCode)
+
+" debug config {{{
+  "" Map <leader>d to start debug
+  " map <leader>d <Action>(Debug)
+  "" Map <leader>b to toggle the breakpoint on the current line
+  map <leader>ds <Action>(ChooseDebugConfiguration)
+  map <leader>db <Action>(ToggleLineBreakpoint)
+" }}}
+
+" goto config {{{
+  map gf <Action>(GotoFile)
+  map gc <Action>(GotoClass)
+  map ga <Action>(SearchEverywhere)
+  map gi <Action>(GotoImplementation)
+  map gu <Action>(GotoSuperMethod)
+  map ge <Action>(GotoNextError)
+" }}}
+
+" view config {{{
+  map <leader>vd <Action>(ActivateDatabaseToolWindow)
+  map <leader>vg <Action>(ActivateGradleToolWindow)
+" }}}
+" edit config {{
+  map <leader>cl <Action>(CommentBLineComment)
+  map rr <Action>(RenameElement)
+  map zc <Action>(CollapseBlock)
+  map ze <Action>(ExpandRegion)
+" }}}
+" Find more examples here: https://jb.gg/share-ideavimrc
