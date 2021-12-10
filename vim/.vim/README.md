@@ -1,0 +1,2 @@
+# xqq's vimrc
+
