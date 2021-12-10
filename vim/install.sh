@@ -15,3 +15,8 @@ if [ ! -d ~/.vim ]; then
     ln -s $BASEDIR/.vim ~/.vim
 fi
 
+if [ ! -d ~/.vim/backup ]; then
+    mkdir ~/.vim/backup
+    mkdir ~/.vim/swp
+    mkdir ~/.vim/undo
+fi
