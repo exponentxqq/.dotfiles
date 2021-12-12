@@ -48,6 +48,8 @@
 	nnoremap L 5L
 	noremap E $
 	noremap F ^
+    nnoremap <leader>j  :<c-u>execute 'move +'. v:count1<cr>
+    nnoremap <leader>k  :<c-u>execute 'move -1-'. v:count1<cr>
 " }}}
 " 保存退出快捷键 {{{
     noremap <leader>q <Esc>:q<CR>
@@ -71,6 +73,7 @@
     inoremap < <><left>
     inoremap ' ''<left>
     inoremap " ""<left>
+    inoremap ` ``<left>
 	inoremap ;f <Esc>/<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
     inoremap ;s <++><Esc>F<i
     inoremap ;d <Esc>A
