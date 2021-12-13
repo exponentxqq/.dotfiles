@@ -4,6 +4,11 @@ filetype plugin off
 filetype indent off
 filetype plugin indent on
 
+let $VIMHOME = $HOME . '/.vim'
+if has('win32') || has ('win64')
+    let $VIMHOME = $VIM . '/vimfiles'
+endif
+
 set backspace=indent,eol,start
 set backupdir=~/.vim/.backup//
 set directory=~/.vim/.swp//
@@ -58,11 +63,11 @@ noremap <leader>p :set paste!<Bar>set paste?<CR>
 " 连续键配置
 let mapleader=" " " 设置连续键前缀为,(默认为\)
 " 快捷键载入
-source $HOME/.vim/config/shortcut.vim
+source $VIMHOME/config/shortcut.vim
 " 插件载入
-source $HOME/.vim/config/plug-load.vim
+source $VIMHOME/config/plug-load.vim
 " 自定义vim命令
-source $HOME/.vim/config/command.vim
+source $VIMHOME/config/command.vim
 
 augroup default
 	autocmd!

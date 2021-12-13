@@ -14,11 +14,46 @@ function! s:foo() abort
 endfunction
 call s:foo()
 
+" 全局函数必须以大驼峰命名
 " range声明函数是个范围函数，可以传递诸如`1,5`、`1,$`之类的指定文本范围的参数
-function! g:test_range() range
+function! TestRange() abort range
     let l:line = getline('.')
     let l:line = line('.') . ' ' . l:line
     call setline('.', l:line)
+endfunction
+
+" 可变参数
+function! UseVarargin(named, ...)
+    echo 'named argin: ' . string(a:named)
+    if a:0 >= 1
+        echo 'first varargin: ' . string(a:1)
+    endif
+    if a:0 >= 2
+        echo 'second varargin: ' . string(a:2)
+    endif
+
+    echo 'have varargin: ' . a:0
+    for l:arg in a:000
+        echo 'iterate varargin: ' . string(l:arg)
+    endfor
+endfunction
+
+" 闭包函数
+function! Foo()
+    let x = 0
+    function! Bar() closure
+        let x += 1
+        return x
+    endfunction
+    return funcref('Bar')
+endfunction
+
+function! BufLoaded() abort
+    let l:lsBufShow = []
+    for i in range(1, tabpagenr('$'))
+        call extend(l:lsBufShow, tabpagebuflist(i))
+    endfor
+    return l:lsBufShow
 endfunction
 
 finish

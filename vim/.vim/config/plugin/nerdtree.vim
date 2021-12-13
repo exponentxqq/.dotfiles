@@ -14,10 +14,7 @@ let g:NERDTreeHidden=1
 " nerdtree要忽略的文件
 let NERDTreeIgnore=['\.pyc','\~$','\.swp']
 
-nnoremap <C-1> :NERDTreeToggle<CR>
-nnoremap <leader>dir :NERDTreeToggle<CR>
 nnoremap <leader>1 :NERDTreeToggle<CR>
-nnoremap <C-l> <C-w>l
 
 augroup nerdtree
 	autocmd!

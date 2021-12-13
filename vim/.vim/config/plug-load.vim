@@ -1,6 +1,6 @@
 function! SourcePluginConfig()
-	for config_file in readdir($HOME."/.vim/config/plugin")
-	    exec "source ".$HOME."/.vim/config/plugin/".config_file
+	for config_file in readdir($VIMHOME."/config/plugin")
+	    exec "source ".$VIMHOME."/config/plugin/".config_file
 	endfor
 endfunction
 
