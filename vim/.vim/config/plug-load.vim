@@ -42,6 +42,8 @@ Plug 'kien/rainbow_parentheses.vim'
 Plug 'tpope/vim-speeddating'
 " emmet html
 Plug 'mattn/emmet-vim'
+" 自动填充成对匹配的符号
+Plug 'jiangmiao/auto-pairs'
 
 call plug#end()
 

@@ -59,25 +59,31 @@
 	noremap <leader>S <Esc>:w!<CR>
 " }}}
 " 编辑相关配置 {{{
-	noremap <CR> o<Esc>
-	noremap <C-CR> O<Esc>
-	noremap U <C-r>
-    noremap <leader>t :terminal<CR>
-	inoremap jk <Esc><right>
-    inoremap <Esc> <Esc><right>
-	inoremap <C-x> <Esc>:
-    inoremap <C-d> <Esc>yyp
-	inoremap ( ()<left>
-    inoremap { {}<left>
-    inoremap [ []<left>
-    inoremap < <><left>
-    inoremap ' ''<left>
-    inoremap " ""<left>
-    inoremap ` ``<left>
-	inoremap ;f <Esc>/<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
-    inoremap ;s <++><Esc>F<i
-    inoremap ;d <Esc>A
-    nnoremap gp %
+    " Operater-pending模式{{{
+        onoremap q i"
+    " }}}
+    " insert模式 {{{
+        inoremap jk <Esc><right>
+        inoremap <Esc> <Esc><right>
+        inoremap <C-x> <Esc>:
+        inoremap ;f <Esc>/<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
+        inoremap <C-d> <Esc>yyp
+        inoremap ;s <++><Esc>F<i
+        inoremap ;d <Esc>A
+        inoremap ;o <Esc>o
+    " }}}
+    " normal模式 {{{
+        noremap <CR> o<Esc>
+        noremap <C-CR> O<Esc>
+        noremap U <C-r>
+        noremap <leader>t :terminal<CR>
+        nnoremap gp %
+    " }}}
+    " abbreviate模式, 输入后按<space>可触发，使用<C-v>||<Esc>可取消触发 {{{
+        abbreviate higth hight
+        abbreviate inc# #include
+        abbreviate <expr> today strftime("%Y/%m/%d")
+    " }}}
 " }}}
 " 代码块收起/展开 {{{
 	noremap + za

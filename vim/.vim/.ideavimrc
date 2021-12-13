@@ -13,6 +13,7 @@ let mapleader=" "
 " Do incremental searching.
 set incsearch
 map <leader>r <Action>(IdeaVim.ReloadVimRc.reload)
+map <leader><leader> :nohl<CR>
 
 " tab config {{{
   map t1 <Action>(GoToTab1)
