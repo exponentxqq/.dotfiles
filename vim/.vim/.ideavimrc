@@ -14,6 +14,8 @@ let mapleader=" "
 set incsearch
 map <leader>r <Action>(IdeaVim.ReloadVimRc.reload)
 map <leader><leader> :nohl<CR>
+inoremap ;o <Esc>$i;<CR>
+map ;gp <Esc>%%i
 
 " tab config {{{
   map t1 <Action>(GoToTab1)
@@ -66,9 +68,10 @@ map <leader>f <Action>(OptimizeImports)<Action>(ReformatCode)
   map <leader>vg <Action>(ActivateGradleToolWindow)
 " }}}
 " edit config {{
-  map <leader>cl <Action>(CommentBLineComment)
-  map rr <Action>(RenameElement)
+  map <leader>ci <Action>(CommentBLineComment)
+  map <leader>rr <Action>(RenameElement)
   map zc <Action>(CollapseBlock)
   map ze <Action>(ExpandRegion)
+  map zt <Action>(ToggleRenderedDocPresentation)
 " }}}
 " Find more examples here: https://jb.gg/share-ideavimrc

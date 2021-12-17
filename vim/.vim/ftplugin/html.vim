@@ -1,3 +1,3 @@
 
-echo "load html file"
+let b:AutoPairs = AutoPairsDefine({'<!--': '-->'})
 

@@ -82,12 +82,16 @@ plugins=(
   z
   zsh-syntax-highlighting
   zsh-autosuggestions
+  zsh-interactive-cd
   aws
   command-not-found
   docker
   docker-compose
   sudo
   vi-mode
+  ag
+  fzf
+  tmux
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -115,11 +119,12 @@ source $ZSH/oh-my-zsh.sh
 # For a full list of active aliases, run `alias`.
 export FZF_COMPLETION_TRIGGER=**
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(bat {} || cat {}) 2> /dev/null | head -500'"
+export SHELLPROXY_CONFIG="$HOME/.dotfiles/zsh/proxy-config"
 
 #
 # Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+alias zshconfig="vim ~/.zshrc"
+alias ohmyzsh="vim ~/.oh-my-zsh"
 alias cat="bat"
 alias rootless=csrutil
 alias allow-all="sudo spctl --master-disable" # 允许所有来源
@@ -142,6 +147,8 @@ tasklist() {
 }
 bindkey '`' 'autosuggest-accept'
 zle -N tasklist && bindkey ^R tasklist
+
+fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

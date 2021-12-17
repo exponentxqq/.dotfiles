@@ -46,6 +46,10 @@
 	nnoremap K 5k
 	nnoremap H 5h
 	nnoremap L 5L
+    vnoremap J 5j
+    vnoremap K 5k
+    vnoremap H 5h
+    vnoremap L 5l
 	noremap E $
 	noremap F ^
     nnoremap <leader>j  :<c-u>execute 'move +'. v:count1<cr>
@@ -57,6 +61,7 @@
 	noremap <leader>x <Esc>:x<CR>
 	noremap <leader>Q <Esc>:q!<CR>
 	noremap <leader>S <Esc>:w!<CR>
+	noremap <leader>X <Esc>:x!<CR>
 " }}}
 " 编辑相关配置 {{{
     " Operater-pending模式{{{
@@ -67,9 +72,10 @@
         inoremap <Esc> <Esc><right>
         inoremap <C-x> <Esc>:
         inoremap ;f <Esc>/<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
+        nnoremap <leader>f /<++><CR>:nohlsearch<CR>i<Del><Del><Del><Del>
         inoremap <C-d> <Esc>yyp
         inoremap ;s <++><Esc>F<i
-        inoremap ;d <Esc>A
+        inoremap ;ge <Esc>A
         inoremap ;o <Esc>o
     " }}}
     " normal模式 {{{
@@ -77,7 +83,6 @@
         noremap <C-CR> O<Esc>
         noremap U <C-r>
         noremap <leader>t :terminal<CR>
-        nnoremap gp %
     " }}}
     " abbreviate模式, 输入后按<space>可触发，使用<C-v>||<Esc>可取消触发 {{{
         abbreviate higth hight
