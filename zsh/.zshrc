@@ -125,7 +125,6 @@ export SHELLPROXY_CONFIG="$HOME/.dotfiles/zsh/proxy-config"
 # Example aliases
 alias zshconfig="vim ~/.zshrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
-alias cat="bat"
 alias rootless=csrutil
 alias allow-all="sudo spctl --master-disable" # 允许所有来源
 alias s='neofetch'
