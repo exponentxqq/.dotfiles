@@ -1,5 +1,7 @@
 #!/bin/bash
 
+THEME="default"
+
 # Terminate already running bar instances
 killall -q polybar
 
@@ -7,5 +9,6 @@ killall -q polybar
 while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 
 # Launch Polybar, using default config location ~/.config/polybar/config
-polybar mybar
+CONFIG_DIR=$(dirname $0)/themes/$THEME/config.ini
+polybar main -c $CONFIG_DIR &
 
