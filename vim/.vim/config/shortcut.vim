@@ -44,14 +44,12 @@
 " 移动键设置 {{{
 	nnoremap J 5j
 	nnoremap K 5k
-	nnoremap H 5h
-	nnoremap L 5L
+	nnoremap H ^
+	nnoremap L $
     vnoremap J 5j
     vnoremap K 5k
-    vnoremap H 5h
-    vnoremap L 5l
-	noremap E $
-	noremap F ^
+    vnoremap H ^
+    vnoremap L $
     nnoremap <leader>j  :<c-u>execute 'move +'. v:count1<cr>
     nnoremap <leader>k  :<c-u>execute 'move -1-'. v:count1<cr>
 " }}}

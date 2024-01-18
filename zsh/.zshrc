@@ -92,6 +92,7 @@ plugins=(
   ag
   fzf
   tmux
+  pnpm-shell-completion
 )
 
 source $ZSH/oh-my-zsh.sh

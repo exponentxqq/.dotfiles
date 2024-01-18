@@ -8,6 +8,7 @@ source ~/.vim/config/shortcut.vim
 set scrolloff=5
 set keep-english-in-normal
 set surround
+set easymotion
 
 let mapleader=" "
 " Do incremental searching.
@@ -16,6 +17,13 @@ map <leader>r <Action>(IdeaVim.ReloadVimRc.reload)
 map <leader><leader> :nohl<CR>
 inoremap ;o <Esc>$i;<CR>
 map ;gp <Esc>%%i
+
+map "i( <Esc>vi(c"<Esc>hp
+map "a( <Esc>va(c"<Esc>hp
+map "iw <Esc>viwc"<Esc>hp
+map 'i( <Esc>vi(c'<Esc>hp
+map 'a( <Esc>va(c'<Esc>hp
+map 'iw <Esc>viwc'<Esc>hp
 
 " tab config {{{
   map t1 <Action>(GoToTab1)
@@ -61,6 +69,7 @@ map <leader>f <Action>(OptimizeImports)<Action>(ReformatCode)
   map gi <Action>(GotoImplementation)
   map gu <Action>(GotoSuperMethod)
   map ge <Action>(GotoNextError)
+  map gt <Action>(GotoTest)
 " }}}
 
 " view config {{{
