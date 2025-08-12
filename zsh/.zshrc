@@ -89,10 +89,8 @@ plugins=(
   docker-compose
   sudo
   vi-mode
-  ag
   fzf
   tmux
-  pnpm-shell-completion
 )
 
 source $ZSH/oh-my-zsh.sh

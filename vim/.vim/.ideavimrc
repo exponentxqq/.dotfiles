@@ -45,7 +45,8 @@ map 'iw <Esc>viwc'<Esc>hp
 " file config {{{
   map <leader>of <Action>(OpenFile)
   map <leader>or <Action>(ManageRecentProjects)
-  map <leader>cp <Action>(CloseProject)
+  map <leader>ep <Action>(CloseProject)
+  map <leader>ea <Action>(CloseOtherProject)
 " }}}
 " Don't use Ex mode, use Q for formatting.
 map Q gq
