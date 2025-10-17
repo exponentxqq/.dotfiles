@@ -126,16 +126,17 @@ alias zshconfig="vim ~/.zshrc"
 alias ohmyzsh="vim ~/.oh-my-zsh"
 alias rootless=csrutil
 alias allow-all="sudo spctl --master-disable" # 允许所有来源
-alias s='neofetch'
+alias s='fastfetch'
+alias pnpm="docker-run node pnpm"
+alias npm="docker-run node npm"
 alias weather="curl http://wttr.in/hangzhou"
-alias wget="docker-run workspace wget"
-alias mysql="docker-run workspace mycli -h dockerhost"
+alias mysql="docker-run mysql mycli -h dockerhost"
 alias php="docker-run fpm php"
 alias composer="docker-run fpm composer"
 alias artisan="docker-run fpm php artisan"
 alias node="docker-run node node"
 alias npx="docker-run node npx"
-# alias npm="docker-run node npm"
+alias npm="docker-run node npm"
 alias yarn="docker-run node yarn"
 alias aws="docker-run python aws"
 alias t="asynctask -f"
@@ -150,3 +151,6 @@ fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+#[ -f ~/.completion/pnpm.zsh ] && source ~/.completion/pnpm.zsh
+source ~/.completion/pnpm.zsh
+

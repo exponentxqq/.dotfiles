@@ -1,0 +1,19 @@
+[global_config]
+  window_state = hidden
+  homogeneous_tabbar = False
+  hide_from_taskbar = True
+[keybindings]
+[profiles]
+  [[default]]
+    show_titlebar = False
+    copy_on_selection = True
+[layouts]
+  [[default]]
+    [[[window0]]]
+      type = Window
+      parent = ""
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+      profile = default
+[plugins]
