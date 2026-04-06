@@ -1,0 +1,34 @@
+{
+  "plugins": [
+    {
+      "name": "claude-hud",
+      "marketplace": "claude-hud",
+      "repo": "jarrodwatts/claude-hud"
+    },
+    {
+      "name": "feature-dev",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "frontend-design",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "superpowers",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "document-skills",
+      "marketplace": "anthropic-agent-skills",
+      "repo": "anthropics/skills"
+    },
+    {
+      "name": "claude-mem",
+      "marketplace": "thedotmack",
+      "repo": "thedotmack/claude-mem"
+    }
+  ]
+}
