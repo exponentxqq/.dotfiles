@@ -14,9 +14,9 @@ if vim.fn.has('termguicolors') == 1 then
 end
 
 -- 编码设置
-vim.opt.encoding = 'utf-8'
-vim.opt.fileencoding = 'utf-8'
-vim.opt.fileencodings = { 'utf-8', 'gb18030', 'gbk', 'gb2312' }
+vim.o.encoding = 'utf-8'
+vim.o.fileencoding = 'utf-8'
+vim.o.fileencodings = 'utf-8,gb18030,gbk,gb2312'
 
 --============================================================
 -- 界面设置
@@ -108,6 +108,16 @@ vim.api.nvim_create_autocmd('TermOpen', {
 vim.api.nvim_create_user_command('ReloadConfig', function()
     dofile(vim.env.VIMINIT or vim.env.NVIM_INIT or vim.env.HOME .. '/.config/nvim/init.lua')
 end, {})
+
+--============================================================
+-- 加载配置文件
+--============================================================
+
+-- 加载键位映射
+dofile(vim.env.HOME .. '/.config/nvim/keymaps.lua')
+
+-- 加载自定义命令
+dofile(vim.env.HOME .. '/.config/nvim/commands.lua')
 
 --============================================================
 -- 启动 lazy.nvim

@@ -8,7 +8,9 @@ local cmd = vim.api.nvim_create_user_command
 
 -- 重新加载配置
 cmd('ReloadConfig', function()
-   vim.fn(source(vim.env.VIMINIT or vim.env.NVIM_INIT or vim.env.HOME .. '/.config/nvim/init.lua'))
+   print('配置已重新加载')
+   -- 只重新加载插件配置，不重新加载整个 init.lua
+   require('lazy').setup(require('plugins'))
 end, {})
 
 --============================================================
@@ -16,7 +18,7 @@ end, {})
 --============================================================
 
 -- 保存所有文件
-cmd('W`, function()
+cmd('W', function()
     vim.cmd('wall')
 end, {})
 

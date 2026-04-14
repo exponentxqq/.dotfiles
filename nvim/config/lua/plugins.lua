@@ -72,9 +72,10 @@ return {
             -- 快捷键
             local builtin = require('telescope.builtin')
             vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '查找文件' })
-            vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '全文搜索' })
             vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = '查找缓冲区' })
             vim.keymap.set('n', '<leader>fh', builtin.oldfiles, { desc = '历史文件' })
+            vim.keymap.set('n', '<leader>fl', builtin.grep_string, { desc = '搜索光标下单词' })
+            vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '全文搜索' })
         end,
     },
 
