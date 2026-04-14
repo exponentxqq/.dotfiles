@@ -21,6 +21,31 @@
       "repo": "anthropics/claude-plugins-official"
     },
     {
+      "name": "code-review",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "typescript-lsp",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "skill-creator",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "chrome-devtools-mcp",
+      "marketplace": "claude-plugins-official",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    {
+      "name": "web-access",
+      "marketplace": "web-access",
+      "repo": "eze-is/web-access"
+    },
+    {
       "name": "document-skills",
       "marketplace": "anthropic-agent-skills",
       "repo": "anthropics/skills"

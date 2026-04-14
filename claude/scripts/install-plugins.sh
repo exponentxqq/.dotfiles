@@ -3,11 +3,15 @@
 
 set -e
 
-PLUGINS_FILE="${HOME}/.dotfiles/claude/plugins.json"
+PLUGINS_FILE="${HOME}/develop/dotfiles/claude/plugins.json"
 
 if [ ! -f "$PLUGINS_FILE" ]; then
-    echo "Error: $PLUGINS_FILE not found"
-    exit 1
+    # Fallback to the original location
+    PLUGINS_FILE="${HOME}/.dotfiles/claude/plugins.json"
+    if [ ! -f "$PLUGINS_FILE" ]; then
+        echo "Error: plugins.json not found in either ${HOME}/develop/dotfiles/claude/plugins.json or ${HOME}/.dotfiles/claude/plugins.json"
+        exit 1
+    fi
 fi
 
 # Parse plugins using jq (install if not available)
