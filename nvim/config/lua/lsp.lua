@@ -29,9 +29,10 @@ function M.setup_mason_lsp()
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
     require('mason-lspconfig').setup({
+        -- 须为 nvim-lspconfig 的 server 名，勿写 Mason 包名（如 typescript-language-server → ts_ls）
         ensure_installed = {
             'jdtls',
-            'typescript-language-server',
+            'ts_ls',
             'basedpyright',
         },
         handlers = {
