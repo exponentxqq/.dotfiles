@@ -158,3 +158,39 @@ map('n', '<leader>t', ':terminal<CR>', opts)
 
 -- 格式化
 map('n', '<leader>f', ':Format<CR>', opts)
+
+-- 强制走 LSP 的跳转（不依赖 gd 是否被抢键）
+map('n', '<leader>gd', vim.lsp.buf.definition, vim.tbl_extend('force', opts, { desc = 'LSP 跳转定义' }))
+
+-- gd：VeryLazy 后再盖一层全局映射；无 LSP 时只提示，绝不走 :tag（避免 E433/E426）
+vim.api.nvim_create_autocmd('User', {
+    pattern = 'VeryLazy',
+    once = true,
+    callback = function()
+        vim.keymap.set('n', 'gd', function()
+            local bufnr = vim.api.nvim_get_current_buf()
+            if next(vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/definition' })) then
+                vim.lsp.buf.definition()
+            else
+                vim.notify(
+                    '当前缓冲区无 LSP（textDocument/definition）。Java 请 :LspInfo 确认 jdtls；或先用 <leader>gd。',
+                    vim.log.levels.WARN
+                )
+            end
+        end, vim.tbl_extend('force', opts, { desc = '跳转定义（仅 LSP）' }))
+        -- 再延后一次，压过在 VeryLazy 里注册 gd 的插件
+        vim.defer_fn(function()
+            vim.keymap.set('n', 'gd', function()
+                local bufnr = vim.api.nvim_get_current_buf()
+                if next(vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/definition' })) then
+                    vim.lsp.buf.definition()
+                else
+                    vim.notify(
+                        '当前缓冲区无 LSP（textDocument/definition）。Java 请 :LspInfo 确认 jdtls；或先用 <leader>gd。',
+                        vim.log.levels.WARN
+                    )
+                end
+            end, vim.tbl_extend('force', opts, { desc = '跳转定义（仅 LSP）' }))
+        end, 100)
+    end,
+})

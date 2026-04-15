@@ -84,6 +84,66 @@ vim.opt.undofile = true
 
 -- 保存时格式化由 conform.nvim 的 format_on_save 处理（见 lua/plugins.lua）
 
+-- Java：绑定 gd / <C-LeftMouse> / <C-]>，完全绕开 tagfunc/tag 路径（E433/E426 根源）。
+-- 用原始 client:request，不经过 vim.lsp.buf.definition() 的 settagstack 分支。
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'java',
+    group = vim.api.nvim_create_augroup('java-lsp-nav', { clear = true }),
+    callback = function(ev)
+        local buf = ev.buf
+        -- 安全 tagfunc：返回 {} 而非 vim.NIL，防止剩余 tag 路径触发 E433
+        vim.bo[buf].tagfunc = "v:lua.require('java_tagfunc').tagfunc"
+
+        -- 共用的 LSP 定义跳转（不经过任何 tag 代码）
+        local function lsp_definition()
+            local bufnr = vim.api.nvim_get_current_buf()
+            local win = vim.api.nvim_get_current_win()
+            local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/definition' })
+            if #clients == 0 then
+                vim.notify('jdtls 尚未附着，:checkhealth lsp 查看状态', vim.log.levels.WARN)
+                return
+            end
+            local client = clients[1]
+            local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
+            vim.lsp.buf_request(bufnr, 'textDocument/definition', params, function(err, result, ctx)
+                if err then
+                    vim.notify('LSP 定义查询失败: ' .. vim.inspect(err), vim.log.levels.ERROR)
+                    return
+                end
+                if not result or (type(result) == 'table' and vim.tbl_isempty(result)) then
+                    vim.notify('未找到定义（jdtls 可能仍在索引，稍候重试）', vim.log.levels.WARN)
+                    return
+                end
+                local loc = result[1] or result
+                local c = vim.lsp.get_client_by_id(ctx and ctx.client_id) or client
+                local ok, jump_err = pcall(vim.lsp.util.jump_to_location, loc, c.offset_encoding)
+                if not ok then
+                    vim.notify('跳转失败: ' .. tostring(jump_err), vim.log.levels.ERROR)
+                end
+            end)
+        end
+
+        local map_opts = { buffer = buf, noremap = true, silent = false }
+        vim.keymap.set('n', 'gd', lsp_definition, vim.tbl_extend('force', map_opts, { desc = 'LSP 定义（Java）' }))
+        -- Ctrl+Click：先移光标到鼠标位置，再走 LSP（绕开默认的 <C-]>/tagfunc 路径）
+        vim.keymap.set('n', '<C-LeftMouse>', function()
+            local pos = vim.fn.getmousepos()
+            if pos.winid ~= 0 then
+                vim.api.nvim_set_current_win(pos.winid)
+                local col = math.max(0, pos.column - 1)
+                local ok = pcall(vim.api.nvim_win_set_cursor, pos.winid, { pos.line, col })
+                if not ok then return end
+            end
+            lsp_definition()
+        end, vim.tbl_extend('force', map_opts, { silent = true, desc = 'LSP 定义（鼠标）' }))
+        -- <C-]>：同样劫持，避免 tag 路径
+        vim.keymap.set('n', '<C-]>', lsp_definition, vim.tbl_extend('force', map_opts, { silent = true, desc = 'LSP 定义（C-]）' }))
+
+        vim.keymap.set('n', 'gK', vim.lsp.buf.hover,
+            vim.tbl_extend('force', map_opts, { silent = true, desc = 'LSP 文档（Java）' }))
+    end,
+})
+
 -- 终端缓冲区：关闭行号（无标准选项 scrollside，已移除无效赋值）
 vim.api.nvim_create_autocmd('TermOpen', {
     pattern = '*',

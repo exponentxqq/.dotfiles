@@ -1,7 +1,19 @@
 {
+  "permissions": {
+    "autoApprove": [
+      "Read",
+      "Grep",
+      "Glob"
+    ],
+    "requireApproval": [
+      "Bash",
+      "Edit",
+      "Write"
+    ]
+  },
   "statusLine": {
     "type": "command",
-    "command": "bash -c 'plugin_dir=$(ls -d \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | awk -F/ '\\''{ print $(NF-1) \"\\t\" $(0) }'\\'' | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n | tail -1 | cut -f2-); exec \"/opt/local/bin/node\" \"${plugin_dir}dist/index.js\"'"
+    "command": "bash -c 'plugin_dir=$(ls -d \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}\"/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | awk -F/ '\\''{ print $(NF-1) \"\\t\" $(0) }'\\'' | sort -t. -k1,1n -k2,2n -k3,3n -k4,4n | tail -1 | cut -f2-); exec \"/usr/bin/node\" \"${plugin_dir}dist/index.js\"'"
   },
   "enabledPlugins": {
     "claude-hud@claude-hud": true,
@@ -9,7 +21,12 @@
     "frontend-design@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "document-skills@anthropic-agent-skills": true,
-    "claude-mem@thedotmack": true
+    "claude-mem@thedotmack": true,
+    "code-review@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "web-access@web-access": true,
+    "chrome-devtools-mcp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-hud": {
@@ -26,9 +43,30 @@
     },
     "thedotmack": {
       "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
+        "source": "git",
+        "url": "https://github.com/thedotmack/claude-mem.git"
+      }
+    },
+    "web-access": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/eze-is/web-access.git"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/anthropics/claude-plugins-official.git"
       }
     }
+  },
+  "verbose": true,
+  "shell": {
+    "type": "zsh",
+    "historySize": 1000
+  },
+  "git": {
+    "autoCommit": false,
+    "autoPush": false
   }
 }

@@ -27,7 +27,7 @@ marketplaces=$(jq -r '.plugins[] | "\(.marketplace) \(.repo)"' "$PLUGINS_FILE" |
 
 while read -r marketplace repo; do
     echo "Adding marketplace: $marketplace ($repo)"
-    claude plugins marketplace add "$marketplace" --source github --repo "$repo" 2>/dev/null || true
+    claude plugins marketplace add "$marketplace" 2>/dev/null || true
 done <<< "$marketplaces"
 
 # Install each plugin
