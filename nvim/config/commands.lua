@@ -43,12 +43,9 @@ end, {})
 -- 格式化相关
 --============================================================
 
--- 格式化当前文件（供 BufWritePre / <leader>f；勿再 vim.cmd('Format') 自递归）
+-- 格式化当前文件（conform + lsp_fallback；供 <leader>f）
 cmd('Format', function()
-    if vim.tbl_isempty(vim.lsp.get_clients({ bufnr = 0 })) then
-        return
-    end
-    pcall(vim.lsp.buf.format, { async = true, bufnr = 0 })
+    require('conform').format({ async = true, lsp_fallback = true })
 end, {})
 
 --============================================================

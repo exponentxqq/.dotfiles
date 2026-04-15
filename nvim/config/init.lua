@@ -82,21 +82,14 @@ vim.opt.undofile = true
 -- 自动命令
 --============================================================
 
--- 格式化后自动保存
-vim.api.nvim_create_autocmd('BufWritePre', {
-    pattern = { '*.lua', '*.js', '*.ts', '*.python', '*.go', '*.rs' },
-    callback = function()
-        vim.cmd('silent! format')
-    end,
-})
+-- 保存时格式化由 conform.nvim 的 format_on_save 处理（见 lua/plugins.lua）
 
--- 进入终端模式自动进入插入模式
+-- 终端缓冲区：关闭行号（无标准选项 scrollside，已移除无效赋值）
 vim.api.nvim_create_autocmd('TermOpen', {
     pattern = '*',
     callback = function()
-        vim.opt.number = false
-        vim.opt.relativenumber = false
-        vim.wo.scrollside = 'right'
+        vim.opt_local.number = false
+        vim.opt_local.relativenumber = false
     end,
 })
 

@@ -3,6 +3,137 @@
 
 return {
     --============================================================
+    -- Mason / LSP / 格式化 / 补全（spec: docs/superpowers/specs/2026-04-15-nvim-mason-ts-java-python-design.md）
+    --============================================================
+
+    {
+        'mason-org/mason.nvim',
+        cmd = { 'Mason', 'MasonInstall', 'MasonUninstall', 'MasonLog' },
+        config = function()
+            require('mason').setup({
+                PATH = 'prepend',
+                ui = { border = 'rounded' },
+            })
+        end,
+    },
+    {
+        'WhoIsSethDaniel/mason-tool-installer.nvim',
+        dependencies = { 'mason-org/mason.nvim' },
+        config = function()
+            require('mason-tool-installer').setup({
+                ensure_installed = {
+                    'google-java-format',
+                    'ruff',
+                    'eslint_d',
+                },
+                auto_update = false,
+            })
+        end,
+    },
+    {
+        'neovim/nvim-lspconfig',
+        lazy = false,
+    },
+    {
+        'mason-org/mason-lspconfig.nvim',
+        dependencies = {
+            'mason-org/mason.nvim',
+            'neovim/nvim-lspconfig',
+            'hrsh7th/cmp-nvim-lsp',
+        },
+        config = function()
+            require('lsp').setup_mason_lsp()
+        end,
+    },
+    {
+        'mfussenegger/nvim-jdtls',
+        ft = 'java',
+        dependencies = {
+            'mason-org/mason.nvim',
+            'hrsh7th/cmp-nvim-lsp',
+        },
+        config = function()
+            require('lsp').setup_jdtls()
+        end,
+    },
+    {
+        'stevearc/conform.nvim',
+        event = { 'BufWritePre', 'BufNewFile', 'BufReadPost' },
+        config = function()
+            require('conform').setup({
+                format_on_save = {
+                    timeout_ms = 800,
+                    lsp_fallback = true,
+                },
+                formatters_by_ft = {
+                    java = { 'google-java-format' },
+                    javascript = { 'eslint_d', 'eslint' },
+                    javascriptreact = { 'eslint_d', 'eslint' },
+                    typescript = { 'eslint_d', 'eslint' },
+                    typescriptreact = { 'eslint_d', 'eslint' },
+                    vue = { 'eslint_d', 'eslint' },
+                    python = { 'ruff_format' },
+                },
+            })
+        end,
+    },
+    {
+        'hrsh7th/nvim-cmp',
+        event = 'InsertEnter',
+        dependencies = {
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-nvim-lsp',
+            'saadparwaiz1/cmp_luasnip',
+            'L3MON4D3/LuaSnip',
+        },
+        config = function()
+            require('luasnip').config.set_config({
+                history = true,
+                updateevents = 'TextChanged,TextChangedI',
+            })
+            local cmp = require('cmp')
+            local luasnip = require('luasnip')
+            cmp.setup({
+                snippet = {
+                    expand = function(args)
+                        luasnip.lsp_expand(args.body)
+                    end,
+                },
+                mapping = cmp.mapping.preset.insert({
+                    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+                    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+                    ['<C-Space>'] = cmp.mapping.complete(),
+                    ['<C-e>'] = cmp.mapping.abort(),
+                    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+                    ['<Tab>'] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_next_item()
+                        elseif luasnip.expand_or_locally_jumpable() then
+                            luasnip.expand_or_jump()
+                        else
+                            fallback()
+                        end
+                    end, { 'i', 's' }),
+                    ['<S-Tab>'] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_prev_item()
+                        elseif luasnip.jumpable(-1) then
+                            luasnip.jump(-1)
+                        else
+                            fallback()
+                        end
+                    end, { 'i', 's' }),
+                }),
+                sources = cmp.config.sources({
+                    { name = 'nvim_lsp' },
+                    { name = 'luasnip' },
+                    { name = 'buffer' },
+                }),
+            })
+        end,
+    },
+
+    --============================================================
     -- 核心工具
     --============================================================
 
@@ -80,6 +211,11 @@ return {
             vim.keymap.set('n', '<leader>fh', builtin.oldfiles, { desc = '历史文件' })
             vim.keymap.set('n', '<leader>fl', builtin.grep_string, { desc = '搜索光标下单词' })
             vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '全文搜索' })
+            vim.keymap.set('n', '<leader>cm', builtin.commands, { desc = 'Telescope 命令' })
+            vim.keymap.set('n', '<leader>/', builtin.current_buffer_fuzzy_find, { desc = '当前缓冲区模糊查找' })
+            vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = 'Git 文件' })
+            vim.keymap.set('n', '<leader>fs', builtin.current_buffer_fuzzy_find, { desc = '当前缓冲区符号/模糊' })
+            vim.keymap.set('v', '<leader>fs', builtin.current_buffer_fuzzy_find, { desc = '当前缓冲区模糊查找' })
         end,
     },
 
@@ -148,7 +284,7 @@ return {
                     'python', 'go', 'rust',
                     'html', 'css', 'scss',
                     'json', 'yaml', 'toml',
-                    'gitcommit', 'markdown',
+                    'gitcommit', 'markdown', 'vue',
                 },
                 sync_install = false,
                 auto_install = true,
@@ -184,25 +320,7 @@ return {
         end,
     },
 
-    -- 成对符号自动完成 (LuaSnip)
-    {
-        'L3MON4D3/LuaSnip',
-        dependencies = {
-            -- 移除 lua_snippets 依赖，使用 builtin snippets
-        },
-        config = function()
-            require('luasnip').config.set_config({
-                history = true,
-                updateevents = 'TextChanged,TextChangedI',
-            })
-        end,
-    },
-
-    -- 彩虹括号 (替代 rainbow_parentheses.vim)
-    {
-        'nvim-treesitter/nvim-treesitter',
-        -- 使用内置的 rainbow 功能，不需要额外插件
-    },
+    -- LuaSnip 由 nvim-cmp 依赖加载并初始化
 
     -- 插件管理器本身 (.lazy DEMO)
     {
