@@ -117,6 +117,22 @@ return {
         end,
     },
 
+    -- 撤销树（原 plugin/undotree.lua 仅映射了命令但未安装插件）
+    {
+        'mbbill/undotree',
+        keys = { { '<leader>u', '<cmd>UndotreeToggle<CR>', desc = '撤销树' } },
+        config = function()
+            vim.api.nvim_create_autocmd('FileType', {
+                pattern = 'undotree',
+                callback = function()
+                    vim.opt_local.number = false
+                    vim.opt_local.relativenumber = false
+                    vim.wo.cursorline = true
+                end,
+            })
+        end,
+    },
+
     -- Treesitter (语法高亮和代码结构)
     {
         'nvim-treesitter/nvim-treesitter',

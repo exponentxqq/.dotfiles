@@ -1,8 +1,14 @@
 syntax on
-filetype off
-filetype plugin off
-filetype indent off
+set nocompatible        " 禁用 vi 兼容模式
 filetype plugin indent on
+
+" 设置配色方案
+colorscheme flattened_dark
+
+" True Color 支持（Vim 8.0+ 和 Neovim）
+if has('termguicolors')
+    set termguicolors
+endif
 
 let $VIMHOME = $HOME . '/.vim'
 if has('win32') || has ('win64')
@@ -26,11 +32,9 @@ set clipboard+=unnamed
 set cursorline
 set nobackup
 set noswapfile
-set autoread
 set showmatch
 set matchtime=2
 set textwidth=0
-set nocompatible
 set showcmd
 set wildmenu
 set shiftround
@@ -39,43 +43,55 @@ set softtabstop=4
 set shiftwidth=4
 set autoindent
 set expandtab
-set autochdir
-set autoread
+set smarttab
 set nowrap
-" set paste
 set listchars=tab:>-,trail:-
 set incsearch
 set ignorecase
 set smartcase
 set hlsearch
 set scrolloff=8
+set sidescrolloff=5
 set foldmethod=indent
 set foldlevel=99
 
-if &term =~# '256color' && ( &term =~# '^screen'  || &term =~# '^tmux' )
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-    set termguicolors
-endif
-
 noremap <leader>p :set paste!<Bar>set paste?<CR>
 
-" 连续键配置
-let mapleader=" " " 设置连续键前缀为,(默认为\)
+let mapleader=" "  " 设置 leader 键为空格
+
+" 插件目录初始化 - 在 source 之前
+if !filereadable($VIMHOME . '/autoload/plug.vim')
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+endif
+
 " 快捷键载入
 source $VIMHOME/config/shortcut.vim
 " 插件载入
 source $VIMHOME/config/plug-load.vim
+
+" 自动加载插件配置（必须在 plug-load.vim 之后）
+call SourcePluginConfig()
 " 自定义vim命令
 source $VIMHOME/config/command.vim
 
-augroup default
-	autocmd!
-	" 更新vim配置时自动生效
-	autocmd BufWritePost *.vim source $HOME/.vim/vimrc
-	autocmd BufWritePost vimrc source $HOME/.vim/vimrc
-augroup end
+" 自动更新配置 - 限定只更新配置目录的文件
+autocmd! BufWritePost $VIMHOME/vimrc,$VIMHOME/config/*.vim,$VIMHOME/config/plugin/*.vim source $VIMHOME/vimrc
+
 " 记住光标位置
 autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exec "normal! g'\"" | endif
 
+" 自动创建目录
+autocmd DirChanged * call s:ensure_dirs()
+
+function! s:ensure_dirs() abort
+    call mkdir($VIMHOME.'/.backup', 'p')
+    call mkdir($VIMHOME.'/.swp', 'p')
+    call mkdir($VIMHOME.'/.undo', 'p')
+    call mkdir($VIMHOME.'/sessions', 'p')
+endfunction
+
+" 历史命令保存大小
+set history=1000
+" 视觉模式下复制到系统剪贴板
+vnoremap <C-c> "+y
 

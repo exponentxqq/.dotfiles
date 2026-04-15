@@ -9,10 +9,31 @@ let g:NERDTreeWinPos='left'
 let g:NERDTreeShowLineNumbers=1
 " 窗口尺寸
 let g:NERDTreeSize=30
-" 隐藏文件是否显示
-let g:NERDTreeHidden=1
-" nerdtree要忽略的文件
-let NERDTreeIgnore=['\.pyc','\~$','\.swp']
+" 显示隐藏文件和文件夹
+let g:NERDTreeShowHidden = 1
+" 忽略编译产物和临时文件
+let NERDTreeIgnore = [
+    \ '\.pyc$',
+    \ '\.pyo$',
+    \ '\.class$',
+    \ '\.o$',
+    \ '\.a$',
+    \ '\.so$',
+    \ '\.dll$',
+    \ '\.bin$',
+    \ '\..bundle$',
+    \ '\.cache$',
+    \ '__pycache__/',
+    \ '.pytest_cache/',
+    \ '.vscode/',
+    \ '.idea/',
+    \ 'node_modules/',
+    \ 'dist/',
+    \ 'build/',
+    \ 'target/',
+    \ '\.git$',
+    \ '\.svn$'
+    \ ]
 
 nnoremap <leader>1 :NERDTreeToggle<CR>
 
@@ -23,4 +44,3 @@ augroup nerdtree
 	" 打开vim时如果没有文件自动打开nerdtree
 	autocmd VimEnter * if !argc()|NERDTree|
 augroup end
-

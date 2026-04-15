@@ -11,13 +11,13 @@ local opts = { noremap = true, silent = true }
 -- leader 键已在 init.lua 中设置为空格
 
 -- Escape 在插入模式下
-map('i', 'jj', '<Esc>', { noremap = true, silent = true })
+map('i', 'jk', '<Esc>', { noremap = true, silent = true })
 
 -- 保存和退出
-map('n', '<leader>s', '<Esc>:w<CR>', opts)
+map('n', '<leader>w', '<Esc>:w<CR>', opts)
 map('n', '<leader>q', '<Esc>:q<CR>', opts)
 map('n', '<leader>x', '<Esc>:x<CR>', opts)
-map('n', '<leader>S', '<Esc>:w!<CR>', opts)
+map('n', '<leader>W', '<Esc>:w!<CR>', opts)
 map('n', '<leader>Q', '<Esc>:q!<CR>', opts)
 map('n', '<leader>X', '<Esc>:x!<CR>', opts)
 
