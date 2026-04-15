@@ -1,13 +1,14 @@
 # Neovim：TypeScript / Java / Python 开发环境（Mason 方案）— 设计规格
 
 **日期**：2026-04-15  
-**版本**：v1.4  
+**版本**：v1.5  
 **状态**：已评审（用户认可）；待实施  
 
 **v1.1**：§5.3 按仓库实际工具链区分 **ESLint `--fix`** 与 **Prettier**（对齐 Nuxt 等仅 ESLint 格式化的项目，如 `child-game/child`）。  
 **v1.2**：§5.2.1 / §8 参照 **Gradle 多模块 + Spotless** 工程（如 `family/service`）补充 **Java 17、jdtls 根目录、与 `spotlessApply` 的差异**。  
 **v1.3**：明确 **Neovim 可从 `.../family` 或 `.../family/service` 启动**；**jdtls/Gradle 规范根**仍为含 `settings.gradle` 的 **`service`**，实施时须解析 `root_dir`（见 §5.2.1）。  
-**v1.4**：补充 **前端 dev 跑在 Docker**（配置目录 `~/develop/docker`）与 **宿主机 Neovim** 的关系（见 §1.1、§8）。
+**v1.4**：补充 **前端 dev 跑在 Docker**（配置目录 `~/develop/docker`）与 **宿主机 Neovim** 的关系（见 §1.1、§8）。  
+**v1.5**：明确 **Java / Gradle 当前在宿主机运行**（见 §1.2、§8），与 Docker 中可选 `java` 服务区分。
 
 ---
 
@@ -23,6 +24,12 @@
 - **源码挂载**：该栈通过 **`${HOST_PROJECT_PATH}:${CONTAINER_PROJECT_PATH}`** 将宿主机工程目录挂进容器；在容器内安装依赖所产生的 **`node_modules`** 出现在 **同一挂载树** 上，**宿主机上的 Neovim 通常可直接使用** 项目内 `node_modules/.bin/eslint` 等路径（与 §5.3「优先项目内 ESLint」一致）。
 - **编辑与 LSP**：本 spec 假定 **Neovim 在 Arch 宿主机** 编辑；**`typescript-language-server`（Mason）等在宿主运行**，解析的是宿主可见的仓库与 `node_modules`。不要求把 LSP 放进容器内，除非日后单独增加「远程 / Dev Container」类方案。
 - **Node 版本**：前端仓库（如 `child-game`）的 **`engines.node`** 应与 Docker **`node` 镜像**（`NODE_VERSION` 等）**大体一致**；宿主若另有 Node，仅影响你偶尔在宿主跑脚本的行为，**tsserver 仍以能读到项目类型为准**；若出现版本相关诊断差异，以项目与容器为准排查。
+
+### 1.2 Java 在宿主机（运行约定）
+
+- **当前实践**：**Java 开发（Gradle、`./gradlew`、运行 Spring Boot 等）在 Arch 宿主机执行**，**不依赖** Docker 内的 Java 运行时作为日常编辑与构建路径。
+- **与本 spec 的对应**：**`JAVA_HOME`、Mason 的 `jdtls`、宿主上的 `google-java-format`** 均指向 **宿主机 JDK**（如 **Java 17** 与 `family/service` 的 `gradle.properties` 一致）。Neovim 内 Java LSP / 格式化与 **宿主 Gradle / Spotless** 对齐即可。
+- **与 `~/develop/docker` 的关系**：Compose 中可能存在 **`java`** 等服务镜像，**本 spec 不假设** Neovim/jdtls 必须与容器内 JDK 一致；若日后改为「只在容器里跑 Gradle」，需另开修订（远程 LSP 或统一 JDK 版本说明）。
 
 ---
 
@@ -140,7 +147,7 @@
 
 ## 8. 风险与使用约束
 
-- **Java**：**jdtls 有效根**须为含 **`settings.gradle`** 的目录（`family` 示例中为 **`.../family/service`**）。用户可从 **`.../family` 或 `.../family/service`** 打开 Neovim；配置须 **自动解析** 到 `service`，避免将 `family` 顶层误作 Gradle 根。`nvim-jdtls` 数据目录需可写；**JDK** 与 `gradle.properties` / toolchain 一致（该示例为 **Java 17**）。**Spotless** 与编辑器 GJF 的差异见 §5.2.1。
+- **Java**：**jdtls 有效根**须为含 **`settings.gradle`** 的目录（`family` 示例中为 **`.../family/service`**）。用户可从 **`.../family` 或 `.../family/service`** 打开 Neovim；配置须 **自动解析** 到 `service`，避免将 `family` 顶层误作 Gradle 根。`nvim-jdtls` 数据目录需可写；**JDK 与 Gradle 在宿主机使用**（见 §1.2），**`JAVA_HOME`** 与 `gradle.properties` / toolchain 一致（该示例为 **Java 17**）。**Spotless** 与编辑器 GJF 的差异见 §5.2.1。
 - **TypeScript / Vue**：Monorepo 尽量与团队打开目录一致，保证 `tsconfig` / 路径别名解析正确；**ESLint flat config** 需在正确 **cwd** 下执行，否则 `--fix` 与编辑器内结果可能与 `pnpm run format` 不一致。**依赖若在 Docker 的 `node` 容器内安装**，须保证 **`HOST_PROJECT_PATH` 下已出现对应 `node_modules`**，否则宿主机 Neovim 无法解析 `eslint` / 类型包；若仅在容器内、未映射到宿主可见路径，则不在本 spec 范围内（需先修正挂载或安装位置）。
 - **Python**：虚拟环境需对 Pyright 可见（常见：`venv`、工作区配置、`pyrightconfig.json`）；否则诊断与跳转质量下降，与 Mason 无关。
 
@@ -155,10 +162,10 @@
 
 ---
 
-## 10. 规格自检（v1.4）
+## 10. 规格自检（v1.5）
 
 1. **占位符**：无 TBD；Java 用 google-java-format；TS/JS/Vue 已区分 ESLint-only 与 Prettier 仓库。  
-2. **一致性**：Java 与 `family/service` 的 Spotless GJF 一致；§5.2.1 已说明 **双启动目录**、`service` 为规范根及 **完整 Spotless** 与 GJF 的差异；§1.1 已说明 **Docker 前端 + 宿主 Neovim** 与 `node_modules` 可见性。  
+2. **一致性**：Java 与 `family/service` 的 Spotless GJF 一致；§5.2.1 已说明 **双启动目录**、`service` 为规范根及 **完整 Spotless** 与 GJF 的差异；§1.1 已说明 **Docker 前端 + 宿主 Neovim**；§1.2 已说明 **Java 宿主运行**，与 Docker `java` 服务无强制绑定。  
 3. **范围**：单 spec 覆盖 TS/Java/Python + Mason + 补全 + 格式化；调试与 DAP 明确排除。  
 4. **歧义**：§5.3 已缩小歧义；**无 node_modules 时** 的 fallback 仍在实施计划中写死为一种行为；Python「无 ruff」fallback 同上。
 
