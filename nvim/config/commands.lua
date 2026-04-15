@@ -4,14 +4,8 @@ local cmd = vim.api.nvim_create_user_command
 
 --============================================================
 -- 配置管理
+-- ReloadConfig 仅在 init.lua 中定义，避免此处覆盖为不完整重载
 --============================================================
-
--- 重新加载配置
-cmd('ReloadConfig', function()
-   print('配置已重新加载')
-   -- 只重新加载插件配置，不重新加载整个 init.lua
-   require('lazy').setup(require('plugins'))
-end, {})
 
 --============================================================
 -- 文件操作
@@ -40,32 +34,26 @@ end, {})
 -- 查看和操作寄存器
 --============================================================
 
--- 查看寄存器
+-- 查看寄存器（勿用 :Registers 递归调用自身；内置为 :registers）
 cmd('Registers', function()
-    vim.cmd('Registers')
+    vim.cmd('registers')
 end, {})
 
 --============================================================
 -- 格式化相关
 --============================================================
 
--- 格式化当前文件
+-- 格式化当前文件（供 BufWritePre / <leader>f；勿再 vim.cmd('Format') 自递归）
 cmd('Format', function()
-    if vim.fn.exists(':Format') == 2 then
-        vim.cmd('Format')
-    else
-        print('No formatter available')
+    if vim.tbl_isempty(vim.lsp.get_clients({ bufnr = 0 })) then
+        return
     end
+    pcall(vim.lsp.buf.format, { async = true, bufnr = 0 })
 end, {})
 
 --============================================================
--- Treesitter 相关
+-- Treesitter：不定义 :TSUpdate，保留 nvim-treesitter 内置命令
 --============================================================
-
--- Treesitter 重载
-cmd('TSUpdate', function()
-    vim.cmd('TSUpdate')
-end, {})
 
 --============================================================
 -- 辅助功能

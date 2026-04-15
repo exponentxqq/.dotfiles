@@ -13,10 +13,10 @@ if vim.fn.has('termguicolors') == 1 then
     vim.opt.termguicolors = true
 end
 
--- 编码设置
-vim.o.encoding = 'utf-8'
-vim.o.fileencoding = 'utf-8'
-vim.o.fileencodings = 'utf-8,gb18030,gbk,gb2312'
+-- 编码设置（用 scope=global，避免在 nomodifiable 缓冲区里 :ReloadConfig 时 vim.o.fileencoding 触发 E21）
+vim.api.nvim_set_option_value('encoding', 'utf-8', {})
+vim.api.nvim_set_option_value('fileencoding', 'utf-8', { scope = 'global' })
+vim.api.nvim_set_option_value('fileencodings', 'utf-8,gb18030,gbk,gb2312', {})
 
 --============================================================
 -- 界面设置

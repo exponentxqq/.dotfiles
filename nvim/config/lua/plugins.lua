@@ -44,9 +44,13 @@ return {
     },
 
     -- 文件查找 (替代 fzf)
+    -- 勿 pin 0.1.x：nvim-treesitter main 已移除 parsers.ft_to_lang，旧 telescope 预览会报错
+    -- （见 https://github.com/nvim-telescope/telescope.nvim/issues/3487 ）
+    -- 若仍报 ft_to_lang：lazy-lock.json 可能仍钉在旧提交，请在本机执行 :Lazy update telescope.nvim
     {
         'nvim-telescope/telescope.nvim',
-        tag = '0.1.8',
+        branch = 'master',
+        version = false,
         dependencies = {
             'nvim-lua/plenary.nvim',
         },
