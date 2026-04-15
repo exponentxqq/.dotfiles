@@ -1,11 +1,12 @@
 # Neovim：TypeScript / Java / Python 开发环境（Mason 方案）— 设计规格
 
 **日期**：2026-04-15  
-**版本**：v1.2  
+**版本**：v1.3  
 **状态**：已评审（用户认可）；待实施  
 
 **v1.1**：§5.3 按仓库实际工具链区分 **ESLint `--fix`** 与 **Prettier**（对齐 Nuxt 等仅 ESLint 格式化的项目，如 `child-game/child`）。  
-**v1.2**：§5.2.1 / §8 参照 **Gradle 多模块 + Spotless** 工程（如 `family/service`）补充 **Java 17、jdtls 根目录、与 `spotlessApply` 的差异**。
+**v1.2**：§5.2.1 / §8 参照 **Gradle 多模块 + Spotless** 工程（如 `family/service`）补充 **Java 17、jdtls 根目录、与 `spotlessApply` 的差异**。  
+**v1.3**：明确 **Neovim 可从 `.../family` 或 `.../family/service` 启动**；**jdtls/Gradle 规范根**仍为含 `settings.gradle` 的 **`service`**，实施时须解析 `root_dir`（见 §5.2.1）。
 
 ---
 
@@ -77,7 +78,8 @@
 
 | 事实 | 对 Neovim 的含义 |
 |------|------------------|
-| **Gradle 多模块**，根项目名 `family`，根目录含 `settings.gradle` | **jdtls 工作区根**应设为该根目录（含 `build.gradle` 的 `service` 目录），勿只打开单个子模块目录，否则跨模块引用与 Gradle 导入易不完整。 |
+| **Gradle 多模块**，`settings.gradle` 位于 **`.../family/service`**（父目录 `.../family` 下还可含前端等其它子树） | **jdtls / Gradle 的规范工作区根** = 含 **`settings.gradle`** 的目录，即 **`service`**，而非笼统的「任意 family 子目录」。跨模块 Java 代码不要在 **脱离该根的孤立子模块路径** 里长期单开（除非实现显式指向 `service`）。 |
+| **实际启动目录**：用户可能 **`cd .../family` 或 `cd .../family/service` 再开 Neovim** | **当前工作目录（cwd）两种均合法**；**实施 nvim-jdtls 时**须将 **`root_dir`（或等效项目根）解析为 `service`**（例如自当前文件或 cwd 向上查找含 `settings.gradle` 的目录）。从 `family` 启动时，**不得**把仅含前端的 `family` 根误当作 Java 工程根。 |
 | **Java 17**（`sourceCompatibility` / `targetCompatibility`） | 本机 **`JAVA_HOME` 与 PATH 使用 JDK 17**（或与 `gradle.properties` 一致）；与 jdtls 启动参数中的 Java 版本匹配。 |
 | **Spotless** + **`googleJavaFormat()`**，并含 `importOrder()`、`removeUnusedImports()`、换行与去行尾空格 | **conform + google-java-format** 与 Spotless 的 **GJF 步骤一致**，利于日常编辑；**但** Spotless 另含 **import 排序规则**，仅靠独立 `google-java-format` 二进制 **不一定** 与 `./gradlew spotlessApply` 的 import 顺序 **逐字节一致**。 |
 | CI / 提交前常跑 `spotlessCheck` / `spotlessApply` | 建议在 spec 外的工作流中保留 **`./gradlew spotlessApply`**（或提交前检查）；Neovim 内 `:Format` 作为 **快速近似**，遇 CI 报 import 顺序等问题时以 Gradle 为准。 |
@@ -130,7 +132,7 @@
 
 ## 8. 风险与使用约束
 
-- **Java**：多模块 Maven/Gradle 工程应从 **正确项目根** 启动 Neovim（示例：`family/service` 为含 `settings.gradle` 的根）；`nvim-jdtls` 数据目录需可写；**JDK 版本与 `gradle.properties` / toolchain 一致**（该示例为 **Java 17**）。若仓库使用 **Spotless**，编辑器内 **google-java-format** 与 **`spotlessApply`** 在 import 排序等步骤上可能仍有差异，以 Gradle 为准（见 §5.2.1）。
+- **Java**：**jdtls 有效根**须为含 **`settings.gradle`** 的目录（`family` 示例中为 **`.../family/service`**）。用户可从 **`.../family` 或 `.../family/service`** 打开 Neovim；配置须 **自动解析** 到 `service`，避免将 `family` 顶层误作 Gradle 根。`nvim-jdtls` 数据目录需可写；**JDK** 与 `gradle.properties` / toolchain 一致（该示例为 **Java 17**）。**Spotless** 与编辑器 GJF 的差异见 §5.2.1。
 - **TypeScript / Vue**：Monorepo 尽量与团队打开目录一致，保证 `tsconfig` / 路径别名解析正确；**ESLint flat config** 需在正确 **cwd** 下执行，否则 `--fix` 与编辑器内结果可能与 `pnpm run format` 不一致。
 - **Python**：虚拟环境需对 Pyright 可见（常见：`venv`、工作区配置、`pyrightconfig.json`）；否则诊断与跳转质量下降，与 Mason 无关。
 
@@ -139,15 +141,16 @@
 ## 9. 验证标准（实施后）
 
 - 在三种语言的 **最小示例项目** 中：打开文件后 Mason 已装服务器可附着；`gd` / `K` / 诊断可用；`:Format` 在 **Java** 上产出符合 **google-java-format** 的风格；保存触发与手动格式化行为一致。  
+- 在 **`family` 类仓库**中：分别从 **`.../family` 与 `.../family/service`** 启动 Neovim 并打开 Java 文件时，**jdtls 均应附着到同一 Gradle 工程**（规范根为 `service`），跨模块跳转可用。  
 - 在 **仅 ESLint format** 的前端仓库（如 Nuxt + `eslint --fix`）中：`:Format` 与 **`pnpm run format`** 对同文件结果一致（允许实现细节差异，但规则集须同源）。
 - `:checkhealth` 中 **lsp**、**mason**（若提供）无阻塞性错误。
 
 ---
 
-## 10. 规格自检（v1.2）
+## 10. 规格自检（v1.3）
 
 1. **占位符**：无 TBD；Java 用 google-java-format；TS/JS/Vue 已区分 ESLint-only 与 Prettier 仓库。  
-2. **一致性**：Java 与 `family/service` 的 Spotless GJF 一致；§5.2.1 已说明与 **完整 Spotless**（含 importOrder）的差异及 Gradle 优先原则。  
+2. **一致性**：Java 与 `family/service` 的 Spotless GJF 一致；§5.2.1 已说明 **双启动目录**、`service` 为规范根及 **完整 Spotless** 与 GJF 的差异。  
 3. **范围**：单 spec 覆盖 TS/Java/Python + Mason + 补全 + 格式化；调试与 DAP 明确排除。  
 4. **歧义**：§5.3 已缩小歧义；**无 node_modules 时** 的 fallback 仍在实施计划中写死为一种行为；Python「无 ruff」fallback 同上。
 
