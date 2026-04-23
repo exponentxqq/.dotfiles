@@ -1,0 +1,39 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug Gradle Spring Boot (Auto Detect)",
+      "request": "launch",
+      "mainClass": "${command:SpecifyMainClass}",
+      "projectName": "${command:SpecifyProjectName}",
+      "args": "",
+      "vmArgs": "-Dspring.profiles.active=dev",
+      "noDebug": false
+    },
+    {
+      "type": "java",
+      "name": "Launch Spring Boot with Gradle",
+      "request": "launch",
+      "mainClass": "com.example.YourApplication",
+      "projectName": "your-project-name",
+      "classPaths": [],
+      "vmArgs": "-Dspring.profiles.active=dev",
+      "args": "",
+      "noDebug": false
+    },
+    {
+      "type": "java",
+      "name": "Attach to Running Gradle App",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 30000
+    },
+    {
+      "type": "java",
+      "name": "Debug Current Java File",
+      "request": "launch",
+      "mainClass": "${file}"
+    }
+  ]
+}

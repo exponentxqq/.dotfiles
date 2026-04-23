@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch Spring Boot",
+      "request": "launch",
+      "mainClass": "com.example.YourApplication",
+      "projectName": "your-project-name",
+      "args": "",
+      "vmArgs": "-Dspring.profiles.active=dev",
+      "noDebug": false,
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "type": "java",
+      "name": "Attach to Running Spring Boot",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "timeout": 30000
+    },
+    {
+      "type": "java",
+      "name": "Debug Current File",
+      "request": "launch",
+      "mainClass": "${file}",
+      "noDebug": false
+    }
+  ]
+}

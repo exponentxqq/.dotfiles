@@ -7,6 +7,9 @@
   [[default]]
     show_titlebar = False
     copy_on_selection = True
+    # Nerd Font：LazyVim / nvim-web-devicons 图标依赖；需 pacman -S ttf-terminus-nerd
+    # font = TerminessTTF Nerd Font 11
+    font = JetBrainsMono Nerd Font 11
 [layouts]
   [[default]]
     [[[window0]]]
