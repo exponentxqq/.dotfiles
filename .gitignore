@@ -3,7 +3,7 @@
 vim/.vim/plugged
 
 # Claude local settings (contains API keys)
-claude/settings.local.json
+claude/settings.*.json
 # Added by code-review-graph
 .code-review-graph/
 .mcp.json

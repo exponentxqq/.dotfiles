@@ -11,9 +11,18 @@
       "Write"
     ]
   },
-  "model": "sonnet[1m]",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ccstatusline-zh --hook"
+          }
+        ]
+      },
       {
         "matcher": "Skill",
         "hooks": [
@@ -34,6 +43,14 @@
       }
     ],
     "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ccstatusline-zh --hook"
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -94,6 +111,8 @@
       }
     }
   },
+  "language": "简体中文",
+  "theme": "dark-daltonized",
   "verbose": true,
   "shell": {
     "type": "zsh",

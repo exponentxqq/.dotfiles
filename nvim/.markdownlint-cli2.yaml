@@ -1,0 +1,11 @@
+# markdownlint-cli2 配置
+# 规则参考: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# 禁用过于严格的规则
+config:
+  MD013: false          # 行长度限制（写中文很容易超 80 字符）
+  MD033: false          # 允许内联 HTML
+  MD034: false          # 允许裸 URL
+  MD009: false          # 允许行尾空格（用于显式换行）
+
+# 启用其他默认规则
