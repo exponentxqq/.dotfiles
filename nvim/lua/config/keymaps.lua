@@ -9,6 +9,6 @@ local nx = { "n", "x" } -- x = 可视模式（不含 Select）
 -- J/H/L 仍覆盖默认（5j、行首、行尾）
 map(nx, "K", "5k", { desc = "上移 5 行" })
 map(nx, "J", "5j", { desc = "下移 5 行" })
-map(nx, "H", "0", { desc = "行首" })
+map(nx, "H", "^", { desc = "行首" })
 map(nx, "L", "$", { desc = "行尾" })
-map("i", "jk", "<Esc>", { desc = "退出插入模式" })
+map("i", "jk", "<Esc>l", { desc = "退出插入模式" })

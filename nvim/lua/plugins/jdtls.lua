@@ -104,6 +104,14 @@ return {
       else
         local cmd = vim.deepcopy(opts.cmd)
         table.insert(cmd, 2, "--java-executable=" .. run_java)
+        -- 增大 JVM 堆内存，加快启动和索引
+        for i, arg in ipairs(cmd) do
+          if arg:match("^%-Xms") or arg:match("^%-Xmx") then
+            cmd[i] = nil
+          end
+        end
+        table.insert(cmd, 2, "-Xmx2g")
+        table.insert(cmd, 2, "-Xms512m")
         opts.cmd = cmd
       end
 
