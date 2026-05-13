@@ -11,27 +11,9 @@
       "Write"
     ]
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "PreToolUse": [
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
-      },
       {
         "matcher": "Skill",
         "hooks": [
@@ -43,22 +25,6 @@
       }
     ],
     "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
-      },
       {
         "hooks": [
           {

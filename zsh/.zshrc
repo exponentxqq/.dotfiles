@@ -6,7 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH=$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -127,18 +127,7 @@ alias ohmyzsh="vim ~/.oh-my-zsh"
 alias rootless=csrutil
 alias allow-all="sudo spctl --master-disable" # 允许所有来源
 alias s='fastfetch'
-alias pnpm="docker-run node pnpm"
-alias npm="docker-run node npm"
 alias weather="curl http://wttr.in/hangzhou"
-alias mysql="docker-run mysql mycli -h dockerhost"
-alias php="docker-run fpm php"
-alias composer="docker-run fpm composer"
-alias artisan="docker-run fpm php artisan"
-alias node="docker-run node node"
-alias npx="docker-run node npx"
-alias npm="docker-run node npm"
-alias yarn="docker-run node yarn"
-alias aws="docker-run python aws"
 alias t="asynctask -f"
 
 tasklist() {
@@ -152,5 +141,5 @@ fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 #[ -f ~/.completion/pnpm.zsh ] && source ~/.completion/pnpm.zsh
-source ~/.completion/pnpm.zsh
+source ~/.completion/_pnpm
 

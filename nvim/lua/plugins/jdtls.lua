@@ -48,7 +48,9 @@ local function jdtls_java_executable()
       end
     end
   end
-  for _, path in ipairs(vim.fn.glob("/usr/lib/jvm/*/bin/java", true, true) --[[@as string[] ]]) do
+  for _, path in
+    ipairs(vim.fn.glob("/usr/lib/jvm/*/bin/java", true, true) --[[@as string[] ]])
+  do
     local v = java_major_version(path)
     if v and v >= 21 then
       return path
