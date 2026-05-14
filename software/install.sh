@@ -25,5 +25,5 @@ sh $BASEDIR/../tool.sh albert
 sh $BASEDIR/../tool.sh alsa-utils
 if [ -d ~/.asoundrc ]; then
   rm -rf ~/.asoundrc
-  ln -s $BASEDIR/software/amixer/asoundrc ~/.asoundrc
+  ln -s $BASEDIR/amixer/asoundrc ~/.asoundrc
 fi

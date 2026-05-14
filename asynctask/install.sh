@@ -1,3 +1,4 @@
+#!/bin/sh
 
 BASEDIR=$(
   cd "$(dirname "$0")"
