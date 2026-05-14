@@ -6,17 +6,16 @@ BASEDIR=$(
 )
 
 echo --------------------------------------------------------
-echo ----  install tool softwares and config in $BASEDIR......      ----
+echo ---- install tool softwares and config in $BASEDIR...... ----
 echo --------------------------------------------------------
 
-sh $BASEDIR/../tool.sh terminator
-
-if [ -d ~/.config/terminator ]; then
-  rm -rf ~/.config/terminator
-  ln -s $BASEDIR/software/terminator ~/.config/terminator
+sh $BASEDIR/../tool.sh kitty
+if [ -d ~/.config/kitty ]; then
+  rm -rf ~/.config/kitty
 fi
+ln -s $BASEDIR/kitty ~/.config/kitty
 
-sh $BASEDIR/../tool.sh guake
+sh $BASEDIR/../tool.sh tdrop
 
 sh $BASEDIR/../tool.sh shutter
 mkdir -p ~/Documents/captures

@@ -34,14 +34,14 @@ exec --no-startup-id dex --autostart --environment i3
 
 # xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
 # screen before suspend. Use loginctl lock-session to lock your screen.
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/i3/script/lock.sh
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 # exec --no-startup-id nm-applet
 exec --no-startup-id fcitx5 -d
 exec --no-startup-id albert
-exec --no-startup-id guake -u
+exec --no-startup-id tdrop -ma -w 100% -h 40% -x 0 -y 0 kitty
 exec --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id dunst -config ~/.config/i3/dunst.conf
 exec --no-startup-id variety
@@ -58,7 +58,8 @@ bindsym $mod+Ctrl+l exec ~/.config/i3/script/lock.sh
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
-bindsym $mod+Return exec terminator
+bindsym $mod+grave exec --no-startup-id tdrop -ma -w 100% -h 60% -x 0 -y 0 kitty
+bindsym $mod+Return exec kitty
 bindsym $mod+Shift+x exec flameshot gui -p ~/Documents/captures
 bindsym $mod+b exec --no-startup-id ~/.config/polybar/launch.sh
 bindsym $mod+z exec jetbrains-toolbox

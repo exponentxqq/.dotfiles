@@ -1,20 +1,19 @@
 #!/bin/bash
 
-blank='#00000000'  # blank
-#background='#1A6785FF'
+blank='#00000000'
 background='#1A5E81AC'
-foreground='#D8DEE9FF'  # text
+foreground='#D8DEE9FF'
 
-primary='#82b1ff'  # default
-alert='#EBCB8BFF'  # wrong
-verifying='#A3BE8CFF'  # verifying
+primary='#82b1ff'
+alert='#EBCB8BFF'
+verifying='#A3BE8CFF'
 
 i3lock \
     --screen 1 \
-    --indicator \
-    --keylayout 2 \
     --force-clock \
+    --blur 5 \
     \
+    --clock \
     --time-align=0 \
     --date-align=0 \
     --layout-align=0 \
@@ -22,12 +21,26 @@ i3lock \
     --wrong-align=0 \
     --modif-align=0 \
     \
-    --blur 5              \
-    --indicator           \
-    --keylayout 2         \
+    --time-font=noto-sans \
+    --date-font=noto-sans \
+    --keylayout 2 \
     \
-    --clock               \
-    --time-font=noto-sans    \
-    --date-font=noto-sans    \
-    # etc
-
+    --time-color="${foreground}" \
+    --date-color="${foreground}" \
+    --layout-color="${foreground}" \
+    --verif-color="${verifying}" \
+    --wrong-color="${alert}" \
+    --modif-color="${foreground}" \
+    \
+    --inside-color="${background}" \
+    --insidever-color='#A3BE8C33' \
+    --insidewrong-color='#EBCB8B33' \
+    \
+    --ring-color="${primary}" \
+    --ringver-color="${verifying}" \
+    --ringwrong-color="${alert}" \
+    \
+    --keyhl-color="${primary}" \
+    --bshl-color="${alert}" \
+    --separator-color="${primary}" \
+    --line-color="${blank}"
