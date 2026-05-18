@@ -1,3 +1,0 @@
-filetype *.jpg,*.jpeg,*.png,*.gif feh %f 2>/dev/null &
-filetype *.md5 md5sum -c %f
-

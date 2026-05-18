@@ -41,5 +41,7 @@ Plug 'tpope/vim-speeddating'
 Plug 'mattn/emmet-vim'
 " 自动填充成对匹配的符号
 Plug 'jiangmiao/auto-pairs'
+" tmux 窗格导航插件
+Plug 'christoomey/vim-tmux-navigator'
 
 call plug#end()

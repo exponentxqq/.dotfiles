@@ -27,3 +27,5 @@ if [ -d ~/.asoundrc ]; then
   rm -rf ~/.asoundrc
   ln -s $BASEDIR/amixer/asoundrc ~/.asoundrc
 fi
+
+sh "$BASEDIR/ranger/install.sh"

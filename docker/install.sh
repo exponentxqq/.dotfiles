@@ -5,5 +5,6 @@ BASEDIR=$(
   pwd
 )
 
-echo start config docker in $BASEDIR......
+echo start config docker in "$BASEDIR......"
 
+sh "$BASEDIR/../tool.sh" docker docker-compose docker-buildx
