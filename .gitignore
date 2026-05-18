@@ -1,6 +1,7 @@
 /**/.idea
 
 vim/.vim/plugged
+tmux/plugins
 
 # Claude local settings (contains API keys)
 claude/settings.*.json

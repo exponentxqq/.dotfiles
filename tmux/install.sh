@@ -6,9 +6,6 @@ echo "Installing tmux config from $BASEDIR..."
 # 安装 tmux（如果未安装）
 sh "$BASEDIR/../tool.sh" tmux
 
-# 移除旧的 Oh My Tmux symlink
-rm -f ~/.tmux.conf ~/.tmux.conf.local
-
 # 创建 XDG 应用目录
 mkdir -p ~/.config/tmux
 
