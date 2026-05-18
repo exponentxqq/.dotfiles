@@ -23,6 +23,7 @@ sh $BASEDIR/software/install.sh
 sh $BASEDIR/i3/install.sh
 sh $BASEDIR/zsh/install.sh
 sh $BASEDIR/asynctask/install.sh
+sh $BASEDIR/taskit/install.sh
 sh $BASEDIR/tmux/install.sh
 sh $BASEDIR/docker/install.sh
 sh $BASEDIR/vim/install.sh

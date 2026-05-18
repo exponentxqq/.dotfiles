@@ -1,0 +1,44 @@
+[tasks."util.port"]
+command = "sudo lsof -i :${?port}"
+
+[tasks."util.host"]
+command = "ifconfig | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | awk '{ print $2}'"
+
+[tasks."util.bigfile"]
+command = "find ${?path} -type f -size +10000k"
+
+[tasks."mysql.reset"]
+command = "cd ~/develop/docker && run.sh mysql \"mysql -uroot -p123456 -e 'drop database if exists ${?db_name};create database if not exists ${?db_name}'\""
+
+[tasks."docker.in"]
+command = "cd ~/develop/docker && docker compose exec ${?container} /bin/${?bash}"
+
+[tasks."docker.up"]
+command = "cd ~/develop/docker && docker compose stop ${?container} && docker compose up -d ${?container}"
+
+[tasks."docker.stop"]
+command = "cd ~/develop/docker && docker compose stop ${?container}"
+
+[tasks."docker.rm-image"]
+command = "docker rmi -f $(docker images|grep \"${?image}\"|awk '{print $3}')"
+
+[tasks."docker.clear-container"]
+command = "docker container prune"
+
+[tasks."docker.clear-image"]
+command = "docker image prune"
+
+[tasks."project.migration"]
+command = "bash generate_migrate.sh ${?module} ${?description}"
+
+[tasks."project.migrate"]
+command = "cd ~/develop/docker && run.sh java \"pwd && flyway -url='jdbc:mysql://dockerhost:3306/${?db_name}?useTimezone=true&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8' -user=root -password=123456 -locations='filesystem:$(pwd)/modules/**/src/main/resources/db/migration' migrate\""
+
+[tasks."tmux.new"]
+command = "tmux new -s ${?session}"
+
+[tasks."tmux.attach"]
+command = "tmux attach -t ${?session}"
+
+[tasks."tmux.kill"]
+command = "tmux kill-session -t ${?session}"
