@@ -128,10 +128,10 @@ alias rootless=csrutil
 alias allow-all="sudo spctl --master-disable" # 允许所有来源
 alias s='fastfetch'
 alias weather="curl http://wttr.in/hangzhou"
-alias t="asynctask -f"
+alias t="taskit fzf"
 
 tasklist() {
-	asynctask -f
+	taskit fzf
 }
 bindkey '`' 'autosuggest-accept'
 zle -N tasklist && bindkey ^R tasklist
