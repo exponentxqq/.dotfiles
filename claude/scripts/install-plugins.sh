@@ -3,15 +3,12 @@
 
 set -e
 
-PLUGINS_FILE="${HOME}/develop/dotfiles/claude/plugins.json"
+BASEDIR=$(cd "$(dirname "$0")" && pwd)
+PLUGINS_FILE="$BASEDIR/plugins.json"
 
 if [ ! -f "$PLUGINS_FILE" ]; then
-    # Fallback to the original location
-    PLUGINS_FILE="${HOME}/.dotfiles/claude/plugins.json"
-    if [ ! -f "$PLUGINS_FILE" ]; then
-        echo "Error: plugins.json not found in either ${HOME}/develop/dotfiles/claude/plugins.json or ${HOME}/.dotfiles/claude/plugins.json"
-        exit 1
-    fi
+    echo "Error: plugins.json not found at $PLUGINS_FILE"
+    exit 1
 fi
 
 # Parse plugins using jq (install if not available)

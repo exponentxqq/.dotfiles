@@ -26,3 +26,4 @@ sh $BASEDIR/taskit/install.sh
 sh $BASEDIR/tmux/install.sh
 sh $BASEDIR/docker/install.sh
 sh $BASEDIR/vim/install.sh
+sh $BASEDIR/claude/install.sh
