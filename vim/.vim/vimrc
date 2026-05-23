@@ -44,7 +44,8 @@ set shiftwidth=4
 set autoindent
 set expandtab
 set smarttab
-set nowrap
+set wrap
+set linebreak
 set listchars=tab:>-,trail:-
 set incsearch
 set ignorecase
