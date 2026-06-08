@@ -96,6 +96,7 @@ return {
         map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
         map("n", "gI", vim.lsp.buf.implementation, "Go to implementation")
         map("n", "gy", vim.lsp.buf.type_definition, "Go to type definition")
+        map("n", "<leader>ci", require("jdtls").organize_imports, "Organize imports")
       end
       local run_java = jdtls_java_executable()
       if not run_java then
