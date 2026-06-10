@@ -1,37 +1,27 @@
-# MCP Tools: code-review-graph
+# CLAUDE.md
 
-**IMPORTANT: This project has a knowledge graph. ALWAYS use the
-code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
-the codebase.** The graph is faster, cheaper (fewer tokens), and gives
-you structural context (callers, dependents, test coverage) that file
-scanning cannot.
+This file provides guidance to Claude Code when working with code in this repository.
 
-## When to use graph tools FIRST
+## Project Overview
 
-- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
-- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
-- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
-- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
-- **Architecture questions**: `get_architecture_overview` + `list_communities`
+Personal dotfiles managed with GNU Stow.
 
-Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+## Repository Structure
 
-## Key Tools
+- `zsh/` — Z shell configuration
+- `tmux/` — Tmux configuration
+- `vim/` — Vim configuration
+- `i3/` — i3 window manager configuration
+- `kitty/` — Kitty terminal emulator configuration
+- `software/` — Additional software configs (amixer, etc.)
+- `install.sh` — Main installation script
 
-| Tool                        | Use when                                               |
-| --------------------------- | ------------------------------------------------------ |
-| `detect_changes`            | Reviewing code changes — gives risk-scored analysis    |
-| `get_review_context`        | Need source snippets for review — token-efficient      |
-| `get_impact_radius`         | Understanding blast radius of a change                 |
-| `get_affected_flows`        | Finding which execution paths are impacted             |
-| `query_graph`               | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes`     | Finding functions/classes by name or keyword           |
-| `get_architecture_overview` | Understanding high-level codebase structure            |
-| `refactor_tool`             | Planning renames, finding dead code                    |
+## Commands
 
-## Workflow
+```bash
+# Install all dotfiles
+./install.sh
 
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes` for code review.
-3. Use `get_affected_flows` to understand impact.
-4. Use `query_graph` pattern="tests_for" to check coverage.
+# Install specific component
+./tool.sh zsh
+```

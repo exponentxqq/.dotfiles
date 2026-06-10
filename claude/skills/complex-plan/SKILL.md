@@ -25,10 +25,8 @@ End-to-end planning flow: explore codebase → brainstorm approaches → write d
 
 2. **Explore the codebase**
 
-   Use code-review-graph tools first, then Read/Grep as fallback:
-   - `semantic_search_nodes` or `query_graph` to find related code
-   - `get_architecture_overview` to understand structure
-   - `list_communities` to see code organization
+   Use structural search first, then Read/Grep as fallback:
+   - `smart_search` to find related code by keyword or symbol
    - Read relevant files to understand current implementation
 
 3. **Brainstorm approach**
