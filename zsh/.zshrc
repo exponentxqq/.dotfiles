@@ -48,7 +48,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
@@ -118,7 +118,6 @@ source $ZSH/oh-my-zsh.sh
 # For a full list of active aliases, run `alias`.
 export FZF_COMPLETION_TRIGGER=**
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(bat {} || cat {}) 2> /dev/null | head -500'"
-export SHELLPROXY_CONFIG="$HOME/.dotfiles/zsh/proxy-config"
 
 #
 # Example aliases
@@ -143,6 +142,8 @@ fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-#[ -f ~/.completion/pnpm.zsh ] && source ~/.completion/pnpm.zsh
-source ~/.completion/_pnpm
+# 加载 ~/.completion 目录下所有补全文件
+for f in ~/.completion/_*; do
+  source "$f"
+done
 
