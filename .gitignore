@@ -3,6 +3,10 @@
 vim/.vim/plugged
 tmux/plugins
 
+# zsh custom (插件和主题由 install.sh 自动安装，不纳入版本管理)
+zsh/custom/plugins/
+zsh/custom/themes/
+
 # Claude local settings (contains API keys)
 claude/settings.*.json
 # Added by code-review-graph

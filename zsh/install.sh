@@ -17,6 +17,12 @@ fi
 # sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" || echo "oh-my-zsh installed"
 wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh
 
+# 用 dotfiles 的 custom 目录替换 oh-my-zsh 默认的 custom 目录
+# oh-my-zsh 会自动 source $ZSH_CUSTOM/*.zsh，因此 custom 下的 .zsh 文件无需额外配置
+rm -rf ~/.oh-my-zsh/custom
+mkdir -p $BASEDIR/custom/plugins $BASEDIR/custom/themes
+ln -s $BASEDIR/custom ~/.oh-my-zsh/custom
+
 echo --------------------------------------------------------
 echo ----         start install zsh plugin               ----
 echo --------------------------------------------------------

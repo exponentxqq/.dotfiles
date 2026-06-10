@@ -22,26 +22,9 @@
             "command": "ccstatusline-zh --hook"
           }
         ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
       }
     ],
     "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "ccstatusline-zh --hook"
-          }
-        ]
-      },
       {
         "hooks": [
           {
