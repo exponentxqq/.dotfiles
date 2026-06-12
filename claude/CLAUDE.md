@@ -15,3 +15,7 @@ Implement exactly what is requested. Do not add fallback behavior, keep legacy p
 ## Monorepo Command Discipline
 
 In pnpm monorepos, confirm the current workspace/package before running build, test, or git commands. Always use the correct `--filter` or `--project` flag for the target package.
+
+## Git Commits
+
+不要在任何 commit message 中添加 `Co-Authored-By:` 签名行。
