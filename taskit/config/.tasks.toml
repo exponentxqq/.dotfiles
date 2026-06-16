@@ -11,10 +11,13 @@ command = "blue"
 # ─── Utility ────────────────────────────────────────────────
 
 [tasks."util.port"]
-cmd = "sudo lsof -i :${?port}"
+cmd = "sudo lsof -i :${?port|3000,8080,3306,5432,80,443}"
 
-[tasks."util.host"]
+[tasks."ip.local"]
 cmd = "ifconfig | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | awk '{ print $2}'"
+
+[tasks."ip.public"]
+cmd = "curl -s ifconfig.me"
 
 [tasks."util.bigfile"]
 cmd = "find ${?path} -type f -size +10000k"
@@ -32,11 +35,9 @@ cmd = { steps = [
 
 [tasks.model.args.PROVIDER]
 flag = "--provider"
-prompt = "Provider (deepseek/glm/mimo/litellm)"
+prompt = "Select provider"
+options = ["deepseek", "glm", "mimo", "litellm"]
 required = true
-
-[tasks._model-current]
-cmd = "echo -n 'Current: ' && readlink .claude/settings.json"
 
 # ─── MySQL ──────────────────────────────────────────────────
 
@@ -44,11 +45,11 @@ cmd = "echo -n 'Current: ' && readlink .claude/settings.json"
 uses = "docker-dev"
 cmd = "run.sh mysql \"mysql -uroot -p123456 -e 'drop database if exists ${?db_name};create database if not exists ${?db_name}'\""
 
-# ─── Docker ─────────────────────────────────────────────────
+# ─── Docker (支持多选: taskit select 或 taskit fzf) ────────
 
 [tasks."docker.in"]
 uses = "docker-dev"
-cmd = "docker compose exec ${?container} /bin/${?bash}"
+cmd = "docker compose exec ${?container} /bin/${?bash|bash,sh,zsh}"
 
 [tasks."docker.up"]
 uses = "docker-dev"
