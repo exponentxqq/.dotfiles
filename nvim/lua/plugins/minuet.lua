@@ -34,7 +34,7 @@ return {
         virtualtext = {
           auto_trigger_ft = { "*" },
           keymap = {
-            accept = "<M-y>",
+            accept = "<Tab>",
             accept_line = "<M-l>",
             accept_n_lines = "<M-z>",
             dismiss = "<M-e>",

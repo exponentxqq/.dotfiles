@@ -11,7 +11,7 @@
       "Write"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -49,7 +49,8 @@
     "typescript-lsp@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "web-access@web-access": true,
-    "chrome-devtools-mcp@claude-plugins-official": true
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "anthropic-agent-skills": {
@@ -78,6 +79,7 @@
     }
   },
   "language": "简体中文",
+  "skipWorkflowUsageWarning": true,
   "theme": "dark-daltonized",
   "verbose": true,
   "shell": {
