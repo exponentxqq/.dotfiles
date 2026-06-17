@@ -29,7 +29,8 @@
     "lazyvim.plugins.extras.ui.indent-blankline",
     "lazyvim.plugins.extras.ui.mini-indentscope",
     "lazyvim.plugins.extras.util.dot",
-    "lazyvim.plugins.extras.editor.inc-rename"
+    "lazyvim.plugins.extras.editor.inc-rename",
+    "lazyvim.plugins.extras.lang.go"
   ],
   "install_version": 8,
   "news": {
