@@ -26,6 +26,13 @@ if [ -d ~/.claude/skills ] && [ ! -L ~/.claude/skills ]; then
 fi
 ln -sfn "$BASEDIR/skills" ~/.claude/skills
 
+# 备份并 symlink commands 目录
+if [ -d ~/.claude/commands ] && [ ! -L ~/.claude/commands ]; then
+  mv ~/.claude/commands ~/.claude/commands.bak
+  echo "Backed up existing commands/ to commands.bak"
+fi
+ln -sfn "$BASEDIR/commands" ~/.claude/commands
+
 # 创建 settings.local.json（如果不存在），不覆盖已有文件
 if [ ! -f ~/.claude/settings.local.json ]; then
   cp "$BASEDIR/settings.local.example.json" ~/.claude/settings.local.json

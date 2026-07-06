@@ -1,0 +1,46 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/qwen3.7-plus",
+  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
+  "agent": {
+    "plan": {
+      "model": "opencode-go/glm-5.2",
+      "temperature": 0.1,
+    },
+    "build": {
+      "model": "opencode-go/kimi-k2.7-code",
+      "temperature": 0.0,
+    },
+    "general": {
+      "model": "opencode-go/qwen3.7-plus",
+      "temperature": 0.1,
+    },
+    "explore": {
+      "model": "deepseek/deepseek-v4-flash",
+    },
+    "title": {
+      "model": "opencode-go/minimax-m3",
+    },
+    "compaction": {
+      "model": "deepseek/deepseek-v4-flash",
+    },
+    "summary": {
+      "model": "deepseek/deepseek-v4-flash",
+    },
+    "code-reviewer": {
+      "description": "Reviews code for quality, security, and best practices",
+      "mode": "subagent",
+      "model": "opencode-go/qwen3.7-plus",
+      "temperature": 0.1,
+      "permission": {
+        "edit": "deny",
+        "bash": "deny",
+      },
+    },
+    "git-commit": {
+      "description": "Specialized agent for git commit operations. Use when the user asks to commit, stage, write a commit message, or prepare a git commit.",
+      "mode": "subagent",
+      "model": "deepseek/deepseek-v4-flash",
+    },
+  },
+}

@@ -34,6 +34,7 @@ This directory contains Claude Code configuration for cross-machine sync.
 | `settings.local.json` | Local overrides with API keys (in `~/.claude/`, **not** synced) |
 | `settings.local.example.json` | Example template for local settings |
 | `skills/` | Custom skills directory (symlinked) |
+| `commands/` | Custom slash commands directory (symlinked) |
 | `plugins.json` | Plugin manifest for quick installation |
 | `install-plugins.sh` | Script to install all plugins from manifest |
 

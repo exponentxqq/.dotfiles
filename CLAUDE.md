@@ -13,6 +13,7 @@ Personal dotfiles managed with GNU Stow.
 - `vim/` — Vim configuration
 - `i3/` — i3 window manager configuration
 - `kitty/` — Kitty terminal emulator configuration
+- `opencode/` — opencode configuration
 - `software/` — Additional software configs (amixer, etc.)
 - `install.sh` — Main installation script
 
