@@ -1,15 +1,7 @@
 {
   "permissions": {
-    "autoApprove": [
-      "Read",
-      "Grep",
-      "Glob"
-    ],
-    "requireApproval": [
-      "Bash",
-      "Edit",
-      "Write"
-    ]
+    "autoApprove": ["Read", "Grep", "Glob"],
+    "requireApproval": ["Bash", "Edit", "Write"]
   },
   "model": "opus",
   "hooks": {
@@ -41,16 +33,16 @@
   },
   "enabledPlugins": {
     "feature-dev@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "document-skills@anthropic-agent-skills": true,
     "claude-mem@thedotmack": true,
-    "code-review@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "web-access@web-access": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "anthropic-agent-skills": {
@@ -79,8 +71,9 @@
     }
   },
   "language": "简体中文",
+  "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
-  "theme": "dark-daltonized",
+  "theme": "dark",
   "verbose": true,
   "shell": {
     "type": "zsh",
