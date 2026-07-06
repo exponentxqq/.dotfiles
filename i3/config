@@ -62,7 +62,7 @@ floating_modifier $mod
 
 bindsym $mod+grave exec --no-startup-id tdrop -ma -w 100% -h 60% -x 0 -y 0 kitty
 bindsym $mod+Return exec kitty
-bindsym $mod+Shift+x exec flameshot gui -p ~/Documents/captures
+bindsym $mod+Shift+x exec flameshot -p ~/Documents/captures
 bindsym $mod+b exec --no-startup-id ~/.config/polybar/launch.sh
 bindsym $mod+z exec jetbrains-toolbox
 bindsym $mod+x exec google-chrome-stable
