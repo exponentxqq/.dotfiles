@@ -6,7 +6,7 @@ return {
       servers = {
         rust_analyzer = {
           -- 使用 Docker 容器中的 rust_analyzer，替代 Mason 安装的
-          cmd = { "/home/xuqinqin/develop/docker/bin/rust-analyzer" },
+          cmd = { "rust-analyzer" },
           -- 不需要 Mason 安装
           mason = false,
         },

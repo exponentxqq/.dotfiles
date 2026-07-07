@@ -9,7 +9,7 @@ return {
       },
       formatters = {
         gofmt = {
-          command = "/home/xuqinqin/develop/docker/bin/gofmt",
+          command = "gofmt",
         },
       },
     },

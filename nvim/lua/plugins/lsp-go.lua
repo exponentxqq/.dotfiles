@@ -7,7 +7,7 @@ return {
       servers = {
         gopls = {
           -- 使用 Docker 容器中的 gopls，替代 Mason 安装的
-          cmd = { "/home/xuqinqin/develop/docker/bin/gopls" },
+          cmd = { "gopls" },
           -- 不需要 Mason 安装
           mason = false,
           -- settings (gofumpt / codelens / hints / analyses) 由 LazyVim Go extra 提供
