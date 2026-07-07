@@ -1,7 +1,15 @@
 {
   "permissions": {
-    "autoApprove": ["Read", "Grep", "Glob"],
-    "requireApproval": ["Bash", "Edit", "Write"]
+    "autoApprove": [
+      "Read",
+      "Grep",
+      "Glob"
+    ],
+    "requireApproval": [
+      "Bash",
+      "Edit",
+      "Write"
+    ]
   },
   "model": "opus",
   "hooks": {
