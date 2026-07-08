@@ -1,2 +1,11 @@
 #!/usr/bin/env bash
-exec "$(dirname "$0")/../scripts/codebase-reindex" "post-commit" "$@"
+HOOK_NAME="post-commit"
+
+# Forward to project-level hook first, if one exists
+GIT_DIR=$(git rev-parse --git-dir 2>/dev/null) || exit 0
+if [ -x "${GIT_DIR}/hooks/${HOOK_NAME}" ]; then
+    "${GIT_DIR}/hooks/${HOOK_NAME}" || true
+fi
+
+# Run codebase-memory-mcp reindex (backgrounds itself)
+"$(dirname "$0")/../scripts/codebase-reindex" "$HOOK_NAME"
