@@ -33,6 +33,13 @@ if [ -d ~/.claude/commands ] && [ ! -L ~/.claude/commands ]; then
 fi
 ln -sfn "$BASEDIR/commands" ~/.claude/commands
 
+# 备份并 symlink rules 目录
+if [ -d ~/.claude/rules ] && [ ! -L ~/.claude/rules ]; then
+  mv ~/.claude/rules ~/.claude/rules.bak
+  echo "Backed up existing rules/ to rules.bak"
+fi
+ln -sfn "$BASEDIR/rules" ~/.claude/rules
+
 # 创建 settings.local.json（如果不存在），不覆盖已有文件
 if [ ! -f ~/.claude/settings.local.json ]; then
   cp "$BASEDIR/settings.local.example.json" ~/.claude/settings.local.json
