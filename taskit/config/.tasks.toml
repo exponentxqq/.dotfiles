@@ -87,3 +87,14 @@ cmd = "tmux attach -t ${?session}"
 
 [tasks."tmux.kill"]
 cmd = "tmux kill-session -t ${?session}"
+
+# ─── Codebase Memory MCP ──────────────────────────────────
+
+[tasks."codebase.index-all"]
+cmd = '''
+for gitdir in $(find ~/develop -maxdepth 5 -type d -name .git -prune); do
+  repo=$(dirname "$gitdir")
+  echo "=== Indexing $repo ==="
+  codebase-memory-mcp cli index_repository "{\"repo_path\": \"$repo\"}"
+done
+'''

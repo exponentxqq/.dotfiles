@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# codebase-memory-mcp auto-reindex hook
+# $1 = hook name (post-commit, post-merge, post-rewrite)
+
+set -e
+
+HOOK_NAME="${1:-unknown}"
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+
+LOG_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/cbm-hook.log"
+
+(
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_NAME: indexing $REPO_ROOT"
+    /usr/bin/codebase-memory-mcp cli index_repository "{\"repo_path\": \"$REPO_ROOT\"}" 2>&1
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_NAME: done ($?)"
+) >> "$LOG_FILE" 2>&1 &
+
+disown
