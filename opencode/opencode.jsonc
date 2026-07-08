@@ -1,7 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/qwen3.7-plus",
-  "instructions": ["~/.config/opencode/rules/codebase-memory.md"],
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "@ephemushroom/opencode-claude-mem",
