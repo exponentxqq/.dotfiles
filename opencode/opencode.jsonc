@@ -1,7 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/qwen3.7-plus",
-  "instructions": ["chinese-instructions.md"],
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "@ephemushroom/opencode-claude-mem",
@@ -47,20 +46,22 @@
   },
   "lsp": {
     "gopls": {
-      "command": ["/home/xuqinqin/develop/docker/bin/gopls"]
+      "command": ["/home/xuqinqin/develop/docker/bin/gopls"],
     },
     "rust": {
-      "command": ["/home/xuqinqin/develop/docker/bin/rust-analyzer"]
+      "command": ["/home/xuqinqin/develop/docker/bin/rust-analyzer"],
     },
     "pyright": {
-      "disabled": true
+      "disabled": true,
     },
     "jdtls": {
-      "command": ["/home/xuqinqin/.local/share/nvim/mason/packages/jdtls/bin/jdtls"],
+      "command": [
+        "/home/xuqinqin/.local/share/nvim/mason/packages/jdtls/bin/jdtls",
+      ],
       "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk"
-      }
-    }
+        "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk",
+      },
+    },
   },
   "mcp": {
     "codebase-memory-mcp": {
