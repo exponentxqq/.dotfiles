@@ -36,3 +36,14 @@ local function smart_bs()
 end
 
 map("i", "<BS>", smart_bs, { expr = true, replace_keycodes = false, silent = true, desc = "智能退格" })
+
+-- flash.nvim: Treesitter 增量选择
+-- <C-k> 扩大选择，<C-j> 缩小选择
+map({ "n", "o", "x" }, "<C-k>", function()
+  require("flash").treesitter({
+    actions = {
+      ["<C-k>"] = "next",
+      ["<C-j>"] = "prev",
+    },
+  })
+end, { desc = "Treesitter 增量选择 (扩大)" })
