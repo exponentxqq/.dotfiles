@@ -12,3 +12,27 @@ map(nx, "J", "5j", { desc = "下移 5 行" })
 map(nx, "H", "^", { desc = "行首" })
 map(nx, "L", "$", { desc = "行尾" })
 map("i", "jk", "<Esc>l", { desc = "退出插入模式" })
+
+local function smart_bs_fallback()
+  local ok, mp = pcall(require, "mini.pairs")
+  if ok then
+    return mp.bs()
+  end -- 已由 mini.pairs 预转义
+  return vim.api.nvim_replace_termcodes("<BS>", true, true, true)
+end
+
+local function smart_bs()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local col = pos[2]
+  if col == 0 then
+    return smart_bs_fallback()
+  end
+  local before = vim.api.nvim_get_current_line():sub(1, col)
+  local stripped = before:gsub("%s+$", "")
+  if #stripped == #before then
+    return smart_bs_fallback()
+  end
+  return vim.api.nvim_replace_termcodes(("<BS>"):rep(#before - #stripped), true, true, true)
+end
+
+map("i", "<BS>", smart_bs, { expr = true, replace_keycodes = false, silent = true, desc = "智能退格" })
