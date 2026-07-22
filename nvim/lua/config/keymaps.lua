@@ -13,29 +13,27 @@ map(nx, "H", "^", { desc = "行首" })
 map(nx, "L", "$", { desc = "行尾" })
 map("i", "jk", "<Esc>l", { desc = "退出插入模式" })
 
-local function smart_bs_fallback()
-  local ok, mp = pcall(require, "mini.pairs")
-  if ok then
-    return mp.bs()
-  end -- 已由 mini.pairs 预转义
-  return vim.api.nvim_replace_termcodes("<BS>", true, true, true)
-end
-
 local function smart_bs()
   local pos = vim.api.nvim_win_get_cursor(0)
-  local col = pos[2]
-  if col == 0 then
-    return smart_bs_fallback()
+  local row, col = pos[1], pos[2]
+  if col ~= 0 then
+    local line = vim.api.nvim_get_current_line()
+    local before = line:sub(1, col)
+    local stripped = before:gsub("%s+$", "")
+    if #stripped ~= #before then
+      -- 直接删除尾部空白，只动当前行，绝不跨行
+      vim.api.nvim_set_current_line(stripped .. line:sub(col + 1))
+      vim.api.nvim_win_set_cursor(0, { row, #stripped })
+      return
+    end
   end
-  local before = vim.api.nvim_get_current_line():sub(1, col)
-  local stripped = before:gsub("%s+$", "")
-  if #stripped == #before then
-    return smart_bs_fallback()
-  end
-  return vim.api.nvim_replace_termcodes(("<BS>"):rep(#before - #stripped), true, true, true)
+  -- 交给 mini.pairs / 原生 BS（已由 mini.pairs 预转义）
+  local ok, mp = pcall(require, "mini.pairs")
+  local keys = (ok and mp.bs()) or vim.api.nvim_replace_termcodes("<BS>", true, true, true)
+  vim.api.nvim_feedkeys(keys, "n", false)
 end
 
-map("i", "<BS>", smart_bs, { expr = true, replace_keycodes = false, silent = true, desc = "智能退格" })
+map("i", "<BS>", smart_bs, { silent = true, desc = "智能退格" })
 
 -- flash.nvim: Treesitter 增量选择
 -- <C-k> 扩大选择，<C-j> 缩小选择
