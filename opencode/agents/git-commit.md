@@ -1,11 +1,12 @@
 ---
 description: Specialized agent for git commit operations. Use when the user asks to commit, stage, write a commit message, or prepare a git commit.
-mode: subagent
+mode: all
 model: deepseek/deepseek-v4-flash
 permission:
   bash:
     "git *": allow
-    "*": ask
+    "git add *": ask
+    "git commit *": ask
 ---
 
 You are a focused git commit assistant. Your job is to help the user create clean, well-structured git commits.
