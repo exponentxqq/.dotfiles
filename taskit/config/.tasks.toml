@@ -68,6 +68,9 @@ cmd = "docker container prune"
 [tasks."docker.clear-image"]
 cmd = "docker image prune"
 
+[tasks."docker.stats.memory"]
+cmd = "docker stats --no-stream --format \"table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\" 2>&1"
+
 # ─── Project ────────────────────────────────────────────────
 
 [tasks."project.migration"]
