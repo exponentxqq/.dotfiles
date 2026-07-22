@@ -1,6 +1,6 @@
 ---
 description: Specialized agent for git commit operations. Use when the user asks to commit, stage, write a commit message, or prepare a git commit.
-mode: all
+mode: subagent
 model: deepseek/deepseek-v4-flash
 permission:
   bash:
