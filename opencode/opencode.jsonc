@@ -58,6 +58,9 @@
     "jdtls": {
       "command": [
         "/home/xuqinqin/.local/share/nvim/mason/packages/jdtls/bin/jdtls",
+        "--jvm-arg=-Xmx1g",
+        "--jvm-arg=-XX:MaxMetaspaceSize=384m",
+        "--jvm-arg=-XX:+UseG1GC",
       ],
       "env": {
         "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk",

@@ -107,14 +107,26 @@ return {
       else
         local cmd = vim.deepcopy(opts.cmd)
         table.insert(cmd, 2, "--java-executable=" .. run_java)
-        -- 增大 JVM 堆内存，加快启动和索引
+        -- 清除已有 JVM 内存参数（含 --jvm-arg= 前缀），统一注入封顶限制
         for i, arg in ipairs(cmd) do
-          if arg:match("^%-Xms") or arg:match("^%-Xmx") then
+          if arg:match("^%-X") or arg:match("^%-%-jvm%-arg=%-X") then
             cmd[i] = nil
           end
         end
-        table.insert(cmd, 2, "-Xmx2g")
-        table.insert(cmd, 2, "-Xms512m")
+        local jvm_args = {
+          "--jvm-arg=-Xmx2g",
+          "--jvm-arg=-Xms512m",
+          "--jvm-arg=-XX:MaxMetaspaceSize=512m",
+          "--jvm-arg=-XX:+UseG1GC",
+          "--jvm-arg=-XX:MaxGCPauseMillis=100",
+          "--jvm-arg=-XX:SoftRefLRUPolicyMSPerMB=50",
+          "--jvm-arg=-XX:ReservedCodeCacheSize=128m",
+          "--jvm-arg=-XX:MaxDirectMemorySize=256m",
+          "--jvm-arg=-Xss512k",
+        }
+        for i = #jvm_args, 1, -1 do
+          table.insert(cmd, 2, jvm_args[i])
+        end
         opts.cmd = cmd
       end
 
@@ -124,11 +136,15 @@ return {
           updateBuildConfiguration = "automatic",
         },
         eclipse = {
-          downloadSources = true,
+          downloadSources = false,
         },
         maven = {
-          downloadSources = true,
+          downloadSources = false,
         },
+        autobuild = {
+          enabled = false,
+        },
+        maxConcurrentBuilds = 1,
       }
       if home then
         java_extra.configuration.runtimes = {
@@ -144,9 +160,25 @@ return {
           },
         }
       end
+      java_extra.import = vim.tbl_deep_extend("force", java_extra.import or {}, {
+        gradle = {
+          jvmArguments = "-Xmx512m -XX:MaxMetaspaceSize=384m -XX:MaxDirectMemorySize=256m -XX:+UseG1GC -Dfile.encoding=UTF-8",
+        },
+      })
       opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
         java = java_extra,
       })
+
+      opts.dap_main = false
+
+      opts.project_name = function(root_dir)
+        if not root_dir then
+          return nil
+        end
+        local parent = vim.fs.basename(vim.fs.dirname(root_dir))
+        local name = vim.fs.basename(root_dir)
+        return parent and (parent .. "-" .. name) or name
+      end
 
       return opts
     end,
