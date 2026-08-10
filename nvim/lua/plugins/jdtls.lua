@@ -142,7 +142,7 @@ return {
           downloadSources = false,
         },
         autobuild = {
-          enabled = false,
+          enabled = true,
         },
         maxConcurrentBuilds = 1,
       }
