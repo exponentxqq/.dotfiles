@@ -2,14 +2,11 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/qwen3.7-plus",
   "permission": "allow",
-  "plugin": [
-    "superpowers@git+https://github.com/obra/superpowers.git",
-    "@ephemushroom/opencode-claude-mem",
-  ],
+  "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
   "agent": {
     "plan": {
-      "model": "zai-coding-plan/glm-5.2",
-      "temperature": 0.1,
+      "model": "opencode-go/kimi-k3",
+      "temperature": 1.0,
       "permission": {
         "read": "allow",
         "glob": "allow",
@@ -18,11 +15,11 @@
       },
     },
     "build": {
-      "model": "deepseek/deepseek-v4-pro",
+      "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.0,
     },
     "general": {
-      "model": "opencode-go/qwen3.7-plus",
+      "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
     },
     "title": {
@@ -33,16 +30,6 @@
     },
     "summary": {
       "model": "deepseek/deepseek-v4-flash",
-    },
-    "code-reviewer": {
-      "description": "Reviews code for quality, security, and best practices",
-      "mode": "subagent",
-      "model": "opencode-go/qwen3.7-plus",
-      "temperature": 0.1,
-      "permission": {
-        "edit": "deny",
-        "bash": "deny",
-      },
     },
   },
   "lsp": {
