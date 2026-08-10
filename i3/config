@@ -48,6 +48,7 @@ exec --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id dunst -config ~/.config/i3/dunst.conf
 exec --no-startup-id variety
 exec --no-startup-id copyq
+exec --no-startup-id flameshot
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -62,7 +63,6 @@ floating_modifier $mod
 
 bindsym $mod+grave exec --no-startup-id tdrop -ma -w 100% -h 60% -x 0 -y 0 kitty
 bindsym $mod+Return exec kitty
-bindsym $mod+Shift+x exec flameshot -p ~/Documents/captures
 bindsym $mod+b exec --no-startup-id ~/.config/polybar/launch.sh
 bindsym $mod+z exec jetbrains-toolbox
 bindsym $mod+x exec google-chrome-stable
