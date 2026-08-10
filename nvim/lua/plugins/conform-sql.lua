@@ -9,7 +9,7 @@ return {
       opts.formatters = opts.formatters or {}
       opts.formatters.sqlfluff = {
         command = vim.fn.stdpath("data") .. "/mason/bin/sqlfluff",
-        args = { "format", "--dialect=mysql", "--ignore", "parsing,templating", "-" },
+        args = { "format", "--dialect=mysql", "--ignore", "parsing,templating", "--exclude-rules", "L016", "-" },
         cwd = function(ctx)
           return vim.fn.fnamemodify(ctx.filename, ":h")
         end,

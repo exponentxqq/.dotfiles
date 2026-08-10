@@ -20,7 +20,15 @@ local function parse_groups(segments)
   groups.name = segments[i]; i = i + 1
 
   if segments[i] then
-    groups.type = segments[i]; i = i + 1
+    local type_parts = { segments[i] }
+    local open_count = (segments[i]:match("%(") or ""):len() - (segments[i]:match("%)") or ""):len()
+    i = i + 1
+    while open_count > 0 and segments[i] do
+      type_parts[#type_parts + 1] = segments[i]
+      open_count = open_count + (segments[i]:match("%(") or ""):len() - (segments[i]:match("%)") or ""):len()
+      i = i + 1
+    end
+    groups.type = table.concat(type_parts, " ")
     if segments[i] and segments[i]:lower() == "unsigned" then
       groups.type = groups.type .. " " .. segments[i]; i = i + 1
     end
