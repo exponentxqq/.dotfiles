@@ -5,7 +5,7 @@
   "plugin": ["superpowers@git+https://github.com/obra/superpowers.git"],
   "agent": {
     "plan": {
-      "model": "opencode-go/kimi-k3",
+      "model": "zai-coding-plan/glm-5.3",
       "temperature": 1.0,
       "permission": {
         "read": "allow",
@@ -17,6 +17,7 @@
     "build": {
       "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.0,
+      "variant": "max",
     },
     "general": {
       "model": "deepseek/deepseek-v4-flash",
