@@ -114,7 +114,7 @@ return {
           end
         end
         local jvm_args = {
-          "--jvm-arg=-Xmx2g",
+          "--jvm-arg=-Xmx4g",
           "--jvm-arg=-Xms512m",
           "--jvm-arg=-XX:MaxMetaspaceSize=512m",
           "--jvm-arg=-XX:+UseG1GC",
