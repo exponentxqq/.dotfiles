@@ -77,6 +77,32 @@ local function java_se_runtime_name(home)
   return "JavaSE-17"
 end
 
+--- 从指定目录（默认当前 buffer）向上查找 gradle-wrapper.properties 并解析 Gradle 版本（如 "8.5"）
+--- 兼容 8.5-bin.zip / 8.14.3-bin.zip / 6.0.1-all.zip 及各镜像 URL
+---@param start string? 查找起点目录，默认当前 buffer 或 cwd
+---@return string?
+local function gradle_wrapper_version(start)
+  if not start then
+    local buf = vim.api.nvim_buf_get_name(0)
+    start = (buf ~= "" and vim.fs.dirname(buf)) or vim.uv.cwd()
+  end
+  local props = vim.fs.find("gradle-wrapper.properties", {
+    upward = true,
+    path = start,
+    stop = vim.fs.normalize("~"),
+  })
+  if not props[1] then
+    return nil
+  end
+  for line in io.lines(props[1]) do
+    local v = line:match("gradle%-(%d+%.%d+%.?%d*)%-%w+%.zip")
+    if v then
+      return v
+    end
+  end
+  return nil
+end
+
 return {
   {
     "mfussenegger/nvim-jdtls",
@@ -144,7 +170,7 @@ return {
         autobuild = {
           enabled = true,
         },
-        maxConcurrentBuilds = 1,
+        maxConcurrentBuilds = 4,
       }
       if home then
         java_extra.configuration.runtimes = {
@@ -168,6 +194,32 @@ return {
       opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
         java = java_extra,
       })
+
+      -- 逐项目解析 wrapper 版本 + settings 镜像进 init_options。
+      -- 注意：lazy.nvim 的 opts 求值每进程仅一次，版本若在 opts 阶段解析会被「烤死」为
+      -- 首个打开的项目；opts.jdtls 作为函数由 LazyVim 在每次 attach_jdtls 时调用
+      -- （此时 config.root_dir 已知），从而实现每个 jdtls client 跟随自己项目的 wrapper。
+      -- init_options 镜像让 jdt.ls 的 BaseInitHandler 在 initialize 阶段即读取 settings，
+      -- 消除「先按内嵌 8.9 探查、settings 到达后再重同步」的启动竞态。
+      local prev_jdtls = opts.jdtls
+      opts.jdtls = function(config)
+        if type(prev_jdtls) == "function" then
+          config = prev_jdtls(config) or config
+        elseif type(prev_jdtls) == "table" then
+          config = vim.tbl_deep_extend("force", config, prev_jdtls)
+        end
+        local v = config.root_dir and gradle_wrapper_version(config.root_dir)
+        if v then
+          -- deepcopy 避免污染跨项目共享的 opts.settings 表
+          config.settings = vim.tbl_deep_extend("force", vim.deepcopy(config.settings or {}), {
+            java = { import = { gradle = { version = v } } },
+          })
+        end
+        config.init_options = vim.tbl_deep_extend("force", config.init_options or {}, {
+          settings = config.settings,
+        })
+        return config
+      end
 
       opts.dap_main = false
 
