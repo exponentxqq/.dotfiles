@@ -73,7 +73,6 @@
       "command": ["npx", "-y", "@dbx-app/mcp-server"],
       "environment": {
         "DBX_WEB_URL": "http://localhost:4224",
-        "DBX_MCP_SCOPE_CONNECTION_NAME": "localhost@mysql5.7",
       },
     },
   },
