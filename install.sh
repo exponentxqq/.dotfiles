@@ -29,3 +29,4 @@ sh $BASEDIR/vim/install.sh
 sh $BASEDIR/agent/install.sh
 sh $BASEDIR/opencode/install.sh
 sh $BASEDIR/codex/install.sh
+sh $BASEDIR/grub/install.sh
