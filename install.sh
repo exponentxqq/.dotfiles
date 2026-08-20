@@ -10,10 +10,10 @@ echo ---- start install and config in root: $BASEDIR ----
 echo --------------------------------------------------------
 
 if [ ! -d ~/bin ]; then
-    mkdir ~/bin
+  mkdir ~/bin
 fi
 if [ ! -d ~/.config ]; then
-    mkdir ~/.config
+  mkdir ~/.config
 fi
 
 command -v curl >/dev/null 2>&1 || { sh $BASEDIR/tool.sh curl >&2; }
@@ -26,6 +26,6 @@ sh $BASEDIR/taskit/install.sh
 sh $BASEDIR/tmux/install.sh
 sh $BASEDIR/docker/install.sh
 sh $BASEDIR/vim/install.sh
-sh $BASEDIR/claude/install.sh
+sh $BASEDIR/agent/install.sh
 sh $BASEDIR/opencode/install.sh
 sh $BASEDIR/codex/install.sh

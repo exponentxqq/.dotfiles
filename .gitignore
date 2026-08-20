@@ -7,10 +7,3 @@ tmux/plugins
 zsh/custom/plugins/
 zsh/custom/themes/
 
-# Claude local settings (contains API keys)
-claude/settings.*.json
-
-
-.mcp.json
-.claude
-

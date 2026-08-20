@@ -41,26 +41,6 @@ fi
 ln -sfn "$BASEDIR" ~/.config/opencode
 echo "Linked ~/.config/opencode -> $BASEDIR"
 
-# ~/.agents/skills/openspec-* 去重：统一指向 dotfiles/claude/skills 中的单一副本
-CLAUDE_SKILLS_DIR="$BASEDIR/../claude/skills"
-AGENTS_SKILLS_DIR="$HOME/.agents/skills"
-
-if [ -d "$CLAUDE_SKILLS_DIR" ]; then
-  mkdir -p "$AGENTS_SKILLS_DIR"
-  for skill_path in "$CLAUDE_SKILLS_DIR"/openspec-*; do
-    [ -d "$skill_path" ] || continue
-    skill_name=$(basename "$skill_path")
-    target="$AGENTS_SKILLS_DIR/$skill_name"
-
-    if [ -e "$target" ] && [ ! -L "$target" ]; then
-      mv "$target" "$target.bak"
-      echo "Backed up $target to $target.bak"
-    fi
-    ln -sfn "$skill_path" "$target"
-    echo "Linked $target -> $skill_path"
-  done
-fi
-
 echo "opencode configuration installed."
 echo ""
 echo "Note: restart opencode to load any config changes."
