@@ -47,7 +47,9 @@ def wind_dir_cn(deg: float) -> str:
     return dirs[int((deg + 22.5) % 360) // 45]
 
 
-def get_weather(city: str, lang: str, unit: str, api_key: str, extend: bool = False) -> dict[str, str] | None:
+def get_weather(
+    city: str, lang: str, unit: str, api_key: str, extend: bool = False
+) -> dict[str, str] | None:
     try:
         r = requests.get(
             f"{OPENWEATHER_URL}?q={city}&lang={lang}&units={unit}&appid={api_key}",
@@ -69,7 +71,7 @@ def get_weather(city: str, lang: str, unit: str, api_key: str, extend: bool = Fa
             wind_deg = data["wind"].get("deg")
             direction = f"{wind_dir_cn(wind_deg)}风" if wind_deg is not None else "风"
             result["extend"] = (
-                f"体感{feels}{unit} · {desc.title()} · 湿度{hum}% · {direction}{wind_speed}m/s"
+                f"体感{feels}{unit} · {desc.title()} · 湿度{hum}％ · {direction}{wind_speed}m/s"
             )
         return result
     except Exception:
@@ -147,3 +149,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
