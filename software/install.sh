@@ -29,3 +29,6 @@ if [ -d ~/.asoundrc ]; then
 fi
 
 sh "$BASEDIR/ranger/install.sh"
+
+# wireplumber 未安装时跳过（全新机器上 pipewire-pulse 由 i3/install.sh 稍后安装）
+command -v wireplumber >/dev/null 2>&1 && sh "$BASEDIR/wireplumber/install.sh"
