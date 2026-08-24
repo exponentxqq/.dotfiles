@@ -1,6 +1,6 @@
 #!/bin/bash
 
-THEME="default"
+THEME="onedark"
 
 # Terminate already running bar instances
 killall -q polybar

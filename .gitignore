@@ -9,3 +9,6 @@ tmux/plugins
 zsh/custom/plugins/
 zsh/custom/themes/
 
+# weather API key（不入库）
+i3/polybar/scripts/weather/.api_key
+

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-python3 $HOME/.dotfiles/polybar/scripts/weather/main.py -u metric
+python3 $HOME/.config/polybar/scripts/weather/main.py -u metric -c Yuhang
 
