@@ -9,7 +9,7 @@ echo --------------------------------------------------------
 echo ---- install tool softwares and config in $BASEDIR...... ----
 echo --------------------------------------------------------
 
-sh $BASEDIR/../tool.sh kitty
+sh $BASEDIR/../tool.sh kitty copyq flameshot
 if [ -d ~/.config/kitty ]; then
   rm -rf ~/.config/kitty
 fi
