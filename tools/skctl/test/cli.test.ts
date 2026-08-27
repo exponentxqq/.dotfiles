@@ -54,6 +54,42 @@ test("cli list hides description by default, shows indented with --desc", () => 
   }
 });
 
+test("cli list --path shows real skill dir", () => {
+  const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
+  writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  try {
+    cli(store, `install ${quote(src)}`);
+    const list = cli(store, "list");
+    assert.ok(!list.includes(src));
+    const listPath = cli(store, "list --path");
+    assert.ok(listPath.includes(`\n          ${src}`));
+  } finally {
+    rmSync(src, { recursive: true, force: true });
+    rmSync(store, { recursive: true, force: true });
+  }
+});
+
+test("cli colors output with FORCE_COLOR, plain when piped", () => {
+  const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
+  writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  try {
+    cli(store, `install ${quote(src)}`);
+    const plain = cli(store, "list");
+    assert.ok(!plain.includes("\x1b["));
+    const colored = execSync(`node ${CLI} --store ${quote(store)} list`, {
+      stdio: "pipe",
+      env: { ...process.env, FORCE_COLOR: "1" },
+    }).toString();
+    assert.ok(colored.includes("\x1b[32m"));
+    assert.ok(colored.includes("\x1b[1m"));
+  } finally {
+    rmSync(src, { recursive: true, force: true });
+    rmSync(store, { recursive: true, force: true });
+  }
+});
+
 test("cli list tolerates skill dir without SKILL.md", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   try {
