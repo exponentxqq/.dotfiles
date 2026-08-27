@@ -64,6 +64,19 @@ test("installSkill installs from git repo subdir", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
+test("installSkill excludes .git from copied skill", () => {
+  const repo = makeRepo();
+  writeFileSync(join(repo, "SKILL.md"), "---\nname: root-skill\ndescription: d\n---\n");
+  git(repo, "add -A");
+  git(repo, "commit -qm init");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  installSkill({ src: `file://${repo}`, store });
+  assert.ok(existsSync(join(store, "skills", "root-skill", "SKILL.md")));
+  assert.equal(existsSync(join(store, "skills", "root-skill", ".git")), false);
+  rmSync(repo, { recursive: true, force: true });
+  rmSync(store, { recursive: true, force: true });
+});
+
 test("installSkill creates symlink for local source", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: local-skill\ndescription: d\n---\n");

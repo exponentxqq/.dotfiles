@@ -8,7 +8,7 @@ export function doctor(store: string, agentsLink: string = join(USER_HOME, ".age
   const report: string[] = [];
   const p = storePaths(store);
 
-  const linkOk = existsSync(agentsLink) && readlinkSync(agentsLink) === p.skills;
+  const linkOk = existsSync(agentsLink) && lstatSync(agentsLink).isSymbolicLink() && readlinkSync(agentsLink) === p.skills;
   if (!linkOk) {
     mkdirSync(dirname(agentsLink), { recursive: true });
     rmSync(agentsLink, { recursive: true, force: true });

@@ -37,6 +37,17 @@ test("cli install + list + disable + enable + uninstall", () => {
   }
 });
 
+test("cli list tolerates skill dir without SKILL.md", () => {
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  try {
+    mkdirSync(join(store, "skills", "broken-skill"), { recursive: true });
+    const out = cli(store, "list");
+    assert.match(out, /broken-skill/);
+  } finally {
+    rmSync(store, { recursive: true, force: true });
+  }
+});
+
 test("cli doctor and migrate", () => {
   const agentsLink = "/home/xuqinqin/.agents/skills";
   const orig = existsSync(agentsLink) ? readlinkSync(agentsLink) : null;

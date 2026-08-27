@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, readdirSync, readSync, renameSync, rmSync, statSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, readdirSync, readSync, renameSync, rmSync, lstatSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { doctor } from "./doctor.ts";
@@ -23,7 +23,7 @@ Commands:
   disable <name>        Disable skill
   update [<name>...]    Update git-sourced skills
   doctor                Check and repair store
-  migrate [dir]         Migrate from dotfiles/agent/skills
+  migrate [dir] [--local-only]  Migrate from dotfiles/agent/skills (--local-only skips git installs)
   --help, -h            Show this help
 
 Global:
@@ -74,7 +74,8 @@ function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
     if (!existsSync(dir)) continue;
     for (const name of readdirSync(dir)) {
       const skillDir = join(dir, name);
-      if (!statSync(skillDir).isDirectory()) continue;
+      const st = lstatSync(skillDir);
+      if (!st.isDirectory() && !st.isSymbolicLink()) continue;
       const enabled = dir === p.skills;
       if (!all && !enabled) continue;
       const rec = registry.skills[name];
