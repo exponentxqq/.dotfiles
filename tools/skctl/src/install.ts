@@ -2,14 +2,13 @@ import {
   cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync,
   statSync, symlinkSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { storePaths } from "./paths.ts";
+import { storePaths, USER_HOME } from "./paths.ts";
 import { loadRegistry, saveRegistry } from "./registry.ts";
 import { quote, run } from "./shell.ts";
 import { parseFrontmatter, validateName } from "./validate.ts";
 
-export const TMP_DIR = join(tmpdir(), "agent-skills");
+export const TMP_DIR = join(USER_HOME, ".cache", "agent-skills", "tmp");
 
 export function findSkillDir(root: string): string | null {
   if (existsSync(join(root, "SKILL.md"))) return root;

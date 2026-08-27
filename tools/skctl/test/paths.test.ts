@@ -5,6 +5,10 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { DEFAULT_STORE, resolveStore, storePaths } from "../src/paths.ts";
 
+test("DEFAULT_STORE lives under real user home", () => {
+  assert.ok(DEFAULT_STORE.startsWith("/home/xuqinqin/"));
+});
+
 test("resolveStore defaults to XDG path", () => {
   assert.equal(resolveStore(), DEFAULT_STORE);
 });
