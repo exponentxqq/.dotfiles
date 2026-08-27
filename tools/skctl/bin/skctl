@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /home/xuqinqin/bin/docker-run node node /home/xuqinqin/develop/dotfiles/tools/skctl/src/cli.ts "$@"
