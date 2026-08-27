@@ -1,6 +1,14 @@
 import {
-  cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync,
-  statSync, symlinkSync, writeFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
 import { simpleGit } from "simple-git";
@@ -38,7 +46,12 @@ export async function installSkill(opts: InstallOptions): Promise<string> {
   const tmp = mkdtempSync(join(TMP_DIR, "install-"));
   try {
     let skillDir: string;
-    let source: { type: "git" | "local"; url?: string; subdir?: string; path?: string };
+    let source: {
+      type: "git" | "local";
+      url?: string;
+      subdir?: string;
+      path?: string;
+    };
     let commit: string | undefined;
 
     if (existsSync(src)) {
@@ -55,14 +68,14 @@ export async function installSkill(opts: InstallOptions): Promise<string> {
       await extract(zipPath, { dir: unzipDir });
       skillDir = subdir
         ? join(unzipDir, subdir)
-        : findSkillDir(unzipDir) ?? fail("cannot locate SKILL.md in zip, use --subdir");
+        : (findSkillDir(unzipDir) ?? fail("cannot locate SKILL.md in zip, use --subdir"));
       source = { type: "local", url: src };
     } else {
       const repoDir = join(tmp, "repo");
       await simpleGit().clone(src, repoDir, ["--depth", "1"]);
       skillDir = subdir
         ? join(repoDir, subdir)
-        : findSkillDir(repoDir) ?? fail("cannot locate SKILL.md, use --subdir");
+        : (findSkillDir(repoDir) ?? fail("cannot locate SKILL.md, use --subdir"));
       commit = await simpleGit(repoDir).revparse("HEAD");
       source = { type: "git", url: src, subdir };
     }
@@ -79,7 +92,10 @@ export async function installSkill(opts: InstallOptions): Promise<string> {
     if (source.type === "local" && source.path) {
       symlinkSync(skillDir, dest);
     } else {
-      cpSync(skillDir, dest, { recursive: true, filter: (src) => !src.split("/").includes(".git") });
+      cpSync(skillDir, dest, {
+        recursive: true,
+        filter: (src) => !src.split("/").includes(".git"),
+      });
     }
     const registry = loadRegistry(p.registry);
     registry.skills[name] = {

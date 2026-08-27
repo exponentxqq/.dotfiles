@@ -1,5 +1,15 @@
 #!/usr/bin/env node
-import { readFileSync, readdirSync, readSync, renameSync, rmSync, lstatSync, existsSync, mkdirSync, realpathSync } from "node:fs";
+import {
+  readFileSync,
+  readdirSync,
+  readSync,
+  renameSync,
+  rmSync,
+  lstatSync,
+  existsSync,
+  mkdirSync,
+  realpathSync,
+} from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { doctor } from "./doctor.ts";
@@ -55,15 +65,24 @@ async function main() {
   const p = storePaths(store);
 
   switch (cmd) {
-    case "list": return cmdList(rest, p);
-    case "info": return cmdInfo(rest, p);
-    case "install": return cmdInstall(rest, p);
-    case "uninstall": return cmdUninstall(rest, p);
-    case "enable": return cmdEnable(rest, p, true);
-    case "disable": return cmdEnable(rest, p, false);
-    case "update": return cmdUpdate(rest, p);
-    case "doctor": return cmdDoctor(rest, p);
-    case "migrate": return cmdMigrate(rest, p);
+    case "list":
+      return cmdList(rest, p);
+    case "info":
+      return cmdInfo(rest, p);
+    case "install":
+      return cmdInstall(rest, p);
+    case "uninstall":
+      return cmdUninstall(rest, p);
+    case "enable":
+      return cmdEnable(rest, p, true);
+    case "disable":
+      return cmdEnable(rest, p, false);
+    case "update":
+      return cmdUpdate(rest, p);
+    case "doctor":
+      return cmdDoctor(rest, p);
+    case "migrate":
+      return cmdMigrate(rest, p);
     default:
       console.error(c.red(`unknown command: ${cmd}`));
       console.error(USAGE);
@@ -76,7 +95,13 @@ function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
   const showDesc = args.includes("--desc");
   const showPath = args.includes("--path");
   const registry = loadRegistry(p.registry);
-  const rows: { name: string; enabled: boolean; source: string; desc: string; path: string }[] = [];
+  const rows: {
+    name: string;
+    enabled: boolean;
+    source: string;
+    desc: string;
+    path: string;
+  }[] = [];
   for (const dir of [p.skills, p.disabled]) {
     if (!existsSync(dir)) continue;
     for (const name of readdirSync(dir)) {
@@ -105,7 +130,12 @@ function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
   rows.sort((a, b) => a.name.localeCompare(b.name));
   for (const r of rows) {
     const status = r.enabled ? c.green("enabled ") : c.yellow("disabled");
-    const srcCol = r.source === "git" ? c.magenta(r.source.padEnd(8)) : r.source === "local" ? c.cyan(r.source.padEnd(8)) : c.red(r.source.padEnd(8));
+    const srcCol =
+      r.source === "git"
+        ? c.magenta(r.source.padEnd(8))
+        : r.source === "local"
+          ? c.cyan(r.source.padEnd(8))
+          : c.red(r.source.padEnd(8));
     console.log(`${status}  ${c.bold(r.name.padEnd(24))} ${srcCol}`);
     if (showPath) console.log(`          ${c.dim(r.path)}`);
     if (showDesc && r.desc) console.log(`          ${c.dim(r.desc)}`);
@@ -140,13 +170,21 @@ function cmdInfo(args: string[], p: ReturnType<typeof storePaths>) {
 }
 
 async function cmdInstall(args: string[], p: ReturnType<typeof storePaths>) {
-  const { values, positionals } = parseArgs({ args, options: { subdir: { type: "string" } }, allowPositionals: true });
+  const { values, positionals } = parseArgs({
+    args,
+    options: { subdir: { type: "string" } },
+    allowPositionals: true,
+  });
   const src = positionals[0] as string | undefined;
   if (!src) {
     console.error(c.red("usage: skctl install <src> [--subdir DIR]"));
     process.exit(1);
   }
-  const name = await installSkill({ src, subdir: values.subdir, store: p.store });
+  const name = await installSkill({
+    src,
+    subdir: values.subdir,
+    store: p.store,
+  });
   console.log(c.green(`installed: ${name}`));
 }
 
@@ -163,7 +201,7 @@ async function cmdUninstall(args: string[], p: ReturnType<typeof storePaths>) {
     process.exit(1);
   }
   if (!force) {
-    let yes = false;
+    let yes: boolean;
     if (process.stdin.isTTY) {
       yes = await confirm({ message: `remove ${name}?`, default: false });
     } else {
@@ -212,7 +250,9 @@ async function cmdUpdate(args: string[], p: ReturnType<typeof storePaths>) {
   for (const name of targets) {
     try {
       const result = await updateSkill(name, p.store);
-      const line = result.startsWith("updated") ? c.green(`${name}: ${result}`) : c.dim(`${name}: ${result}`);
+      const line = result.startsWith("updated")
+        ? c.green(`${name}: ${result}`)
+        : c.dim(`${name}: ${result}`);
       console.log(line);
     } catch (e) {
       console.error(c.red(`${name}: ${(e as Error).message}`));
@@ -222,7 +262,8 @@ async function cmdUpdate(args: string[], p: ReturnType<typeof storePaths>) {
 
 function cmdDoctor(_args: string[], p: ReturnType<typeof storePaths>) {
   for (const line of doctor(p.store)) {
-    if (line.startsWith("broken:") || line.startsWith("orphan:") || line.startsWith("invalid:")) console.log(c.red(line));
+    if (line.startsWith("broken:") || line.startsWith("orphan:") || line.startsWith("invalid:"))
+      console.log(c.red(line));
     else if (line.startsWith("fixed:")) console.log(c.green(line));
     else console.log(line);
   }
@@ -231,7 +272,9 @@ function cmdDoctor(_args: string[], p: ReturnType<typeof storePaths>) {
 async function cmdMigrate(args: string[], p: ReturnType<typeof storePaths>) {
   const localOnly = args.includes("--local-only");
   const dir = args.find((a) => !a.startsWith("-"));
-  const report = localOnly ? await migrateLocal(dir ?? DEFAULT_DOTFILES_SKILLS, p.store) : await migrate(p.store, dir);
+  const report = localOnly
+    ? await migrateLocal(dir ?? DEFAULT_DOTFILES_SKILLS, p.store)
+    : await migrate(p.store, dir);
   for (const line of report) {
     if (line.startsWith("migrated") || line.startsWith("installed")) console.log(c.green(line));
     else if (line.startsWith("next:")) console.log(c.dim(line));

@@ -30,14 +30,25 @@ export async function migrateExternal(store: string): Promise<string[]> {
   for (const sub of ["skills/pdf", "skills/pptx"]) {
     const name = sub.split("/").pop()!;
     if (registry.skills[name]) continue;
-    await installSkill({ src: "https://github.com/anthropics/skills", subdir: sub, store, ifExists: "skip" });
+    await installSkill({
+      src: "https://github.com/anthropics/skills",
+      subdir: sub,
+      store,
+      ifExists: "skip",
+    });
     report.push(`installed (git): ${name}`);
   }
   return report;
 }
 
-export async function migrate(store: string, dotfilesSkillsDir: string = DEFAULT_DOTFILES_SKILLS): Promise<string[]> {
-  const report = [...await migrateLocal(dotfilesSkillsDir, store), ...await migrateExternal(store)];
+export async function migrate(
+  store: string,
+  dotfilesSkillsDir: string = DEFAULT_DOTFILES_SKILLS,
+): Promise<string[]> {
+  const report = [
+    ...(await migrateLocal(dotfilesSkillsDir, store)),
+    ...(await migrateExternal(store)),
+  ];
   report.push("next: commit dotfiles changes (remove agent/skills/pdf, agent/skills/pptx)");
   return report;
 }

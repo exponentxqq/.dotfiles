@@ -5,19 +5,23 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { loadRegistry, saveRegistry } from "../src/registry.ts";
 
-test("loadRegistry returns empty for missing file", () => {
+void test("loadRegistry returns empty for missing file", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   assert.deepEqual(loadRegistry(join(dir, "nope.json")), { skills: {} });
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("saveRegistry then loadRegistry round-trips", () => {
+void test("saveRegistry then loadRegistry round-trips", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   const path = join(dir, "registry.json");
   const reg = {
     skills: {
       pdf: {
-        source: { type: "git" as const, url: "https://github.com/anthropics/skills", subdir: "skills/pdf" },
+        source: {
+          type: "git" as const,
+          url: "https://github.com/anthropics/skills",
+          subdir: "skills/pdf",
+        },
         installedCommit: "abc1234",
         installedAt: "2026-08-27T00:00:00.000Z",
       },
@@ -29,7 +33,7 @@ test("saveRegistry then loadRegistry round-trips", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("loadRegistry returns empty for corrupt json", () => {
+void test("loadRegistry returns empty for corrupt json", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   const path = join(dir, "registry.json");
   writeFileSync(path, "not json");
@@ -37,7 +41,7 @@ test("loadRegistry returns empty for corrupt json", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("saveRegistry creates nested parent dirs", () => {
+void test("saveRegistry creates nested parent dirs", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   const path = join(dir, "a", "b", "registry.json");
   saveRegistry(path, { skills: {} });

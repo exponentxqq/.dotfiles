@@ -31,5 +31,12 @@ Personal dotfiles managed with GNU Stow.
 ## skctl
 
 ```bash
+# 测试
 ~/develop/docker/run.sh node "cd /home/xuqinqin/develop/dotfiles/tools/skctl && pnpm install --silent && node --test 'test/*.test.ts'"
+# 类型检查
+~/develop/docker/run.sh node "cd /home/xuqinqin/develop/dotfiles/tools/skctl && pnpm exec tsc --noEmit"
+# Lint
+~/develop/docker/run.sh node "cd /home/xuqinqin/develop/dotfiles/tools/skctl && pnpm exec eslint src test"
+# 格式化
+~/develop/docker/run.sh node "cd /home/xuqinqin/develop/dotfiles/tools/skctl && pnpm exec prettier --write src test"
 ```

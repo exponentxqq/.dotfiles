@@ -8,7 +8,9 @@ export const CONFIG_PATH = join(USER_HOME, ".config", "agent-skills", "config.js
 export function resolveStore(storeFlag?: string, configPath: string = CONFIG_PATH): string {
   if (storeFlag) return storeFlag;
   try {
-    const cfg = JSON.parse(readFileSync(configPath, "utf8")) as { store?: string };
+    const cfg = JSON.parse(readFileSync(configPath, "utf8")) as {
+      store?: string;
+    };
     return cfg.store ?? DEFAULT_STORE;
   } catch {
     return DEFAULT_STORE;

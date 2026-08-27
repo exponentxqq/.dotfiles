@@ -20,7 +20,7 @@ function makeRepo(): string {
   return repo;
 }
 
-test("updateSkill reports up-to-date", async () => {
+void test("updateSkill reports up-to-date", async () => {
   const repo = makeRepo();
   mkdirSync(join(repo, "my-skill"));
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: d\n---\n");
@@ -33,7 +33,7 @@ test("updateSkill reports up-to-date", async () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("updateSkill overwrites on new commit", async () => {
+void test("updateSkill overwrites on new commit", async () => {
   const repo = makeRepo();
   mkdirSync(join(repo, "my-skill"));
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: v1\n---\n");
@@ -52,7 +52,7 @@ test("updateSkill overwrites on new commit", async () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("updateSkill skips local source", async () => {
+void test("updateSkill skips local source", async () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: ls\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));

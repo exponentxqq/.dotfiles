@@ -5,19 +5,19 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { DEFAULT_STORE, resolveStore, storePaths } from "../src/paths.ts";
 
-test("DEFAULT_STORE lives under real user home", () => {
+void test("DEFAULT_STORE lives under real user home", () => {
   assert.ok(DEFAULT_STORE.startsWith("/home/xuqinqin/"));
 });
 
-test("resolveStore defaults to XDG path", () => {
+void test("resolveStore defaults to XDG path", () => {
   assert.equal(resolveStore(), DEFAULT_STORE);
 });
 
-test("resolveStore prefers --store flag", () => {
+void test("resolveStore prefers --store flag", () => {
   assert.equal(resolveStore("/custom/store"), "/custom/store");
 });
 
-test("resolveStore reads config.json", () => {
+void test("resolveStore reads config.json", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   const cfg = join(dir, "config.json");
   writeFileSync(cfg, JSON.stringify({ store: "/custom/store" }));
@@ -25,7 +25,7 @@ test("resolveStore reads config.json", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("resolveStore falls back on bad config", () => {
+void test("resolveStore falls back on bad config", () => {
   const dir = mkdtempSync(join(tmpdir(), "skctl-"));
   const cfg = join(dir, "config.json");
   writeFileSync(cfg, "not json");
@@ -33,7 +33,7 @@ test("resolveStore falls back on bad config", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("storePaths returns subpaths", () => {
+void test("storePaths returns subpaths", () => {
   const p = storePaths("/s");
   assert.deepEqual(p, {
     store: "/s",

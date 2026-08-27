@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { doctor } from "../src/doctor.ts";
 import { saveRegistry } from "../src/registry.ts";
 
-test("doctor creates missing agents symlink", () => {
+void test("doctor creates missing agents symlink", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   mkdirSync(join(store, "skills"), { recursive: true });
   const link = join(store, "agents-link");
@@ -16,7 +16,7 @@ test("doctor creates missing agents symlink", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("doctor repairs wrong agents symlink", () => {
+void test("doctor repairs wrong agents symlink", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   mkdirSync(join(store, "skills"), { recursive: true });
   const link = join(store, "agents-link");
@@ -26,7 +26,7 @@ test("doctor repairs wrong agents symlink", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("doctor reports orphan registry entries", () => {
+void test("doctor reports orphan registry entries", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   mkdirSync(join(store, "skills"), { recursive: true });
   saveRegistry(join(store, "registry.json"), {
@@ -37,7 +37,7 @@ test("doctor reports orphan registry entries", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("doctor reports broken local symlink target", () => {
+void test("doctor reports broken local symlink target", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   mkdirSync(join(store, "skills"), { recursive: true });
   const missing = join(store, "missing-src");
@@ -50,10 +50,13 @@ test("doctor reports broken local symlink target", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("doctor reports frontmatter name mismatch", () => {
+void test("doctor reports frontmatter name mismatch", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   mkdirSync(join(store, "skills", "mismatch"), { recursive: true });
-  writeFileSync(join(store, "skills", "mismatch", "SKILL.md"), "---\nname: other\ndescription: d\n---\n");
+  writeFileSync(
+    join(store, "skills", "mismatch", "SKILL.md"),
+    "---\nname: other\ndescription: d\n---\n",
+  );
   const report = doctor(store, join(store, "link"));
   assert.ok(report.some((l) => l.includes("invalid: mismatch")));
   rmSync(store, { recursive: true, force: true });

@@ -1,14 +1,29 @@
-import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+} from "node:fs";
 import { dirname, join } from "node:path";
 import { loadRegistry } from "./registry.ts";
 import { parseFrontmatter } from "./validate.ts";
 import { storePaths, USER_HOME } from "./paths.ts";
 
-export function doctor(store: string, agentsLink: string = join(USER_HOME, ".agents", "skills")): string[] {
+export function doctor(
+  store: string,
+  agentsLink: string = join(USER_HOME, ".agents", "skills"),
+): string[] {
   const report: string[] = [];
   const p = storePaths(store);
 
-  const linkOk = existsSync(agentsLink) && lstatSync(agentsLink).isSymbolicLink() && readlinkSync(agentsLink) === p.skills;
+  const linkOk =
+    existsSync(agentsLink) &&
+    lstatSync(agentsLink).isSymbolicLink() &&
+    readlinkSync(agentsLink) === p.skills;
   if (!linkOk) {
     mkdirSync(dirname(agentsLink), { recursive: true });
     rmSync(agentsLink, { recursive: true, force: true });
@@ -36,7 +51,7 @@ export function doctor(store: string, agentsLink: string = join(USER_HOME, ".age
         report.push(`broken: ${name} (local source missing: ${rec.source.path})`);
         continue;
       }
-      let fm: ReturnType<typeof parseFrontmatter> = null;
+      let fm: ReturnType<typeof parseFrontmatter>;
       try {
         fm = parseFrontmatter(readFileSync(join(entry, "SKILL.md"), "utf8"));
       } catch {

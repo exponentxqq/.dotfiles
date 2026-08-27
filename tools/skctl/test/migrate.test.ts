@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { migrateLocal } from "../src/migrate.ts";
 
-test("migrateLocal registers self-written skills as local symlinks", async () => {
+void test("migrateLocal registers self-written skills as local symlinks", async () => {
   const srcDir = mkdtempSync(join(tmpdir(), "skctl-src-"));
   mkdirSync(join(srcDir, "my-skill"));
   writeFileSync(join(srcDir, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: d\n---\n");
@@ -17,7 +17,7 @@ test("migrateLocal registers self-written skills as local symlinks", async () =>
   rmSync(store, { recursive: true, force: true });
 });
 
-test("migrateLocal skips non-skill dirs and existing", async () => {
+void test("migrateLocal skips non-skill dirs and existing", async () => {
   const srcDir = mkdtempSync(join(tmpdir(), "skctl-src-"));
   mkdirSync(join(srcDir, "no-skill"));
   writeFileSync(join(srcDir, "no-skill", "README.md"), "not a skill");
@@ -28,7 +28,7 @@ test("migrateLocal skips non-skill dirs and existing", async () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("migrateLocal skips skills already in registry", async () => {
+void test("migrateLocal skips skills already in registry", async () => {
   const srcDir = mkdtempSync(join(tmpdir(), "skctl-src-"));
   mkdirSync(join(srcDir, "my-skill"));
   writeFileSync(join(srcDir, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: d\n---\n");

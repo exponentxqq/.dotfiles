@@ -14,8 +14,14 @@ import { createColors } from "picocolors";
 
 export const makeColor = (enabled: boolean): Color => {
   const c = createColors(enabled);
-  const normalize = (fn: ColorFn): ColorFn => (s) =>
-    fn(s).replace(/\x1b\[39m/g, "\x1b[0m").replace(/\x1b\[22m/g, "\x1b[0m");
+  const normalize =
+    (fn: ColorFn): ColorFn =>
+    (s) =>
+      fn(s)
+        // eslint-disable-next-line no-control-regex -- matching ANSI reset codes
+        .replace(/\x1b\[39m/g, "\x1b[0m")
+        // eslint-disable-next-line no-control-regex -- matching ANSI reset codes
+        .replace(/\x1b\[22m/g, "\x1b[0m");
   return {
     green: normalize(c.green),
     red: normalize(c.red),

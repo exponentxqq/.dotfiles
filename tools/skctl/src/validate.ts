@@ -15,5 +15,9 @@ import matter from "gray-matter";
 export function parseFrontmatter(content: string): SkillFrontmatter | null {
   const { data } = matter(content);
   if (typeof data.name !== "string" || typeof data.description !== "string") return null;
-  return { ...data, name: data.name, description: data.description } as SkillFrontmatter;
+  return {
+    ...data,
+    name: data.name,
+    description: data.description,
+  };
 }

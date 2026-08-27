@@ -1,7 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { quote } from "./helpers.ts";
@@ -12,7 +20,7 @@ function cli(store: string, args: string): string {
   return execSync(`node ${CLI} --store ${quote(store)} ${args}`, { stdio: "pipe" }).toString();
 }
 
-test("cli install + list + disable + enable + uninstall", () => {
+void test("cli install + list + disable + enable + uninstall", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
@@ -37,13 +45,16 @@ test("cli install + list + disable + enable + uninstall", () => {
   }
 });
 
-test("cli uninstall confirms via piped stdin", () => {
+void test("cli uninstall confirms via piped stdin", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   try {
     cli(store, `install ${quote(src)}`);
-    const out = execSync(`node ${CLI} --store ${quote(store)} uninstall demo`, { stdio: "pipe", input: "y\n" }).toString();
+    const out = execSync(`node ${CLI} --store ${quote(store)} uninstall demo`, {
+      stdio: "pipe",
+      input: "y\n",
+    }).toString();
     assert.match(out, /uninstalled: demo/);
   } finally {
     rmSync(src, { recursive: true, force: true });
@@ -51,7 +62,7 @@ test("cli uninstall confirms via piped stdin", () => {
   }
 });
 
-test("cli list hides description by default, shows indented with --desc", () => {
+void test("cli list hides description by default, shows indented with --desc", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
@@ -68,7 +79,7 @@ test("cli list hides description by default, shows indented with --desc", () => 
   }
 });
 
-test("cli list --path shows real skill dir", () => {
+void test("cli list --path shows real skill dir", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
@@ -84,7 +95,7 @@ test("cli list --path shows real skill dir", () => {
   }
 });
 
-test("cli colors output with FORCE_COLOR, plain when piped", () => {
+void test("cli colors output with FORCE_COLOR, plain when piped", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
@@ -104,7 +115,7 @@ test("cli colors output with FORCE_COLOR, plain when piped", () => {
   }
 });
 
-test("cli list tolerates skill dir without SKILL.md", () => {
+void test("cli list tolerates skill dir without SKILL.md", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   try {
     mkdirSync(join(store, "skills", "broken-skill"), { recursive: true });
@@ -115,12 +126,15 @@ test("cli list tolerates skill dir without SKILL.md", () => {
   }
 });
 
-test("cli doctor and migrate", () => {
+void test("cli doctor and migrate", () => {
   const agentsLink = "/home/xuqinqin/.agents/skills";
   const orig = existsSync(agentsLink) ? readlinkSync(agentsLink) : null;
   const srcDir = mkdtempSync(join(tmpdir(), "skctl-src-"));
   mkdirSync(join(srcDir, "self-skill"));
-  writeFileSync(join(srcDir, "self-skill", "SKILL.md"), "---\nname: self-skill\ndescription: d\n---\n");
+  writeFileSync(
+    join(srcDir, "self-skill", "SKILL.md"),
+    "---\nname: self-skill\ndescription: d\n---\n",
+  );
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   try {
     rmSync(agentsLink, { force: true });

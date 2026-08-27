@@ -1,4 +1,13 @@
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { join, relative } from "node:path";
 import { simpleGit } from "simple-git";
 import { findSkillDir, TMP_DIR } from "./install.ts";
@@ -22,14 +31,17 @@ export async function updateSkill(name: string, store: string): Promise<string> 
     if (newCommit === rec.installedCommit) return "up-to-date";
     const skillDir = rec.source.subdir
       ? join(repoDir, rec.source.subdir)
-      : findSkillDir(repoDir) ?? fail("cannot locate SKILL.md");
+      : (findSkillDir(repoDir) ?? fail("cannot locate SKILL.md"));
     const changed = diffFiles(dest, skillDir);
     if (changed.length > 0) {
       console.log(`  local modifications will be overwritten: ${changed.join(", ")}`);
     }
     const oldCommit = rec.installedCommit;
     rmSync(dest, { recursive: true, force: true });
-    cpSync(skillDir, dest, { recursive: true, filter: (src) => !src.split("/").includes(".git") });
+    cpSync(skillDir, dest, {
+      recursive: true,
+      filter: (src) => !src.split("/").includes(".git"),
+    });
     rec.installedCommit = newCommit;
     rec.installedAt = new Date().toISOString();
     saveRegistry(p.registry, registry);
