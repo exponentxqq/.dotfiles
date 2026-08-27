@@ -10,15 +10,19 @@ export interface Color {
   magenta: ColorFn;
 }
 
-export function makeColor(enabled: boolean): Color {
-  const wrap = (code: string) => (s: string) => (enabled ? `\x1b[${code}m${s}\x1b[0m` : s);
+import { createColors } from "picocolors";
+
+export const makeColor = (enabled: boolean): Color => {
+  const c = createColors(enabled);
+  const normalize = (fn: ColorFn): ColorFn => (s) =>
+    fn(s).replace(/\x1b\[39m/g, "\x1b[0m").replace(/\x1b\[22m/g, "\x1b[0m");
   return {
-    green: wrap("32"),
-    red: wrap("31"),
-    yellow: wrap("33"),
-    bold: wrap("1"),
-    dim: wrap("2"),
-    cyan: wrap("36"),
-    magenta: wrap("35"),
+    green: normalize(c.green),
+    red: normalize(c.red),
+    yellow: normalize(c.yellow),
+    bold: normalize(c.bold),
+    dim: normalize(c.dim),
+    cyan: normalize(c.cyan),
+    magenta: normalize(c.magenta),
   };
-}
+};
