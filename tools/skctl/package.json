@@ -13,9 +13,6 @@
     "picocolors": "^1.1.1",
     "simple-git": "^3.36.0"
   },
-  "devDependencies": {
-    "@types/extract-zip": "^2.0.3"
-  },
   "volta": {
     "node": "22.18.0"
   }

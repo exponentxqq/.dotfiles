@@ -23,10 +23,6 @@ importers:
       simple-git:
         specifier: ^3.36.0
         version: 3.36.0
-    devDependencies:
-      '@types/extract-zip':
-        specifier: ^2.0.3
-        version: 2.0.3
 
 packages:
 
@@ -175,10 +171,6 @@ packages:
 
   '@simple-git/argv-parser@1.1.1':
     resolution: {integrity: sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw==}
-
-  '@types/extract-zip@2.0.3':
-    resolution: {integrity: sha512-yrO7h+0qOIGxHCmBeL5fKFzR+PBafh9LG6sOLBFFi2JuN+Hj663TAxfnqJh5vkQn963VimrhBF1GZzea3A+4Ig==}
-    deprecated: This is a stub types definition. extract-zip provides its own type definitions, so you do not need this installed.
 
   '@types/node@26.4.0':
     resolution: {integrity: sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ==}
@@ -444,12 +436,6 @@ snapshots:
   '@simple-git/argv-parser@1.1.1':
     dependencies:
       '@simple-git/args-pathspec': 1.0.3
-
-  '@types/extract-zip@2.0.3':
-    dependencies:
-      extract-zip: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@types/node@26.4.0':
     dependencies:
