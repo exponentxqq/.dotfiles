@@ -2,8 +2,9 @@ import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
-export default tseslint.config(
+export default defineConfig([
   { ignores: ["node_modules/"] },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -23,4 +24,4 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
   prettier,
-);
+]);
