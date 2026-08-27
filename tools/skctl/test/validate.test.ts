@@ -53,3 +53,9 @@ test("parseFrontmatter returns null for missing frontmatter", () => {
 test("parseFrontmatter returns null without name or description", () => {
   assert.equal(parseFrontmatter("---\nname: x\n---\n"), null);
 });
+
+test("parseFrontmatter reads multi-line folded description", () => {
+  const md = "---\nname: demo\ndescription: >-\n  line one\n  line two\n---\nbody";
+  const fm = parseFrontmatter(md);
+  assert.equal(fm?.description, "line one line two");
+});

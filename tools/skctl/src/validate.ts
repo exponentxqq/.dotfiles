@@ -10,24 +10,10 @@ export interface SkillFrontmatter {
   [key: string]: string;
 }
 
+import matter from "gray-matter";
+
 export function parseFrontmatter(content: string): SkillFrontmatter | null {
-  if (!content.startsWith("---")) return null;
-  const end = content.indexOf("\n---", 3);
-  if (end === -1) return null;
-  const block = content.slice(3, end);
-  const fm: Record<string, string> = {};
-  for (const line of block.split("\n")) {
-    const m = line.match(/^([a-zA-Z0-9_-]+):\s*(.*)$/);
-    if (!m) continue;
-    let value = m[2].trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    fm[m[1]] = value;
-  }
-  if (!fm.name || !fm.description) return null;
-  return fm as SkillFrontmatter;
+  const { data } = matter(content);
+  if (typeof data.name !== "string" || typeof data.description !== "string") return null;
+  return { ...data, name: data.name, description: data.description } as SkillFrontmatter;
 }
