@@ -5,5 +5,7 @@ export function quote(s: string): string {
 }
 
 export function run(cmd: string): string {
-  return execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString().trim();
+  return execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] })
+    .toString()
+    .trim();
 }
