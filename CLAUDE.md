@@ -27,3 +27,9 @@ Personal dotfiles managed with GNU Stow.
 # Install specific component
 ./tool.sh zsh
 ```
+
+## skctl
+
+```bash
+~/develop/docker/run.sh node "cd /home/xuqinqin/develop/dotfiles/tools/skctl && pnpm install --silent && node --test 'test/*.test.ts'"
+```
