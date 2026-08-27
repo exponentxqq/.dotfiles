@@ -10,6 +10,7 @@ import { loadRegistry, saveRegistry } from "./registry.ts";
 import { updateSkill } from "./update.ts";
 import { parseFrontmatter } from "./validate.ts";
 import { makeColor } from "./color.ts";
+import { confirm } from "@inquirer/prompts";
 
 const colorEnabled = !!process.env.FORCE_COLOR || (!!process.stdout.isTTY && !process.env.NO_COLOR);
 const c = makeColor(colorEnabled);
@@ -162,11 +163,17 @@ async function cmdUninstall(args: string[], p: ReturnType<typeof storePaths>) {
     process.exit(1);
   }
   if (!force) {
-    process.stdout.write(`remove ${name}? [y/N] `);
-    const buf = Buffer.alloc(16);
-    const n = readSync(0, buf, 0, 16, null);
-    const answer = buf.subarray(0, n).toString().trim().toLowerCase();
-    if (answer !== "y" && answer !== "yes") {
+    let yes = false;
+    if (process.stdin.isTTY) {
+      yes = await confirm({ message: `remove ${name}?`, default: false });
+    } else {
+      process.stdout.write(`remove ${name}? [y/N] `);
+      const buf = Buffer.alloc(16);
+      const n = readSync(0, buf, 0, 16, null);
+      const answer = buf.subarray(0, n).toString().trim().toLowerCase();
+      yes = answer === "y" || answer === "yes";
+    }
+    if (!yes) {
       console.log("aborted");
       return;
     }

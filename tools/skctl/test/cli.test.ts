@@ -37,6 +37,20 @@ test("cli install + list + disable + enable + uninstall", () => {
   }
 });
 
+test("cli uninstall confirms via piped stdin", () => {
+  const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
+  writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  try {
+    cli(store, `install ${quote(src)}`);
+    const out = execSync(`node ${CLI} --store ${quote(store)} uninstall demo`, { stdio: "pipe", input: "y\n" }).toString();
+    assert.match(out, /uninstalled: demo/);
+  } finally {
+    rmSync(src, { recursive: true, force: true });
+    rmSync(store, { recursive: true, force: true });
+  }
+});
+
 test("cli list hides description by default, shows indented with --desc", () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
