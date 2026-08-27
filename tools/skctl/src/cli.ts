@@ -15,7 +15,7 @@ const USAGE = `skctl - skill manager
 Usage: skctl <command> [options]
 
 Commands:
-  list [--all]          List skills
+  list [--all] [--desc] List skills (--desc shows descriptions)
   info <name>           Show skill details
   install <src> [--subdir DIR]   Install skill (git URL | zip URL | local dir)
   uninstall <name> [-y] Remove skill
@@ -68,6 +68,7 @@ function main() {
 
 function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
   const all = args.includes("--all");
+  const showDesc = args.includes("--desc");
   const registry = loadRegistry(p.registry);
   const rows: { name: string; enabled: boolean; source: string; desc: string }[] = [];
   for (const dir of [p.skills, p.disabled]) {
@@ -91,7 +92,8 @@ function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
   }
   rows.sort((a, b) => a.name.localeCompare(b.name));
   for (const r of rows) {
-    console.log(`${r.enabled ? "enabled " : "disabled"}  ${r.name.padEnd(24)} ${r.source.padEnd(8)} ${r.desc}`);
+    console.log(`${r.enabled ? "enabled " : "disabled"}  ${r.name.padEnd(24)} ${r.source.padEnd(8)}`);
+    if (showDesc && r.desc) console.log(`          ${r.desc}`);
   }
 }
 

@@ -37,6 +37,23 @@ test("cli install + list + disable + enable + uninstall", () => {
   }
 });
 
+test("cli list hides description by default, shows indented with --desc", () => {
+  const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
+  writeFileSync(join(src, "SKILL.md"), "---\nname: demo\ndescription: demo skill\n---\n");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  try {
+    cli(store, `install ${quote(src)}`);
+    const list = cli(store, "list");
+    assert.doesNotMatch(list, /demo skill/);
+    const listDesc = cli(store, "list --desc");
+    assert.match(listDesc, /demo skill/);
+    assert.match(listDesc, /\n {10}demo skill/);
+  } finally {
+    rmSync(src, { recursive: true, force: true });
+    rmSync(store, { recursive: true, force: true });
+  }
+});
+
 test("cli list tolerates skill dir without SKILL.md", () => {
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   try {
