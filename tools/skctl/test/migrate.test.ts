@@ -27,3 +27,15 @@ test("migrateLocal skips non-skill dirs and existing", () => {
   rmSync(srcDir, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
+
+test("migrateLocal skips skills already in registry", () => {
+  const srcDir = mkdtempSync(join(tmpdir(), "skctl-src-"));
+  mkdirSync(join(srcDir, "my-skill"));
+  writeFileSync(join(srcDir, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: d\n---\n");
+  const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  migrateLocal(srcDir, store);
+  const report = migrateLocal(srcDir, store);
+  assert.equal(report.length, 0);
+  rmSync(srcDir, { recursive: true, force: true });
+  rmSync(store, { recursive: true, force: true });
+});

@@ -120,12 +120,14 @@ s.listen(0, "127.0.0.1", () => console.log(s.address().port));`,
     server.once("error", reject);
   });
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
+  const url = `http://127.0.0.1:${port}/skill.zip`;
   try {
-    const name = installSkill({ src: `http://127.0.0.1:${port}/skill.zip`, store });
+    const name = installSkill({ src: url, store });
     assert.equal(name, "zip-skill");
     assert.ok(existsSync(join(store, "skills", "zip-skill", "SKILL.md")));
     const reg = loadRegistry(join(store, "registry.json"));
     assert.equal(reg.skills["zip-skill"].source.type, "local");
+    assert.equal(reg.skills["zip-skill"].source.url, url);
   } finally {
     server.kill();
     rmSync(srcDir, { recursive: true, force: true });

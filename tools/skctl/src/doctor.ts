@@ -34,6 +34,7 @@ export function doctor(store: string, agentsLink: string = join(USER_HOME, ".age
       const rec = registry.skills[name];
       if (rec?.source.type === "local" && rec.source.path && !existsSync(rec.source.path)) {
         report.push(`broken: ${name} (local source missing: ${rec.source.path})`);
+        continue;
       }
       let fm: ReturnType<typeof parseFrontmatter> = null;
       try {
@@ -49,6 +50,7 @@ export function doctor(store: string, agentsLink: string = join(USER_HOME, ".age
     }
   }
 
-  report.push(report.length === 0 ? "doctor done: all ok" : `doctor done: ${report.length} issue(s)`);
+  const issues = report.filter((l) => !l.startsWith("fixed:")).length;
+  report.push(issues === 0 ? "doctor done: all ok" : `doctor done: ${issues} issue(s)`);
   return report;
 }

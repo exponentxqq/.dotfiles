@@ -53,7 +53,7 @@ export function installSkill(opts: InstallOptions): string {
       skillDir = subdir
         ? join(unzipDir, subdir)
         : findSkillDir(unzipDir) ?? fail("cannot locate SKILL.md in zip, use --subdir");
-      source = { type: "local" };
+      source = { type: "local", url: src };
     } else {
       const repoDir = join(tmp, "repo");
       run(`git clone --depth 1 ${quote(src)} ${quote(repoDir)}`);
@@ -76,7 +76,7 @@ export function installSkill(opts: InstallOptions): string {
     if (source.type === "local" && source.path) {
       symlinkSync(skillDir, dest);
     } else {
-      cpSync(skillDir, dest, { recursive: true });
+      cpSync(skillDir, dest, { recursive: true, filter: (src) => !src.split("/").includes(".git") });
     }
     const registry = loadRegistry(p.registry);
     registry.skills[name] = {

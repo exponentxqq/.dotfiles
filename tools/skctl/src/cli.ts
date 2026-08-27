@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { doctor } from "./doctor.ts";
 import { installSkill } from "./install.ts";
-import { migrate } from "./migrate.ts";
+import { migrate, migrateLocal, DEFAULT_DOTFILES_SKILLS } from "./migrate.ts";
 import { resolveStore, storePaths } from "./paths.ts";
 import { loadRegistry, saveRegistry } from "./registry.ts";
 import { updateSkill } from "./update.ts";
@@ -80,8 +80,11 @@ function cmdList(args: string[], p: ReturnType<typeof storePaths>) {
       const rec = registry.skills[name];
       const source = rec ? rec.source.type : "unknown";
       let desc = "";
-      const fm = parseFrontmatter(readFileSync(join(skillDir, "SKILL.md"), "utf8"));
-      if (fm) desc = fm.description;
+      const skillMd = join(skillDir, "SKILL.md");
+      if (existsSync(skillMd)) {
+        const fm = parseFrontmatter(readFileSync(skillMd, "utf8"));
+        if (fm) desc = fm.description;
+      }
       rows.push({ name, enabled, source, desc });
     }
   }
@@ -111,8 +114,11 @@ function cmdInfo(args: string[], p: ReturnType<typeof storePaths>) {
   console.log(`source: ${JSON.stringify(rec?.source ?? null)}`);
   if (rec?.installedCommit) console.log(`commit: ${rec.installedCommit}`);
   if (rec?.installedAt) console.log(`installedAt: ${rec.installedAt}`);
-  const fm = parseFrontmatter(readFileSync(join(actual, "SKILL.md"), "utf8"));
-  if (fm) console.log(`description: ${fm.description}`);
+  const skillMd = join(actual, "SKILL.md");
+  if (existsSync(skillMd)) {
+    const fm = parseFrontmatter(readFileSync(skillMd, "utf8"));
+    if (fm) console.log(`description: ${fm.description}`);
+  }
 }
 
 function cmdInstall(args: string[], p: ReturnType<typeof storePaths>) {
@@ -195,10 +201,10 @@ function cmdDoctor(_args: string[], p: ReturnType<typeof storePaths>) {
 }
 
 function cmdMigrate(args: string[], p: ReturnType<typeof storePaths>) {
-  const dir = args[0];
-  for (const line of migrate(p.store, dir)) {
-    console.log(line);
-  }
+  const localOnly = args.includes("--local-only");
+  const dir = args.find((a) => !a.startsWith("-"));
+  const report = localOnly ? migrateLocal(dir ?? DEFAULT_DOTFILES_SKILLS, p.store) : migrate(p.store, dir);
+  for (const line of report) console.log(line);
 }
 
 main();

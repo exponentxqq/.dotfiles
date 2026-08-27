@@ -47,7 +47,7 @@ test("cli doctor and migrate", () => {
   try {
     rmSync(agentsLink, { force: true });
     symlinkSync(join(store, "skills"), agentsLink);
-    const out = cli(store, `migrate ${quote(srcDir)}`);
+    const out = cli(store, `migrate ${quote(srcDir)} --local-only`);
     assert.match(out, /migrated \(local\): self-skill/);
     const doc = cli(store, "doctor");
     assert.match(doc, /all ok/);

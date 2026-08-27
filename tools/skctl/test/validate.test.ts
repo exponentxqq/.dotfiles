@@ -16,6 +16,12 @@ test("validateName rejects invalid names", () => {
   assert.equal(validateName("a b"), false);
 });
 
+test("validateName enforces length limits", () => {
+  assert.equal(validateName(""), false);
+  assert.equal(validateName("a".repeat(65)), false);
+  assert.equal(validateName("a".repeat(64)), true);
+});
+
 test("parseFrontmatter parses name and description", () => {
   const content = `---
 name: pdf

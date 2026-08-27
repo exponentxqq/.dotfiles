@@ -29,7 +29,7 @@ export function updateSkill(name: string, store: string): string {
     }
     const oldCommit = rec.installedCommit;
     rmSync(dest, { recursive: true, force: true });
-    cpSync(skillDir, dest, { recursive: true });
+    cpSync(skillDir, dest, { recursive: true, filter: (src) => !src.split("/").includes(".git") });
     rec.installedCommit = newCommit;
     rec.installedAt = new Date().toISOString();
     saveRegistry(p.registry, registry);
