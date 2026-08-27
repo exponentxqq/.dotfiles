@@ -4,7 +4,7 @@ import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { quote } from "../src/shell.ts";
+import { quote } from "./helpers.ts";
 
 const CLI = "/home/xuqinqin/develop/dotfiles/tools/skctl/src/cli.ts";
 

@@ -1,11 +1,12 @@
 import {
   cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync,
-  statSync, symlinkSync,
+  statSync, symlinkSync, writeFileSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
+import { simpleGit } from "simple-git";
+import extract from "extract-zip";
 import { storePaths, USER_HOME } from "./paths.ts";
 import { loadRegistry, saveRegistry } from "./registry.ts";
-import { quote, run } from "./shell.ts";
 import { parseFrontmatter, validateName } from "./validate.ts";
 
 export const TMP_DIR = join(USER_HOME, ".cache", "agent-skills", "tmp");
@@ -29,7 +30,7 @@ export interface InstallOptions {
   ifExists?: "error" | "skip";
 }
 
-export function installSkill(opts: InstallOptions): string {
+export async function installSkill(opts: InstallOptions): Promise<string> {
   const { src, subdir, store, ifExists = "error" } = opts;
   const p = storePaths(store);
   mkdirSync(p.skills, { recursive: true });
@@ -48,19 +49,21 @@ export function installSkill(opts: InstallOptions): string {
     } else if (src.endsWith(".zip")) {
       const zipPath = join(tmp, "skill.zip");
       const unzipDir = join(tmp, "unzipped");
-      run(`curl -fsSL -o ${quote(zipPath)} ${quote(src)}`);
-      run(`python3 -m zipfile -e ${quote(zipPath)} ${quote(unzipDir)}`);
+      const res = await fetch(src);
+      if (!res.ok) throw new Error(`download failed: ${res.status} ${src}`);
+      writeFileSync(zipPath, Buffer.from(await res.arrayBuffer()));
+      await extract(zipPath, { dir: unzipDir });
       skillDir = subdir
         ? join(unzipDir, subdir)
         : findSkillDir(unzipDir) ?? fail("cannot locate SKILL.md in zip, use --subdir");
       source = { type: "local", url: src };
     } else {
       const repoDir = join(tmp, "repo");
-      run(`git clone --depth 1 ${quote(src)} ${quote(repoDir)}`);
+      await simpleGit().clone(src, repoDir, ["--depth", "1"]);
       skillDir = subdir
         ? join(repoDir, subdir)
         : findSkillDir(repoDir) ?? fail("cannot locate SKILL.md, use --subdir");
-      commit = run(`git -C ${quote(repoDir)} rev-parse HEAD`);
+      commit = await simpleGit(repoDir).revparse("HEAD");
       source = { type: "git", url: src, subdir };
     }
 

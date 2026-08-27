@@ -6,7 +6,7 @@ import { storePaths } from "./paths.ts";
 
 export const DEFAULT_DOTFILES_SKILLS = "/home/xuqinqin/develop/dotfiles/agent/skills";
 
-export function migrateLocal(dotfilesSkillsDir: string, store: string): string[] {
+export async function migrateLocal(dotfilesSkillsDir: string, store: string): Promise<string[]> {
   const report: string[] = [];
   const p = storePaths(store);
   mkdirSync(p.skills, { recursive: true });
@@ -17,27 +17,27 @@ export function migrateLocal(dotfilesSkillsDir: string, store: string): string[]
     if (!statSync(src).isDirectory()) continue;
     if (!existsSync(join(src, "SKILL.md"))) continue;
     if (registry.skills[name]) continue;
-    installSkill({ src, store, ifExists: "skip" });
+    await installSkill({ src, store, ifExists: "skip" });
     report.push(`migrated (local): ${name}`);
   }
   return report;
 }
 
-export function migrateExternal(store: string): string[] {
+export async function migrateExternal(store: string): Promise<string[]> {
   const report: string[] = [];
   const p = storePaths(store);
   const registry = loadRegistry(p.registry);
   for (const sub of ["skills/pdf", "skills/pptx"]) {
     const name = sub.split("/").pop()!;
     if (registry.skills[name]) continue;
-    installSkill({ src: "https://github.com/anthropics/skills", subdir: sub, store, ifExists: "skip" });
+    await installSkill({ src: "https://github.com/anthropics/skills", subdir: sub, store, ifExists: "skip" });
     report.push(`installed (git): ${name}`);
   }
   return report;
 }
 
-export function migrate(store: string, dotfilesSkillsDir: string = DEFAULT_DOTFILES_SKILLS): string[] {
-  const report = [...migrateLocal(dotfilesSkillsDir, store), ...migrateExternal(store)];
+export async function migrate(store: string, dotfilesSkillsDir: string = DEFAULT_DOTFILES_SKILLS): Promise<string[]> {
+  const report = [...await migrateLocal(dotfilesSkillsDir, store), ...await migrateExternal(store)];
   report.push("next: commit dotfiles changes (remove agent/skills/pdf, agent/skills/pptx)");
   return report;
 }

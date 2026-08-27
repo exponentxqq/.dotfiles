@@ -1,11 +1,11 @@
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { simpleGit } from "simple-git";
 import { findSkillDir, TMP_DIR } from "./install.ts";
 import { loadRegistry, saveRegistry } from "./registry.ts";
 import { storePaths } from "./paths.ts";
-import { quote, run } from "./shell.ts";
 
-export function updateSkill(name: string, store: string): string {
+export async function updateSkill(name: string, store: string): Promise<string> {
   const p = storePaths(store);
   const registry = loadRegistry(p.registry);
   const rec = registry.skills[name];
@@ -17,8 +17,8 @@ export function updateSkill(name: string, store: string): string {
   const tmp = mkdtempSync(join(TMP_DIR, "update-"));
   try {
     const repoDir = join(tmp, "repo");
-    run(`git clone --depth 1 ${quote(rec.source.url!)} ${quote(repoDir)}`);
-    const newCommit = run(`git -C ${quote(repoDir)} rev-parse HEAD`);
+    await simpleGit().clone(rec.source.url!, repoDir, ["--depth", "1"]);
+    const newCommit = await simpleGit(repoDir).revparse("HEAD");
     if (newCommit === rec.installedCommit) return "up-to-date";
     const skillDir = rec.source.subdir
       ? join(repoDir, rec.source.subdir)

@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { findSkillDir, installSkill } from "../src/install.ts";
 import { loadRegistry } from "../src/registry.ts";
-import { quote } from "../src/shell.ts";
+import { quote } from "./helpers.ts";
 
 function git(repo: string, cmd: string) {
   execSync(`git -C ${quote(repo)} ${cmd}`, { stdio: "pipe" });
@@ -47,14 +47,14 @@ test("findSkillDir returns null for multiple candidates", () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-test("installSkill installs from git repo subdir", () => {
+test("installSkill installs from git repo subdir", async () => {
   const repo = makeRepo();
   mkdirSync(join(repo, "my-skill"));
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: test skill\n---\n# body\n");
   git(repo, "add -A");
   git(repo, "commit -qm init");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  const name = installSkill({ src: `file://${repo}`, store });
+  const name = await installSkill({ src: `file://${repo}`, store });
   assert.equal(name, "my-skill");
   assert.ok(existsSync(join(store, "skills", "my-skill", "SKILL.md")));
   const reg = loadRegistry(join(store, "registry.json"));
@@ -64,46 +64,46 @@ test("installSkill installs from git repo subdir", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("installSkill excludes .git from copied skill", () => {
+test("installSkill excludes .git from copied skill", async () => {
   const repo = makeRepo();
   writeFileSync(join(repo, "SKILL.md"), "---\nname: root-skill\ndescription: d\n---\n");
   git(repo, "add -A");
   git(repo, "commit -qm init");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src: `file://${repo}`, store });
+  await installSkill({ src: `file://${repo}`, store });
   assert.ok(existsSync(join(store, "skills", "root-skill", "SKILL.md")));
   assert.equal(existsSync(join(store, "skills", "root-skill", ".git")), false);
   rmSync(repo, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
 
-test("installSkill creates symlink for local source", () => {
+test("installSkill creates symlink for local source", async () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: local-skill\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  const name = installSkill({ src, store });
+  const name = await installSkill({ src, store });
   assert.equal(name, "local-skill");
   assert.equal(readlinkSync(join(store, "skills", "local-skill")), src);
   rmSync(src, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
 
-test("installSkill errors on duplicate", () => {
+test("installSkill errors on duplicate", async () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: dup\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src, store });
-  assert.throws(() => installSkill({ src, store }), /already installed/);
+  await installSkill({ src, store });
+  await assert.rejects(async () => installSkill({ src, store }), /already installed/);
   rmSync(src, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
 
-test("installSkill skips existing with ifExists=skip", () => {
+test("installSkill skips existing with ifExists=skip", async () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: skipme\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src, store });
-  const name = installSkill({ src, store, ifExists: "skip" });
+  await installSkill({ src, store });
+  const name = await installSkill({ src, store, ifExists: "skip" });
   assert.equal(name, "skipme");
   rmSync(src, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
@@ -135,7 +135,7 @@ s.listen(0, "127.0.0.1", () => console.log(s.address().port));`,
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
   const url = `http://127.0.0.1:${port}/skill.zip`;
   try {
-    const name = installSkill({ src: url, store });
+    const name = await installSkill({ src: url, store });
     assert.equal(name, "zip-skill");
     assert.ok(existsSync(join(store, "skills", "zip-skill", "SKILL.md")));
     const reg = loadRegistry(join(store, "registry.json"));

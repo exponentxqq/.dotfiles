@@ -42,7 +42,7 @@ function extractStoreFlag(args: string[]): string | undefined {
   return v;
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
     console.log(USAGE);
@@ -138,18 +138,18 @@ function cmdInfo(args: string[], p: ReturnType<typeof storePaths>) {
   }
 }
 
-function cmdInstall(args: string[], p: ReturnType<typeof storePaths>) {
+async function cmdInstall(args: string[], p: ReturnType<typeof storePaths>) {
   const { values, positionals } = parseArgs({ args, options: { subdir: { type: "string" } }, allowPositionals: true });
   const src = positionals[0] as string | undefined;
   if (!src) {
     console.error(c.red("usage: skctl install <src> [--subdir DIR]"));
     process.exit(1);
   }
-  const name = installSkill({ src, subdir: values.subdir, store: p.store });
+  const name = await installSkill({ src, subdir: values.subdir, store: p.store });
   console.log(c.green(`installed: ${name}`));
 }
 
-function cmdUninstall(args: string[], p: ReturnType<typeof storePaths>) {
+async function cmdUninstall(args: string[], p: ReturnType<typeof storePaths>) {
   const name = args[0];
   const force = args.includes("-y");
   if (!name) {
@@ -196,7 +196,7 @@ function cmdEnable(args: string[], p: ReturnType<typeof storePaths>, enable: boo
   console.log(c.green(`${enable ? "enabled" : "disabled"}: ${name}`));
 }
 
-function cmdUpdate(args: string[], p: ReturnType<typeof storePaths>) {
+async function cmdUpdate(args: string[], p: ReturnType<typeof storePaths>) {
   const names = args.filter((a) => !a.startsWith("-"));
   const registry = loadRegistry(p.registry);
   const targets = names.length
@@ -204,7 +204,7 @@ function cmdUpdate(args: string[], p: ReturnType<typeof storePaths>) {
     : Object.keys(registry.skills).filter((n) => registry.skills[n].source.type === "git");
   for (const name of targets) {
     try {
-      const result = updateSkill(name, p.store);
+      const result = await updateSkill(name, p.store);
       const line = result.startsWith("updated") ? c.green(`${name}: ${result}`) : c.dim(`${name}: ${result}`);
       console.log(line);
     } catch (e) {
@@ -221,10 +221,10 @@ function cmdDoctor(_args: string[], p: ReturnType<typeof storePaths>) {
   }
 }
 
-function cmdMigrate(args: string[], p: ReturnType<typeof storePaths>) {
+async function cmdMigrate(args: string[], p: ReturnType<typeof storePaths>) {
   const localOnly = args.includes("--local-only");
   const dir = args.find((a) => !a.startsWith("-"));
-  const report = localOnly ? migrateLocal(dir ?? DEFAULT_DOTFILES_SKILLS, p.store) : migrate(p.store, dir);
+  const report = localOnly ? await migrateLocal(dir ?? DEFAULT_DOTFILES_SKILLS, p.store) : await migrate(p.store, dir);
   for (const line of report) {
     if (line.startsWith("migrated") || line.startsWith("installed")) console.log(c.green(line));
     else if (line.startsWith("next:")) console.log(c.dim(line));
@@ -232,4 +232,7 @@ function cmdMigrate(args: string[], p: ReturnType<typeof storePaths>) {
   }
 }
 
-main();
+main().catch((e) => {
+  console.error(c.red((e as Error).message));
+  process.exit(1);
+});

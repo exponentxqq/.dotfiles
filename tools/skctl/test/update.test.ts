@@ -5,7 +5,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { installSkill } from "../src/install.ts";
-import { quote } from "../src/shell.ts";
+import { quote } from "./helpers.ts";
 import { updateSkill } from "../src/update.ts";
 
 function git(repo: string, cmd: string) {
@@ -20,31 +20,31 @@ function makeRepo(): string {
   return repo;
 }
 
-test("updateSkill reports up-to-date", () => {
+test("updateSkill reports up-to-date", async () => {
   const repo = makeRepo();
   mkdirSync(join(repo, "my-skill"));
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: d\n---\n");
   git(repo, "add -A");
   git(repo, "commit -qm init");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src: `file://${repo}`, store });
-  assert.equal(updateSkill("my-skill", store), "up-to-date");
+  await installSkill({ src: `file://${repo}`, store });
+  assert.equal(await updateSkill("my-skill", store), "up-to-date");
   rmSync(repo, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
 
-test("updateSkill overwrites on new commit", () => {
+test("updateSkill overwrites on new commit", async () => {
   const repo = makeRepo();
   mkdirSync(join(repo, "my-skill"));
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: v1\n---\n");
   git(repo, "add -A");
   git(repo, "commit -qm init");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src: `file://${repo}`, store });
+  await installSkill({ src: `file://${repo}`, store });
   writeFileSync(join(repo, "my-skill", "SKILL.md"), "---\nname: my-skill\ndescription: v2\n---\n");
   git(repo, "add -A");
   git(repo, "commit -qm update");
-  const result = updateSkill("my-skill", store);
+  const result = await updateSkill("my-skill", store);
   assert.match(result, /^updated:/);
   const content = readFileSync(join(store, "skills", "my-skill", "SKILL.md"), "utf8");
   assert.match(content, /v2/);
@@ -52,12 +52,12 @@ test("updateSkill overwrites on new commit", () => {
   rmSync(store, { recursive: true, force: true });
 });
 
-test("updateSkill skips local source", () => {
+test("updateSkill skips local source", async () => {
   const src = mkdtempSync(join(tmpdir(), "skctl-src-"));
   writeFileSync(join(src, "SKILL.md"), "---\nname: ls\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  installSkill({ src, store });
-  assert.equal(updateSkill("ls", store), "skipped (local source)");
+  await installSkill({ src, store });
+  assert.equal(await updateSkill("ls", store), "skipped (local source)");
   rmSync(src, { recursive: true, force: true });
   rmSync(store, { recursive: true, force: true });
 });
