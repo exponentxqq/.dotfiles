@@ -44,9 +44,9 @@ test("cli doctor and migrate", () => {
   mkdirSync(join(srcDir, "self-skill"));
   writeFileSync(join(srcDir, "self-skill", "SKILL.md"), "---\nname: self-skill\ndescription: d\n---\n");
   const store = mkdtempSync(join(tmpdir(), "skctl-store-"));
-  rmSync(agentsLink, { force: true });
-  symlinkSync(join(store, "skills"), agentsLink);
   try {
+    rmSync(agentsLink, { force: true });
+    symlinkSync(join(store, "skills"), agentsLink);
     const out = cli(store, `migrate ${quote(srcDir)}`);
     assert.match(out, /migrated \(local\): self-skill/);
     const doc = cli(store, "doctor");
