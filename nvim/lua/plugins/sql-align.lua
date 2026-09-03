@@ -81,6 +81,7 @@ local function align_col_defs(buf, col_defs_node)
     if child:type() == "column_definition" then
       local s_row = child:start()
       local line = vim.api.nvim_buf_get_lines(buf, s_row, s_row + 1, false)[1] or ""
+      local had_comma = line:match(",%s*$") ~= nil
       line = line:gsub(",%s*$", "")
       local indent = line:match("^(%s+)") or ""
       local rest = line:sub(#indent + 1)
@@ -91,6 +92,7 @@ local function align_col_defs(buf, col_defs_node)
       columns[#columns + 1] = {
         row = s_row,
         indent = indent,
+        had_comma = had_comma,
         groups = parse_groups(segments),
       }
     end
@@ -112,14 +114,10 @@ local function align_col_defs(buf, col_defs_node)
     end
   end
 
-  -- 检查是否有 constraints 节点（PRIMARY KEY 等）
-  -- 如果有，所有列定义都需要逗号；否则最后一个不加逗号
-  local has_constraints = false
-  for child in col_defs_node:iter_children() do
-    if child:type() == "constraints" then
-      has_constraints = true
-      break
-    end
+  -- 安全护栏：列定义必须逐行连续（每列恰好一行），否则跳过，避免静默删行
+  if columns[#columns].row - columns[1].row + 1 ~= #columns then
+    vim.notify("SQL 对齐跳过：存在跨行的列定义（解析异常），未做任何修改", vim.log.levels.WARN)
+    return
   end
 
   local new_lines = {}
@@ -143,8 +141,8 @@ local function align_col_defs(buf, col_defs_node)
     end
 
     line = line:gsub("%s+$", "")
-    -- 如果有约束节点，所有列定义都加逗号；否则最后一个不加
-    if has_constraints or idx < #columns then
+    -- 逗号按原行事实还原，不依赖解析结果，避免误删
+    if col.had_comma then
       line = line .. ","
     end
 
@@ -160,7 +158,11 @@ end
 local function align_constraints(buf, constraints_node)
   local indent = "  "  -- 索引定义也用两个空格缩进
   for child in constraints_node:iter_children() do
-    local s_row = child:start()
+    local s_row, _, e_row, _ = child:range()
+    if e_row > s_row then
+      vim.notify("SQL 对齐跳过：存在跨行的约束定义（解析异常），未做任何修改", vim.log.levels.WARN)
+      return
+    end
     local line = vim.api.nvim_buf_get_lines(buf, s_row, s_row + 1, false)[1] or ""
     local rest = line:match("^%s*(.+)") or ""
     local new_line = indent .. rest
@@ -242,6 +244,9 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(args)
     local buf = args.buf
 
+    -- 保存时不做任何自动格式化/对齐，全部走手动 <leader>cf
+    vim.b[buf].autoformat = false
+
     -- <leader>ca: 手动对齐光标所在表
     vim.keymap.set("n", "<leader>ca", function()
       M.align(true)
@@ -256,16 +261,7 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- 保存后自动对齐（conform 格式化在 BufWritePre 已执行）
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = "*.sql",
-  group = vim.api.nvim_create_augroup("sql_align_save", { clear = true }),
-  callback = function(args)
-    M.align(false)
-    if vim.bo[args.buf].modified then
-      vim.cmd("noautocmd write")
-    end
-  end,
-})
+-- 保存后自动对齐已移除：曾因 treesitter 解析异常导致误删行尾逗号/整行。
+-- 格式化 + 对齐统一走手动 <leader>cf（conform 格式化 → 对齐）。
 
 return {}
