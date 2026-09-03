@@ -8,18 +8,19 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 ## 核心原则
 
 1. **写前先读** — 每写一个组件前，先读同模块 2-3 个已有组件，模仿其组件命名、样式写法、请求方式、测试写法
-2. **复用优先** — 已有 base 组件/composable 必须复用，不新建重复样式；重复 ≥2 处的 UI/逻辑抽公共组件或 composable；组件能力由组件自身 emit 声明，父层不集中维护清单
-3. **页面只做编排** — 业务逻辑下沉 composable/store（可单测）；纯函数放 `app/utils/`
-4. **最小改动** — 只改任务相关文件，存量 lint 错误不顺手修；功能被移除时测试断言与死代码一并清理
-5. **方案先行 + 验证交给用户** — 复杂改动先给 A/B/C 方案；改完自查副作用；不主动起 dev server 验证；不主动提交
+2. **复用优先** — 已有 base 组件/composable 必须复用，不新建重复样式；重复 ≥2 处的 UI/逻辑抽公共组件或 composable；组件能力由组件自身 emit 声明，父层不集中维护清单；通用型 composable 先查 VueUse，确认没有才自写
+3. **页面只做编排** — 业务逻辑下沉 composables/stores（可单测）；通用型组合函数放 `hooks/`（先查 VueUse）；纯函数放 `app/utils/`
+4. **最优改动** — 任务实现选最优方案而非最小 diff；被本次改动波及的存量（调用方、受影响测试、规范收紧涉及的存量）一并改到位；无关文件的问题只报告不擅动；功能被移除时测试断言与死代码一并清理
+5. **验证交给用户** — 改完自查副作用；不主动起 dev server 验证；不主动提交
+6. **优先设计模式** — 写新功能前先考虑是否有成熟设计模式（策略/适配器/观察者/工厂等）可套用，避免堆叠 if-else 分支
 
 ## 组件规范
 
-- 组件使用 kebab-case（`<base-button>`），靠 Nuxt 路径自动导入；标签名与注册名完全对齐（`components/<域>/foo-bar.vue` → `<域-foo-bar>`）；不显式 import（仅 `import type`）
+- 组件使用 kebab-case（`<base-button>`），靠 Nuxt 路径自动导入；标签名与注册名完全对齐（`components/<域>/foo-bar.vue` → `<域-foo-bar>`）；不显式 import（仅 `import type`）；非组件文件名 camelCase（`useXxxApi.ts`、`request.ts`）
 - 含播放器/RTC/手势状态、需跨切换保留的组件隐藏用 `v-show` 不用 `v-if`（卸载销毁内部状态）
 - 弹窗：子组件对外支持 v-model 语义（props 收 `modelValue` + `emit('update:modelValue')`），但组件**内部**禁止把该 prop 再 `v-model` 绑给下层（prop 只读，关不掉）——内层要用 `:model-value` + emit 透传；全局 layout 已挂载的弹窗页面不再挂（双实例叠层）
 - base 表单组件用 `modelValue`/`update:modelValue` 做 v-model，props 全类型化
-- SFC 结构：`<script setup lang="ts">` → `<template>` → `<style scoped>`；`interface Props` + `defineProps<Props>()`；import 集中在 script 顶部（mid-script 干扰 SFC 转换）
+- SFC 结构：`<script setup lang="ts">` → `<template>` → `<style scoped>`；`interface Props` + `defineProps<Props>()`；import 集中在 script 顶部（mid-script 干扰 SFC 转换）；标签对（script/template/style）之间恰好一个空行
 - 图标用 `<nuxt-icon>` + SVG `fill/stroke="currentColor"`（可 CSS 改色），不用 `<img>`+opacity
 - 类需求仿已有同构模式新建（如已有的「按场景集合隐藏布局元素」composable → 新场景照同构新建），不改现有引用
 
@@ -32,9 +33,14 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 - 守卫已保证的条件业务层不重复判断；readonly 用权威标志（服务端下发的数据状态字段）不用前端派生状态
 - 区分「加载即已提交（查看态）」与「用户刚提交」，只对后者自动跳转
 
+## Composable 分层
+
+- 通用型组合函数（防抖、localStorage、媒体查询等跨项目技术能力，无领域名词/业务规则）放 `hooks/`（与 `composables/` 同级）；业务型（含领域逻辑）放 `composables/`；跨组件共享业务状态进 Pinia store
+- `hooks/` 非默认扫描目录，必须配 `imports: { dirs: ['hooks/**'] }` 才自动导入（composables/、utils/ 默认也只扫顶层）
+
 ## 状态与数据
 
-- 登录态/业务域状态分 Pinia store（`stores/` 自动导入），API 调用收进 store action
+- 登录态/业务域状态分 Pinia store（`stores/` 自动导入），API 调用收进 store action；一律 Setup Store 写法，不用 Options Store
 - falsy 兜底一律 `??` 不用 `||`（0 会被吞）
 - 临时草稿用 sessionStorage（按业务 id 分键），跨会话标志用 localStorage；模块顶层 storage 访问必须 try/catch（Safari 隐私模式崩溃）
 - 数据为空隐藏区块，不做假数据兜底；能拿到真实数据不硬编码魔数
@@ -49,8 +55,8 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 
 ## 请求层与 API 契约
 
-- 请求走项目统一封装（`utils/request.ts`），禁止裸 `$fetch`；错误统一 `ApiError.message` 提示
-- 后端有 OpenAPI 时用生成 SDK（`composables/generated/` 自动导入，`useXxxApi()` 风格）；后端重新生成后删除手写请求函数
+- 请求走项目统一封装（`utils/request.ts`），禁止裸 `$fetch`；token 注入、`ApiResponse<T>` 解包、`ApiError(code)` 抛错、401 分流（按端策略，如 web 跳登录/applet 清 token）全部收敛在 request 层，业务层不重复处理；调用方只用封装的 get/post，禁止手动拼 apiBase 或 JSON.stringify
+- 后端有 OpenAPI 时用生成 SDK（`composables/generated/` 自动导入，`useXxxApi()` 风格），生成代码**禁止手动编辑**；后端重新生成后删除手写请求函数。手动 `useXxxApi.ts` 仅限组合场景（多 API 组合、数据转换、本地缓存、与 Pinia store 交互），原子 CRUD 直接用生成 API；错误处理统一走 request 层拦截器，不在 composable 重复
 - TS 类型映射：decimal→decimal.js、date/datetime→时间戳、枚举→TS enum；前后端共用的拼接/签名规则必须两端一致并用测试锁定
 - 前端命名/数据结构与后端契约对齐（后端改名前端组件同步改）；前端不消费的响应字段即死字段，推动后端删除
 - 长耗时异步用轮询（间隔+上限常量化），不上 SSE/WebSocket；轮询超时文案诚实（「继续等待」而非「生成超时请重试」）
@@ -59,7 +65,7 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 
 ## 样式（UnoCSS）
 
-- attributify 优先：样式写 DOM 属性（`w="22.625rem"`、`text="1 #666"`）；同一元素同名属性必须合并为单属性空格分隔（重复声明报 TS1117）
+- attributify 优先：样式写 DOM 属性（`w="22.625rem"`、`text="1 #666"`）；同一元素同名属性必须合并为单属性空格分隔（重复声明报 TS1117）；attributify 中任意值无需 `[]` 包裹（如 `text="2.625rem"`）
 - 颜色用 8 位 hex 含 alpha（`#000000E6`）或纯 hex；尺寸无单位/rem（除 border 不用 px）
 - scoped CSS 仅用于伪元素/关键帧/复杂子选择器
 - 移动端视口高度用 dvh 兜底（`h-screen h-dvh max-h-screen max-h-dvh`——旧 iOS <15.4 不支持 dvh 需完整降级链）
@@ -109,6 +115,8 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 
 - 代码零注释（.vue 同样适用），自解释命名
 - Prettier 管格式、ESLint 管质量（eslint-config-prettier 关闭冲突规则）；改完跑 `pnpm format`
+- ESLint 质量规则：禁用 `any`；未使用的变量/参数直接删除，不配 `_` 前缀豁免；签名必须保留的参数直接用原名（no-unused-vars 默认 after-used，末位使用参数之前的未用参数不报错）
+- 禁用 `v-html`（XSS 攻击面）；确需富文本渲染必须先 sanitize 并在代码中注明理由
 - 提交 conventional commits 中文描述（`fix(scope): 描述`）；只在用户指令时提交
 - mobile/desktop（或双应用）parity：改动两端同步检查（另一端往往有同样问题）
 
@@ -120,4 +128,5 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 - [ ] 移动端坑已过：手势播放 / dvh / contain / label 激活 / iOS repeat 背景
 - [ ] `??` 兜底、空数据隐藏、稳定 key、nextTick 后操作 ref
 - [ ] 测试 100% 覆盖且契约同步，用例名中文
+- [ ] 通用逻辑先查 VueUse；通用型在 hooks/、业务型在 composables/
 - [ ] 零注释；跑 format；双端同步；不主动提交
