@@ -42,6 +42,9 @@ return {
       -- （会话恢复在 VimEnter 完成，由 session.lua 主动开树，行为更确定）
       hijack_netrw_behavior = startup_dir and "disabled" or "open_default",
     },
+    git_status = {
+      group_empty_dirs = true, -- Git Explorer（<leader>ge）同样压缩单链目录
+    },
     window = {
       mappings = {
         Z = "expand_all_subnodes", -- 一键递归展开光标节点下全部
