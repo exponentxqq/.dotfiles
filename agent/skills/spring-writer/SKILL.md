@@ -13,6 +13,8 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 4. **最优改动** — 任务实现选最优方案而非最小 diff；被本次改动波及的存量（调用方、受影响测试、规范收紧涉及的存量）一并改到位；无关文件的问题只报告不擅动；完成后主动报告功能完整性与副作用
 5. **优先设计模式** — 写新功能前先考虑是否有成熟设计模式（策略/模板方法/工厂/责任链等）可套用，避免堆叠 if-else 分支
 6. **不重复造轮子** — 工具方法优先用 `component/utils` 已有的（`JsonUtil`、`CryptUtil`、`HashUtil`、`RandomUtil`、`UuidGenerator`、`HttpUtil`、`FileTypeUtil`、`@Timed`），其次 Guava（`Strings`、`Lists`、`Maps`、`Joiner`、`Preconditions`）；都没有才自写，自写实现也基于二者拼装，不裸写 JDK 样板
+7. **不做无谓判空** — 前提已被契约保证（DDL NOT NULL/唯一约束、校验注解声明、`getByXxx` 查不到即抛、上层守卫、终态 CAS）就不写 `if (x == null)` 类防御分支；判空只留给真正可达 null 的边界（JSON 反序列化恢复对象、外部输入）
+8. **任务拆分粒度** — 拆分实施任务时，单任务非测试改动 ≤10 个文件（不含测试、自动生成代码、新建模块的构建接线文件）；超出说明切片过大，继续按垂直切片/阶段拆——是拆任务不是砍改动范围，每任务独立可验证、收尾全绿
 
 ## 分层与依赖
 
@@ -29,6 +31,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 ## 领域建模
 
 - 状态/类型字段一律用 enum，不用 String；枚举持久化机制（IEnum/转换器）见「数据持久化与 ORM」对应 ORM 文件
+- domain 类与其字段引用的生成枚举同名異包时，改契约枚举名消除冲突（如 `AccountRole`→`Role`），不在 domain 里用全限定名绕行
 - 字段映射收敛为 `ofXxx` 静态工厂方法，消灭各处重复 toView；需要后续注入的字段用 `withXxx` 原地修改返回 this，不为领域类开 setter
 - 同实体多形态记录用 `type` 判别字段区分，不堆叠可选列；查询方法显式带 type（如 `findByXxxAndType`），删除有歧义的方法
 - DB not null/唯一约束已保证的不可能状态，不写防御分支（YAGNI），对应"模拟不可能状态"的测试一并删除
@@ -49,7 +52,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 
 ## Repository 通用约定
 
-- Repository 命名：`getByXxx` 抛异常，`findByXxx` 返回 Optional
+- Repository 命名：`getByXxx` 抛异常，`findByXxx` 返回 Optional；`getByXxx` 查不到抛全局 404 码（`GlobalErrorCode.RESOURCE_NOT_FOUND`），不借用业务错误码（业务码只表达业务校验失败语义）
 - repository 写方法参数直接传 domain 对象，不拆扁平参数列表（部分列更新须 javadoc 明示）
 - 数值型统计字段不允许 null，统一 `BigDecimal.ZERO` 兜底
 - 不用物理外键，用业务唯一键（如 `uk(biz_id, dimension_code)`）+ 应用层约束
@@ -110,7 +113,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - 单 JSON 列 ↔ 对象优先用实体层 `ValueConverter`（EasyQuery，见 `orm/easy-query.md`），entity 直接持有对象、MapStruct 同类型直传零注解；MapStruct default 方法仅用于无列承载的内存/拼装转换（先例 `StatisticScoreConverter.parseScoreJson`）
 - 自定义类型转换（内存/拼装场景）写成 mapper 接口的 default 方法：同 mapper 内按类型签名唯一匹配自动选用，无需 `qualifiedByName`
 - 聚合组装复用其他 converter 用 `@Mapper(uses = {XxxConverter.class})`（被引用的可以是 `INSTANCE` 模式 mapper 接口，List 元素映射自动逐个复用）
-- 无来源的 target 字段（审计列等）用 `@Mapping(target = "xxx", ignore = true)`；**陷阱：ignore 引用不存在的属性同样是编译错误——删实体字段必须连带删对应 ignore**
+- `ignore` 仅用于**来源侧不存在**的 target 字段（审计列、DB 生成列、entity 独有承载，如 `@Mapping(target = "xxx", ignore = true)`）；**双方都有的字段一律禁止 `ignore`**——同名可映射而被 ignore 即静默丢数据（id 丢身份、快照缺列），多为压制警告或复制残留；来源不同名用 `@Mapping(source/target)` 改道（先例 `config↔taskConfig`），不靠 ignore 截断。**陷阱：ignore 引用不存在的属性同样是编译错误——删实体字段必须连带删对应 ignore**
 - 多态 JSON（`@JsonTypeInfo` type 判别字段）序列化用 `JsonUtil.asLowerCamelJsonString`：参数为 Object（声明类型丢失）时 Jackson 恒写 type 判别字段、roundtrip 保型；勿以具体泛型容器序列化（declared type 具体化会丢 type 字段）
 - 调用方统一 `private final XxxConverter CONVERTER = XxxConverter.INSTANCE;` 字段风格（非 Spring 注入）
 
@@ -122,7 +125,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - 多 app 共库：schema 由单一 app 统一管理（其余 app 关 flyway），`validate-on-migrate` 保持 true
 - 手动修复 SQL 不放 `db/migration` 目录（会被 Flyway 拾取）
 - 版本号时间戳风格 `V{yyyyMMdd}_{HHmmss}__desc.sql`；每域维持单 baseline 覆盖全量 schema，不堆增量碎片文件
-- 所有字段必须带 comment（含 `id`/`created_at`/`updated_at`）；枚举列 comment 写全限定枚举名与取值映射（`com.fyzs.interviewer.<module>.api.enums.<EnumName>: 0=A,1=B`）；表统一 `engine=InnoDB default charset=utf8mb4 collate=utf8mb4_general_ci`
+- 所有字段必须带 comment（含 `id`/`created_at`/`updated_at`）；枚举列 comment 写简短形式 `enum <EnumName>`（与存量迁移风格一致，不写全限定名/值映射）；表统一 `engine=InnoDB default charset=utf8mb4 collate=utf8mb4_general_ci`
 - 未发布环境可原地合并规整为单 baseline（删除过时增量文件，不新增版本号空转文件），规整后需重建库（checksum 变更）；破坏性重写（删列）须与对应实体字段删除同一任务完成，保证任务收尾全绿
 - 新增 migration 目录时核对构建聚合 locations 与各 app 运行时 classpath 两个集合一致
 - 测试直跑主迁移（flyway `locations: classpath:db/migration`），不建 migration-test 副本
@@ -170,12 +173,15 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - 枚举/关键词矩阵用 `@ParameterizedTest` + `@ValueSource` 收敛；`ofXxx` 工厂测试须字段对称覆盖
 - LLM prompt 要求 JSON 输出时，走真实解析链路（MockWebServer + 真实 model）验证，不 mock chatClient
 - 对外契约（类/字段名）重命名：先查消费方，改后用 JSON 序列化契约测试锁定（断言含新名不含旧名）
+- 禁止 mock 假象：stub 生产不可能状态（get 风格服务返回 null、NOT NULL 列为 null）构造的"防御路径"用例是假绿——真实实现查不到抛 ErrorCode 而非返回 null，发现即改造为真实状态或删除
+- 多用例公共依赖在 `@BeforeEach` 配 lenient 默认 stub，用例只 stub 差异项（最近 stub 覆盖默认）；默认 stub 须带全严格链所需字段（如任务快照必含 configExtra），否则主代码删掉防御后默认路径集体 NPE
 - e2e 依赖异步回调的断言用轮询收敛（awaitUntil），不用同步 Executor 强行覆盖
 - Lombok/MapStruct/Easy Query 引发的 LSP 误报不算错，以 gradle 编译结果为准
 
 ## 代码风格
 
 - 成员变量 → 构造函数注入（`@RequiredArgsConstructor`）；静态常量放在成员变量之前；日志 `@Slf4j`
+- 时间一律用 `Instant`（domain/entity/DTO/参数统一）；如非必要禁用非 Instant 时间类（`LocalDateTime`/`LocalDate`/`ZonedDateTime`/`Date`）。审计列走 `AuditBaseEntity` 的 Instant 体系，ORM 列转换器见对应 ORM 文件
 - 表名前缀与类名对齐（`statistic_*` 表 ↔ `Statistic*` 类）
 - Javadoc 只写 `@param` / `@return` 有非显而易见语义时才加描述
 
@@ -193,4 +199,6 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - [ ] 涉及 repository/entity/converter 时已阅读项目所用 ORM 的规范文件（见「数据持久化与 ORM」）
 - [ ] service 接口/命名符合约定：对外才建接口，有接口才加 Impl；模块内部直接用 class
 - [ ] 时序正确：事务提交后才发事件/MQ；消费幂等；终态 CAS
+- [ ] 无无谓判空：契约已保证的前提没有重复判空/防御分支
+- [ ] converter 无「双方共有字段」的 @Mapping ignore
 - [ ] 主动报告功能完整性与副作用；不主动提交

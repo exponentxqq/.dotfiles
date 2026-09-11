@@ -22,10 +22,12 @@
 - `@Navigate` 的 FK 基础属性必须保留在实体上（proxy 是 APT 编译期生成的，删字段后 `XxxEntityProxy.Fields.xxx` 引用直接编译失败；按 FK 过滤的查询也依赖它）。方向选择：FK 在本表 → `ManyToOne`（selfProperty=本表 FK，targetProperty=目标 id）；FK 在对方表的 1:1 → `OneToOne`（selfProperty=本表 id，targetProperty=对方 FK）；经映射表的多对多 → `ManyToMany` + `mappingClass`/`selfMappingProperty`/`targetMappingProperty`
 - **OneToMany 带 include 恒为非 null 集合**（EasyQuery 3.1.73：单行走 `singleEntityToManyProcess` 空集合、多行走 `computeIfAbsent(k -> createManyCollection())`，且无 `getter.include()` 提前退出）——repository 里 `== null ? List.of()` 兜底是不可达分支勿写；**ManyToOne/OneToOne 匹配不到才保持 null**（有 `if (!getter.include()) return;` 守卫 + 命中才 set），经查询恢复的对象对 ManyToOne 字段仍要判 null；不带 include 的查询 navigate 字段保持 new 时 null
 - toMany 集合排序用 `@Navigate(orderByProps = @OrderByProperty(property = "xxx"))` 声明式表达（3.1.73：orderByProps 编译进 include 子查询 ORDER BY，回填走 ArrayList 保序），不在 repository 手动 sort——实体级声明一处生效所有 include 查询
+- **过滤关联回填必须用 adapter 形式**：`.include(a -> a.xxx(), q -> q.where(...))`——adapter 的 `where` 编译进关联子查询，只过滤回填集合、不影响主查询行集。**陷阱（3.1.73 实证）：`nav.where()` 链式写法 `.include(a -> a.xxx().where(...))` 静默失效**——不报错、回填仍为全量；过滤语义须真库集成测试锁定（断言跨范围数据不串）。主行集合过滤用 join+where、关联载荷过滤用 adapter include，两者分工不混用
+- 聚合根仓储的 `findByXxx`/`getByXxx` 统一返回聚合（include 一次带出全部关联），不建「`findByXxx` 本体 + `findAggregateByXxx` 聚合」两套方法；取聚合直接 `getByXxx` 一跳，不「`findById` 取本体再按 uuid 取聚合」双跳
 
 ## 复杂类型映射
 
-- Entity 的 `Instant` 字段必须配 `@Column(conversion = InstantConverter.class)`——datetime 列不会自动转 Instant，运行时 ClassCastException
+- 业务时间字段一律 `Instant`（通用规则见 `../SKILL.md`「代码风格」）；Entity 的 `Instant` 字段必须配 `@Column(conversion = InstantConverter.class)`——datetime 列不会自动转 Instant，运行时 ClassCastException
 - 单 JSON 列 ↔ 复杂/多态对象：自定义 `ValueConverter<TProperty, TProvider>` + `@Column(value = "列名", conversion = XxxValueConverter.class)`，entity 直接持有对象（先例 `EnumConverter`/`InstantConverter`/`JsonLongListConverter`）。转换器 `@Component`，由 starter 自动注册进 `QueryConfiguration`——未注册运行时抛 `EasyQueryException("conversion unknown, plz register this component")`；业务类型转换器放业务 repository 的 converter 包，不放 component 层（依赖方向）
 - **`@ValueObject` 是"值对象 ↔ 多列扁平展开"语义**（子字段各自成列、select 按子列展开、insert/update set 段整列不可写会抛 IllegalArgumentException），勿用于 JSON 单列；「校验注解」里 `@Navigate`/值对象字段留空适用于此场景
 - 与 MapStruct 协作：单 JSON 列 ↔ 对象经 ValueConverter 后 entity 直接持有对象，MapStruct 同类型直传零注解
