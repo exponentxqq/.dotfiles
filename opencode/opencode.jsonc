@@ -14,19 +14,21 @@
       },
     },
     "build": {
-      "model": "zhipuai-coding-plan/glm-5.3-flash",
+      // "model": "zhipuai-coding-plan/glm-5.3-flash",
+      "model": "opencode-go/deepseek-v4.1-flash",
       "temperature": 0.0,
       "variant": "max",
     },
     "general": {
-      "model": "zhipuai-coding-plan/glm-5.3-flash",
+      "model": "opencode-go/deepseek-v4.1-flash",
+      // "model": "deepseek/deepseek-v4-flash",
       "temperature": 0.1,
     },
     "title": {
       "model": "opencode-go/minimax-m3",
     },
     "compaction": {
-      "model": "xiaomi-token-plan-cn/mimo-v2.5-pro",
+      "model": "deepseek/deepseek-v4-flash",
     },
     "summary": {
       "model": "xiaomi-token-plan-cn/mimo-v2.5-pro",
