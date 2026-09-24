@@ -23,7 +23,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - service 不 import controller 层对象（尤其带版本号的 `controller.v1.*`）；需要时方法用平铺参数
 - 不新建语义重复的类型、无消费方的字段；已有字段能表达就不新增状态
 - 请求级上下文收敛为单一 `RequestContext`（filter 一次性装配），业务方直接读取；不维护多套 ThreadLocal/参数解析器机制
-- service 接口只在对外（被其他模块依赖）时定义；模块内部使用的直接定义 `@Service` class，不建单一实现的空接口
+- service 接口只在对外（被其他模块依赖）时定义；模块内部使用的直接定义 `@Service` class，不建单一实现的空接口。接口的**方法面**只含跨域消费方所需——域内用例（app 层 web/编排直依的）下沉 impl 具体类（controller 注入 impl），不因接口存在就全量暴露
 - 只有 implements interface 的同名 service 才加 `Impl` 后缀（`XxxService` 接口 → `XxxServiceImpl`）；无接口的 service 直接命名 `XxxService`，禁止无接口也带 Impl
 - 模块内依赖单向：`boot → controllers(web) → service → repository → api`；controller 按域拆 web 模块（candidate-app 下 `candidate-app:controllers:<domain>-web`，包名 `com.fyzs.interviewer.<domain>.web.v1`；console-app 当前单模块 `console-app:controllers`），后台消费逻辑放 `worker-app:consumers`；新 service/repository/api 放 `modules:<domain>:<domain>-<层>`
 - 跨域（跨模块）调用走 `contract:*` 模块的 Feign client，不直接依赖对方业务模块
@@ -52,7 +52,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 
 ## Repository 通用约定
 
-- Repository 命名：`getByXxx` 抛异常，`findByXxx` 返回 Optional；`getByXxx` 查不到抛全局 404 码（`GlobalErrorCode.RESOURCE_NOT_FOUND`），不借用业务错误码（业务码只表达业务校验失败语义）
+- Repository 命名：`getByXxx` 抛异常，`findByXxx` 返回 Optional；`getByXxx` 查不到抛域内业务错误码（如 `XxxErrorCode.NOT_FOUND`）；业务错误码可在 repository 层承载「存储约束/缺失」语义（唯一键冲突、资源不存在等），不限于 service 层
 - repository 写方法参数直接传 domain 对象，不拆扁平参数列表（部分列更新须 javadoc 明示）
 - 数值型统计字段不允许 null，统一 `BigDecimal.ZERO` 兜底
 - 不用物理外键，用业务唯一键（如 `uk(biz_id, dimension_code)`）+ 应用层约束
@@ -135,6 +135,7 @@ description: Use when writing, modifying, or reviewing any Java/Spring Boot code
 - 业务层统一 `BusinessException` + `ErrorCode`，不建异常子类；仅特殊场景（如作为 `@Transactional(noRollbackFor)` 类型判别载体）可建，须在类 javadoc 登记豁免理由
 - 业务 ErrorCode 放各自业务 api 模块，枚举 `implements BaseErrorCode`（component/core 定义接口）；码值全局唯一并分段（通用 1xxx、各业务 2xxx/3xxx/...、组件层 9xxx）
 - 新增 ErrorCode 枚举须同步全局撞号守护测试清单 + 各枚举专属测试
+- 业务语义判定（存在性/合法性/资源缺失）与 `BusinessException` 抛出在 **service 层**；controller 只做协议转换（参数解析、domain→VO），不写业务判断、不抛业务异常
 
 ## API 设计
 

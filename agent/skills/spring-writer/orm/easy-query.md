@@ -27,7 +27,8 @@
 
 ## 复杂类型映射
 
-- 业务时间字段一律 `Instant`（通用规则见 `../SKILL.md`「代码风格」）；Entity 的 `Instant` 字段必须配 `@Column(conversion = InstantConverter.class)`——datetime 列不会自动转 Instant，运行时 ClassCastException
+- 业务时间字段一律 `Instant`（通用规则见 `../SKILL.md`「代码风格」）；Entity 的 `Instant` 字段必须由组件 `InstantConverter` 承接转换——组件以 `ValueConverter` 提供则需逐字段 `@Column(conversion = InstantConverter.class)`（未接入转换器则运行时 ClassCastException），以 `ValueAutoConverter` 提供则对全部 Instant 属性自动生效，以所在项目组件实现为准
+- **date 列同样用 `Instant`**——`InstantConverter` 将 `sqlDate` 反序列化为系统时区当天零点（写入按当天日期落库），往返无损；不手写 `LocalDate`/时区转换
 - 单 JSON 列 ↔ 复杂/多态对象：自定义 `ValueConverter<TProperty, TProvider>` + `@Column(value = "列名", conversion = XxxValueConverter.class)`，entity 直接持有对象（先例 `EnumConverter`/`InstantConverter`/`JsonLongListConverter`）。转换器 `@Component`，由 starter 自动注册进 `QueryConfiguration`——未注册运行时抛 `EasyQueryException("conversion unknown, plz register this component")`；业务类型转换器放业务 repository 的 converter 包，不放 component 层（依赖方向）
 - **`@ValueObject` 是"值对象 ↔ 多列扁平展开"语义**（子字段各自成列、select 按子列展开、insert/update set 段整列不可写会抛 IllegalArgumentException），勿用于 JSON 单列；「校验注解」里 `@Navigate`/值对象字段留空适用于此场景
 - 与 MapStruct 协作：单 JSON 列 ↔ 对象经 ValueConverter 后 entity 直接持有对象，MapStruct 同类型直传零注解
