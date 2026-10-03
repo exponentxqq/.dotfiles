@@ -1,0 +1,17 @@
+# mako 通知配置 (Wayland 原生, Tokyo Night 配色)
+# 来源: dotfiles/hypr/mako/config
+
+font=JetBrainsMono Nerd Font 12
+background-color=#1a1b26ee
+text-color=#c0caf5
+border-color=#7aa2f7
+border-size=2
+border-radius=10
+padding=12
+margin=8
+width=360
+height=140
+max-visible=5
+default-timeout=8000
+anchor=top-right
+layer=overlay

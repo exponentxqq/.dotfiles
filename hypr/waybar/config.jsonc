@@ -1,0 +1,114 @@
+// waybar 配置 (对应原 polybar 信息布局, Tokyo Night)
+// 来源: dotfiles/hypr/waybar/config.jsonc
+// 图标均使用 \uXXXX 转义 (Nerd Font 私有区), 避免文件写入时字符丢失
+{
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "spacing": 8,
+    "margin-top": 4,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left": ["hyprland/workspaces", "hyprland/submap"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": ["custom/fcitx", "tray", "pulseaudio", "bluetooth", "network", "cpu", "memory", "battery", "clock"],
+
+    "hyprland/workspaces": {
+        "format": "{name}",
+        "on-click": "activate"
+    },
+
+    "hyprland/submap": {
+        "format": "{}",
+        "tooltip": false
+    },
+
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 60,
+        "separate-outputs": true
+    },
+
+    "custom/fcitx": {
+        "exec": "~/.config/hypr/script/fcitx-status.sh",
+        "return-type": "json",
+        "tooltip": true,
+        "on-click": "fcitx5-remote -t"
+    },
+
+    "tray": {
+        "icon-size": 14,
+        "spacing": 8
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "\uf026 {volume}%",
+        "format-icons": {
+            "default": ["\uf026", "\uf027", "\uf028"],
+            "headphone": "\uf025",
+            "headset": "\uf025"
+        },
+        "scroll-step": 5,
+        "on-click": "pavucontrol",
+        "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle"
+    },
+
+    "bluetooth": {
+        "format": "\uf293",
+        "format-off": "\uf293",
+        "format-connected": "\uf293 {num_connections}",
+        "format-connected-battery": "\uf293 {num_connections} {device_battery_percentage}%",
+        "tooltip-format": "{controller_alias}\t{status} · 点击管理",
+        "tooltip-format-connected": "{controller_alias} · {num_connections} 个设备已连接 · 点击管理",
+        "on-click": "~/.config/hypr/script/bt-menu.sh"
+    },
+
+    "network": {
+        "format-wifi": "\uf1eb {essid} {signalStrength}%",
+        "format-ethernet": "\uf0ac {ipaddr}",
+        "format-linked": "\uf0ac {ifname}",
+        "format-disconnected": "\uf071 离线",
+        "tooltip-format-wifi": "{essid}\n信号: {signalStrength}%\nIP: {ipaddr}",
+        "interval": 5,
+        "on-click": "~/.config/hypr/script/wifi-menu.sh",
+        "tooltip-format-disconnected": "WiFi 未连接 · 点击选择网络"
+    },
+
+    "cpu": {
+        "format": "\uf2db {usage}%",
+        "interval": 5,
+        "on-click": "kitty -e btop"
+    },
+
+    "memory": {
+        "format": "\uf0a0 {percentage}%",
+        "interval": 10,
+        "on-click": "kitty -e btop"
+    },
+
+    "battery": {
+        "format": "{icon} {capacity}%",
+        "format-icons": ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"],
+        "states": {
+            "warning": 20,
+            "critical": 10
+        },
+        "interval": 30,
+        "tooltip-format": "{timeTo}\n{capacity}%"
+    },
+
+    "clock": {
+        "format": "{:%m-%d %H:%M}",
+        "tooltip-format": "{:%Y-%m-%d %A}",
+        "calendar": {
+            "format": {
+                "today": "<span color='#7aa2f7'><b>{}</b></span>",
+                "days": "<span color='#c0caf5'>{}</span>",
+                "months": "<span color='#bb9af7'><b>{}</b></span>",
+                "weekdays": "<span color='#7dcfff'><b>{}</b></span>"
+            }
+        }
+    }
+}
