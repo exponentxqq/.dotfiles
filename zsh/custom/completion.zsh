@@ -1,7 +1,3 @@
 # 补全配置
-fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
-
-# 加载 ~/.completion 目录下所有补全文件
-for f in ~/.completion/_*; do
-  source "$f"
-done
+# 自定义补全函数放在 custom/completions/ 下，
+# oh-my-zsh 已将该目录加入 fpath，compinit 会自动加载，无需手动 source
