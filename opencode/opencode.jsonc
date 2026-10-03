@@ -28,7 +28,7 @@
       "model": "opencode-go/minimax-m3",
     },
     "compaction": {
-      "model": "deepseek/deepseek-v4-flash",
+      "model": "deepseek/deepseek-flash",
     },
     "summary": {
       "model": "xiaomi-token-plan-cn/mimo-v2.5-pro",
