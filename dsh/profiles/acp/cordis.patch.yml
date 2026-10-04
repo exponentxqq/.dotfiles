@@ -1,4 +1,25 @@
 # Your patch layer for this dsh profile, applied after every bundle layer:
 # a top-level YAML array of loader patch entries (id-targeted config
 # overrides, disables, and insert lists; `!!js` expressions allowed).
-[]
+# 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
+- id: skill-filesystem
+  name: "@deepseek-ai/dsh-skill-filesystem"
+  disabled: false
+  config:
+    includeDefaultRoots: false
+    customSkillDirs:
+      - /home/docker/.agents/skills
+- id: tool-skill
+  name: "@deepseek-ai/dsh-tool-skill"
+  disabled: false
+# 接入 dbx MCP：stdio 启动 @dbx-app/mcp-server（镜像预装），连接 dbx web（同 compose 网络）
+- insert:
+    - id: mcp-dbx
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: dbx
+        transport: stdio
+        command: npx
+        args: ['-y', '@dbx-app/mcp-server']
+        env:
+          DBX_WEB_URL: http://dbx:4224

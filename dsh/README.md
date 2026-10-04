@@ -90,6 +90,50 @@ cd ~/develop/docker
 - [开发一个工具](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/tool.zh.md)
 - [打包与安装插件](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/publish.zh.md)
 
+## skill 复用（与 opencode 同源，经 skctl 聚合）
+
+dsh 原生支持 Agent Skills 标准（`<dir>/<name>/SKILL.md` + `name`/`description` frontmatter）。
+三个 profile 均已启用 skill 工具链（`skill-filesystem` + `tool-skill`），扫描根为容器内
+`~/.agents/skills`——由 compose 把 skctl 聚合层只读挂载进来（`.env` 的 `SKCTL_STORE_PATH`）：
+
+- **单一聚合层**：`~/.local/share/agent-skills/skills`（skctl 维护）。自写 skill 实体在
+  `dotfiles/agent/skills/`（symlink 登记），外部 skill 为 git 源拷贝（记录 commit，可 update）；
+  opencode 经 `~/.agents/skills` 读同一层
+- **增删/更新 skill**：一律用 skctl（命令见 `agent/skills/README.md`）。注意 inotify 事件
+  不跨容器挂载边界——宿主变更后 opencode 即时生效，**dsh 需 `docker compose restart dsh`**
+- **MCP 依赖型 skill**（`codebase-memory`、`analyzing-elastic-logs`、`context7-mcp`）：
+  描述可见但对应 `mcp__*` 工具未接入，模型自行降级；后续按「MCP 接入」一节各加一条
+  insert patch 即可启用（dbx 已接，见下节）
+- skill 的 `name`/`description` 常驻 system prompt，正文由模型按需通过 skill 工具加载
+
+### openspec skills
+
+`openspec-*` 共 7 个（core 6 + verify，选 verify 作交付前校验关口），经 skctl 从
+[Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) 的 `skills/<name>` 安装，
+升级 `skctl update`。正文驱动 `openspec` CLI：容器内已随镜像预装
+（`containers/tools/dsh/Dockerfile`，`ARG OPENSPEC_VERSION` 可 pin）；**宿主机未装**，
+opencode 侧触发时 CLI 缺失会降级，需要时 `npm i -g @fission-ai/openspec`。
+剩余 5 个扩展 skill（`new`/`continue`/`ff`/`bulk-archive`/`onboard`）需要时用 skctl 补装。
+
+> **环境层边界**：dsh 启动时会读取 cwd 的 `.env` 作为环境层，并禁止其中出现 `DSH_*` 变量
+> （只允许来自启动环境）。因此**不要在 `~/develop/docker` 目录下执行 `./bin/dsh <app>`
+> 启动应用**（compose 的 `.env` 含 `DSH_*`，会被拒绝）；`dsh plugin` 管理命令、web 服务
+> （容器 ENTRYPOINT 启动）不受影响。跑 app 时换到无 `.env` 的目录即可。
+
+## MCP 接入（dbx）
+
+三个 profile 的 `cordis.patch.yml` 各有一条 `- insert:` 条目，把内置的
+`@deepseek-ai/dsh-mcp-client` loader 插入树中，stdio 启动 `@dbx-app/mcp-server`
+连接 dbx web（dsh 与 dbx 同在 compose `backend` 网络，容器内以 `http://dbx:4224` 直连）。
+模型侧工具名为 `mcp__dbx__<tool>`。
+
+- **patch 语法要点**：覆盖已有 loader（如翻转 `disabled`）直接写 `- id: ...` 条目；
+  插入全新 loader 必须用 `- insert: [条目]` 包装，裸写新 id 会被静默忽略
+- MCP server 包已烘进镜像（`ARG DBX_MCP_VERSION`），`npx` 启动秒起、无网络下载；
+  初始连接失败不阻断 dsh 启动（该 server 的工具不出现，日志有错误）
+- opencode 侧的同名 MCP 在 `~/.config/opencode/opencode.jsonc`（`DBX_WEB_URL` 为
+  `localhost:4224`，走宿主端口映射），两端各自独立配置
+
 ## 升级注意
 
 dsh 处于 developer preview，官方声明存在破坏性变更。升级 `DSH_VERSION` 前：
