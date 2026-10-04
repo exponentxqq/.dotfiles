@@ -96,7 +96,8 @@
             "critical": 10
         },
         "interval": 30,
-        "tooltip-format": "{timeTo}\n{capacity}%"
+        "tooltip-format": "{timeTo}\n{capacity}% · 点击查看各软件耗电",
+        "on-click": "~/.config/hypr/script/power-menu.sh"
     },
 
     "clock": {
