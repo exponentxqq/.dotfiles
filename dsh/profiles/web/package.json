@@ -6,8 +6,12 @@
       "bundles": [
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
-        "@deepseek-ai/dsh-experimental-agent-team-profile"
+        "@deepseek-ai/dsh-experimental-agent-team-profile",
+        "dsh-pocket"
       ]
     }
+  },
+  "dependencies": {
+    "dsh-pocket": "^2.10.6"
   }
 }

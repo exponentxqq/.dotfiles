@@ -21,6 +21,8 @@
     providers:
       zai:
         apiKeyEnv: ZAI_API_KEY
+      opencode-go:
+        apiKeyEnv: OPENCODE_GO_API_KEY
 # 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
 - id: skill-filesystem
   name: "@deepseek-ai/dsh-skill-filesystem"
@@ -40,6 +42,6 @@
         serverName: dbx
         transport: stdio
         command: npx
-        args: ['-y', '@dbx-app/mcp-server']
+        args: [ '-y', '@dbx-app/mcp-server' ]
         env:
           DBX_WEB_URL: http://dbx:4224
