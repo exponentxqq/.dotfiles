@@ -23,3 +23,17 @@
         args: ['-y', '@dbx-app/mcp-server']
         env:
           DBX_WEB_URL: http://dbx:4224
+# 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
+- id: llm-deepseek
+  name: "@deepseek-ai/dsh-llm-deepseek-api-key"
+  config:
+    # deepseek-official 路由；与内置默认一致，显式声明以自文档
+    apiKeyEnv: DEEPSEEK_API_KEY
+- id: llm-pi-ai
+  name: "@deepseek-ai/dsh-llm-pi-ai"
+  config:
+    providers:
+      zai:
+        apiKeyEnv: ZAI_API_KEY
+      opencode-go:
+        apiKeyEnv: OPENCODE_GO_API_KEY
