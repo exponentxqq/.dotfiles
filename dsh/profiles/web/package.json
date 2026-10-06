@@ -7,11 +7,13 @@
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
         "@deepseek-ai/dsh-experimental-agent-team-profile",
-        "dsh-pocket"
+        "dsh-pocket",
+        "dsh-context"
       ]
     }
   },
   "dependencies": {
+    "dsh-context": "^0.64.0",
     "dsh-pocket": "^2.10.6"
   }
 }
