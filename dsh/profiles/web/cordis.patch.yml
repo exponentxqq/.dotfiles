@@ -12,8 +12,8 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: deepseek-official
-    model: deepseek-flash
+    provider: zai
+    model: glm-5.3
     reasoningEffort: max
 # 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
 - id: llm-deepseek
@@ -27,8 +27,10 @@
     providers:
       zai:
         apiKeyEnv: ZAI_API_KEY
+        reasoningEffort: max
       opencode-go:
         apiKeyEnv: OPENCODE_GO_API_KEY
+        reasoningEffort: max
 # 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
 - id: skill-filesystem
   name: "@deepseek-ai/dsh-skill-filesystem"
@@ -43,11 +45,20 @@
 # 接入 dbx MCP：stdio 启动 @dbx-app/mcp-server（镜像预装），连接 dbx web（同 compose 网络）
 - insert:
     - id: mcp-dbx
-      name: '@deepseek-ai/dsh-mcp-client'
+      name: "@deepseek-ai/dsh-mcp-client"
       config:
         serverName: dbx
         transport: stdio
         command: npx
-        args: [ '-y', '@dbx-app/mcp-server' ]
+        args: [ "-y", "@dbx-app/mcp-server" ]
         env:
           DBX_WEB_URL: http://dbx:4224
+# 接入 codebase-memory MCP：代码知识图谱检索（agent 指令要求优先使用；镜像预装，npx 免下载）
+- insert:
+    - id: mcp-codebase-memory
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: codebase-memory
+        transport: stdio
+        command: npx
+        args: [ "-y", "codebase-memory-mcp" ]

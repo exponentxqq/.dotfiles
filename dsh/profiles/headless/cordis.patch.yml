@@ -37,3 +37,12 @@
         apiKeyEnv: ZAI_API_KEY
       opencode-go:
         apiKeyEnv: OPENCODE_GO_API_KEY
+# 接入 codebase-memory MCP：代码知识图谱检索（agent 指令要求优先使用；镜像预装，npx 免下载）
+- insert:
+    - id: mcp-codebase-memory
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: codebase-memory
+        transport: stdio
+        command: npx
+        args: [ "-y", "codebase-memory-mcp" ]
