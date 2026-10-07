@@ -16,6 +16,8 @@ i3/polybar/scripts/weather/.api_key
 dsh/**/.pnpm-store/
 dsh/profiles/*/.plugin-manager/
 dsh/profiles/*/.dsh-market/
+# pnpm 在本仓库根落盘的依赖缓存（插件目录内执行 pnpm install 时生成）
+.pnpm-store/
 
 bin
 node_modules/

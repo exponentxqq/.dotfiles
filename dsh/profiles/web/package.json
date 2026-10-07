@@ -11,16 +11,16 @@
         "dsh-context",
         "dshmarket",
         "@zzerx/dsh-plugin-notes",
-        "@linxin666/dsh-client-ui-git-graph",
-        "@linxin666/dsh-client-ui-task-board"
+        "@linxin666/dsh-client-ui-task-board",
+        "dsh-plugin-git-graph-multi"
       ]
     }
   },
   "dependencies": {
-    "@linxin666/dsh-client-ui-git-graph": "0.4.5",
     "@linxin666/dsh-client-ui-task-board": "0.4.5",
     "@zzerx/dsh-plugin-notes": "0.4.2",
     "dsh-context": "^0.64.0",
+    "dsh-plugin-git-graph-multi": "link:/home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi",
     "dsh-pocket": "^2.10.6",
     "dshmarket": "^1.66.9"
   }

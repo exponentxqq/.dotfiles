@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@linxin666/dsh-client-ui-git-graph':
-        specifier: 0.4.5
-        version: 0.4.5
       '@linxin666/dsh-client-ui-task-board':
         specifier: 0.4.5
         version: 0.4.5
@@ -20,6 +17,9 @@ importers:
       dsh-context:
         specifier: ^0.64.0
         version: 0.64.0(@deepseek-ai/schemastery@3.18.4)
+      dsh-plugin-git-graph-multi:
+        specifier: link:/home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
+        version: link:../../../../xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
       dsh-pocket:
         specifier: ^2.10.6
         version: 2.10.6
@@ -34,13 +34,6 @@ packages:
 
   '@deepseek-ai/schemastery@3.18.4':
     resolution: {integrity: sha512-SSXO6tYuyrIqKVbmOnIq0s+riUywYzouFMcnBluHF9n4KMo2G8HvEzhCYj6pj2617/glOjbJuVInJ9hfONsjkg==}
-
-  '@linxin666/dsh-client-ui-git-graph@0.4.5':
-    resolution: {integrity: sha512-2U6eAPIDjog+cKjBQQRhIpdIUXPluMEm++f9NiZNjEpXnGE16MG7tvC9iMm5Pn8/eC9O5+o55SohV/hRpAFd+Q==}
-    engines: {node: ^22.19.0 || >=24.0.0}
-    peerDependencies:
-      '@deepseek-ai/dsh': '>=0.2.0-rc.2'
-      react: ^18.2.0
 
   '@linxin666/dsh-client-ui-task-board@0.4.5':
     resolution: {integrity: sha512-DrKWUpEFUtJ4OuB7qDqm0D6h5OkpHPMFbYS+7SNhrYd75EyIkHU0DfeC5aBZZ13uNMVvncSvu36K0B8MF5JARQ==}
@@ -244,10 +237,6 @@ snapshots:
     dependencies:
       '@deepseek-ai/cosmokit': 1.8.5
       '@standard-schema/spec': 1.1.0
-
-  '@linxin666/dsh-client-ui-git-graph@0.4.5':
-    dependencies:
-      '@deepseek-ai/schemastery': 3.18.4
 
   '@linxin666/dsh-client-ui-task-board@0.4.5':
     dependencies:

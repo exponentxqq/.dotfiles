@@ -84,6 +84,40 @@ cd ~/develop/docker
 
 `plugins/hello/` 是可直接复制的示例包（也可复制为新插件目录后改名）。
 
+### git-graph-multi（单工作区多仓 Git Graph）
+
+`plugins/git-graph-multi/` 是 `@linxin666/dsh-client-ui-git-graph@0.4.5`（Apache-2.0）的本地 fork，把分支芯片从「工作区根那一个仓库」扩展为「工作区内多仓总览 + 单仓钻取 + 跨仓（组）分支操作」，同时把 `/git/*` 的门控从「路径全等」放宽为「工作区内 + git 顶层围栏」，并删除了上游的匿名遥测。行为语义与验收场景见
+[`openspec/changes/add-git-graph-multi-repo/`](../openspec/changes/add-git-graph-multi-repo/)，插件自身说明见 [`plugins/git-graph-multi/README.md`](plugins/git-graph-multi/README.md)。
+
+与 `plugins/hello/` 这类单文件插件不同，它是**双面插件 + 构建产物**：源码在 `src/`（host / core / client），`lib/` 由 esbuild 按需构建且不入库。
+
+```bash
+# 1. 构建（产物自包含：link: 安装不会为被链接包装依赖）
+cd ~/develop/dotfiles/dsh/plugins/git-graph-multi
+pnpm install && pnpm run typecheck && pnpm test && pnpm run build
+
+# 2. 替换 profile（容器内执行）
+cd ~/develop/docker
+./bin/dsh plugin --profile web remove @linxin666/dsh-client-ui-git-graph   # 先移除，二者共用 slot id 与 /git/* 前缀
+./bin/dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
+./bin/dsh --profile web --dump-config-schema                              # 校验 host 半可被 Loader 加载
+```
+
+回滚：`./bin/dsh plugin --profile web remove dsh-plugin-git-graph-multi` 后重新 `add @linxin666/dsh-client-ui-git-graph@0.4.5`。
+
+## OpenSpec 变更管理
+
+本仓库根有 OpenSpec 根目录 `openspec/`（`config.yaml` 声明 `schema: spec-driven`、语言简体中文；结构标题与 SHALL/MUST 关键字保持英文）。规划工件与主规格都在这里版本管理：
+
+```bash
+cd ~/develop/dotfiles
+openspec list                       # 变更列表
+openspec validate <change> --strict # 校验工件
+openspec archive <change>           # 评审通过后归档
+```
+
+> 仓库内不写项目本地 openspec skills 副本（`openspec init --tools none`）——dsh / opencode 的 `openspec-*` skills 已由 skctl 全局装好，见下节。
+
 ### 插件开发文档（官方）
 
 - [第一个插件](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/index.zh.md)
