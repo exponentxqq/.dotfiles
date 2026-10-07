@@ -86,8 +86,8 @@ cd ~/develop/docker
 
 ### git-graph-multi（单工作区多仓 Git Graph）
 
-`plugins/git-graph-multi/` 是 `@linxin666/dsh-client-ui-git-graph@0.4.5`（Apache-2.0）的本地 fork，把分支芯片从「工作区根那一个仓库」扩展为「工作区内多仓总览 + 单仓钻取 + 跨仓（组）分支操作」，同时把 `/git/*` 的门控从「路径全等」放宽为「工作区内 + git 顶层围栏」，并删除了上游的匿名遥测。行为语义与验收场景见
-[`openspec/changes/add-git-graph-multi-repo/`](../openspec/changes/add-git-graph-multi-repo/)，插件自身说明见 [`plugins/git-graph-multi/README.md`](plugins/git-graph-multi/README.md)。
+`plugins/git-graph-multi/` 是 `@linxin666/dsh-client-ui-git-graph@0.4.5`（Apache-2.0）的本地 fork，把分支芯片从「工作区根那一个仓库」扩展为「工作区内每仓一个平铺分支芯片 + 各仓自己的操作面板 + 跨仓（组）分支操作」，同时把 `/git/*` 的门控从「路径全等」放宽为「工作区内 + git 顶层围栏」，并删除了上游的匿名遥测。行为语义与验收场景见
+[`openspec/specs/dsh-multi-repo-git-graph/spec.md`](../openspec/specs/dsh-multi-repo-git-graph/spec.md)（三次变更的规划工件已归档在 [`openspec/changes/archive/`](../openspec/changes/archive/)），插件自身说明见 [`plugins/git-graph-multi/README.md`](plugins/git-graph-multi/README.md)。
 
 与 `plugins/hello/` 这类单文件插件不同，它是**双面插件 + 构建产物**：源码在 `src/`（host / core / client），`lib/` 由 esbuild 按需构建且不入库。
 

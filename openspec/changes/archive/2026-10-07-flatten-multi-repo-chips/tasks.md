@@ -50,8 +50,8 @@
 - **订阅成本**：宿主轮询间隔保持 30s，但每订阅者现在对每个被订阅路径各做一次 status + worktree 探测；路径数由 `MAX_EVENT_PATHS = 64` 截断。
 - **宿主验证口径**：`/git/events` 的多路径分发由纯函数单测（18）与路由级集成测试（3，伪造 req/res + 假定时器驱动 30s 轮询）共同覆盖；测试需在假定时器下额外冲刷真实 I/O（轮询链里有 `realpath`），否则断言会早于 fs 回调。仍未做真实浏览器端到端验证，多 chip 的刷新行为需人工走查（任务 6.5）。
 - **保留的既有取舍**：`build.mjs` 的 CSS module 重命名缺陷未修（新 CSS 未受影响，因未在 at-rule 内以裸类名开场）；Git 图谱泳道仍为字形。
-- **未提交**：全部改动未 `git add` / `git commit`。
+- **提交与归档**：实现与三份变更工件已提交为 `ba5e0ec`（`lib/` 按 README 的既定决定不入库，由 `pnpm run build` 生成）；随后按硬依赖顺序归档三个变更。
 
 ## Workflow follow-up
 
-归档顺序（硬依赖）：`add-git-graph-multi-repo` → `improve-git-graph-multi-ui` → `flatten-multi-repo-chips`；归档后确认 `openspec/specs/dsh-multi-repo-git-graph/spec.md` 吸收了三份 delta（本变更移除两项、新增三项、修改六项）。
+归档顺序（硬依赖）：`add-git-graph-multi-repo` → `improve-git-graph-multi-ui` → `flatten-multi-repo-chips`；归档后确认 `openspec/specs/dsh-multi-repo-git-graph/spec.md` 吸收了三份 delta（本变更移除三项、新增四项、修改四项）。归档时 `变更推送` 因订阅模型改变按 REMOVED + ADDED 改名为 `多仓变更推送`，`每仓状态聚合` 保留场景标识并改指芯片行（原因见 design.md D9）。
