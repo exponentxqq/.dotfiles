@@ -3,7 +3,9 @@
  * parameter, the first poll reports every watched path, and a later poll
  * reports only the paths whose status digest actually changed. The route is
  * driven through a fake request/response pair with fake timers, so the 30s poll
- * interval costs no wall time.
+ * interval costs no wall time; each step then waits for that poll's own service
+ * probes to settle rather than for a fixed number of event-loop turns, so the
+ * result does not depend on how loaded the machine is.
  * @module dsh-git-graph-multi/test/host-events-route
  */
 
@@ -32,6 +34,56 @@ async function flushIo(turns = 60): Promise<void> {
   for (let index = 0; index < turns; index++) {
     await new Promise<void>((resolve) => { realImmediate(() => { resolve() }) })
   }
+}
+
+/** The route's poll interval; fake timers jump it so the test costs no wall time. */
+const POLL_INTERVAL_MS = 30_000
+
+/**
+ * Count the two service probes the poll awaits, so a test can wait for a poll
+ * to *finish* instead of guessing how long real filesystem I/O needs: fake
+ * timers drive the interval, but the poll's `realpath` calls run on the real
+ * thread pool, and a fixed event-loop turn budget drains too early under a
+ * loaded parallel run (the suite passes alone and fails beside its siblings).
+ * Every poll issues one status probe and one worktree probe per watched path,
+ * and the push is written once both have settled.
+ * @param service - the service instance the routes are registered with.
+ * @returns the same instance plus a settled-probe counter.
+ */
+function countProbes(service: GitService): { service: GitService; probes: () => number } {
+  let probes = 0
+  const count = async <T>(work: () => Promise<T>): Promise<T> => {
+    try {
+      return await work()
+    } finally {
+      probes += 1
+    }
+  }
+  const status = service.status.bind(service)
+  const worktrees = service.worktrees.bind(service)
+  service.status = (path, signal) => count(() => status(path, signal))
+  service.worktrees = (path, signal) => count(() => worktrees(path, signal))
+  return { service, probes: () => probes }
+}
+
+/**
+ * Advance one poll interval and wait until that poll's probes have settled, then
+ * hand the loop back once more so the digest comparison, the push and the
+ * response write run.
+ * @param probes - settled-probe counter from {@link countProbes}.
+ * @param watchedPaths - how many paths the subscription watches.
+ */
+async function runPoll(probes: () => number, watchedPaths: number): Promise<void> {
+  const before = probes()
+  await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS)
+  const target = before + watchedPaths * 2
+  for (let turn = 0; turn < 20_000 && probes() < target; turn++) {
+    await new Promise<void>((resolve) => { realImmediate(() => { resolve() }) })
+  }
+  if (probes() < target) {
+    throw new Error(`poll did not settle: ${probes() - before} of ${watchedPaths * 2} probes answered`)
+  }
+  await flushIo(5)
 }
 
 afterEach(async () => {
@@ -134,7 +186,7 @@ describe('/git/events multi-repository subscription', () => {
     statusAnswers(answers, workspace, { branch: 'main' })
     statusAnswers(answers, serviceRepo, { branch: 'feat/x' })
     const runner: GitRunner = scriptedRunner(answers)
-    const service = new GitService(runner, buildWorkspaceGate({ list: () => [{ path: workspace }] }))
+    const { service, probes } = countProbes(new GitService(runner, buildWorkspaceGate({ list: () => [{ path: workspace }] })))
     const { ctx, handlers } = fakeCtx()
     registerGitRoutes(ctx as never, service)
     const handler = handlers.get('/git/events') as (req: unknown, res: unknown) => void
@@ -145,23 +197,20 @@ describe('/git/events multi-repository subscription', () => {
     expect(res.headers['content-type']).toContain('text/event-stream')
 
     // First poll: both paths are new, so both are reported in one push.
-    await vi.advanceTimersByTimeAsync(30_000)
-    await flushIo()
+    await runPoll(probes, 2)
     const first = changePayloads(res)
     expect(first).toHaveLength(1)
     expect([...first[0].paths].sort()).toEqual([workspace, serviceRepo].sort())
 
     // A steady poll with no digest change pushes nothing.
     res.chunks.length = 0
-    await vi.advanceTimersByTimeAsync(30_000)
-    await flushIo()
+    await runPoll(probes, 2)
     expect(changePayloads(res)).toHaveLength(0)
 
     // Only the service repository moved: only that path is reported.
     answers[runnerKey(serviceRepo, headBranchArgv())] = { stdout: 'feat/y\n' }
     res.chunks.length = 0
-    await vi.advanceTimersByTimeAsync(30_000)
-    await flushIo()
+    await runPoll(probes, 2)
     const second = changePayloads(res)
     expect(second).toHaveLength(1)
     expect(second[0].paths).toEqual([serviceRepo])
@@ -173,15 +222,16 @@ describe('/git/events multi-repository subscription', () => {
     await makeDirs(workspace, ['.git'])
     const answers: ScriptedAnswers = {}
     statusAnswers(answers, workspace, { branch: 'main' })
-    const service = new GitService(scriptedRunner(answers), buildWorkspaceGate({ list: () => [{ path: workspace }] }))
+    const { service, probes } = countProbes(
+      new GitService(scriptedRunner(answers), buildWorkspaceGate({ list: () => [{ path: workspace }] })),
+    )
     const { ctx, handlers } = fakeCtx()
     registerGitRoutes(ctx as never, service)
     const handler = handlers.get('/git/events') as (req: unknown, res: unknown) => void
 
     const res = fakeResponse()
     handler(fakeRequest(`/git/events?path=${encodeURIComponent(workspace)}`), res)
-    await vi.advanceTimersByTimeAsync(30_000)
-    await flushIo()
+    await runPoll(probes, 1)
     const payloads = changePayloads(res)
     expect(payloads).toHaveLength(1)
     expect(payloads[0].paths).toEqual([workspace])
