@@ -26,11 +26,14 @@
   max-width: 100%;
 }
 
-/* Hero phase: leave the dock row and join the official hero chip row. */
+/* Hero phase (dock seat): the chip row takes its own line directly under the
+   official hero workspace row, and copies that row's content box so the two
+   rows' first chips share one left edge. The shell's hero workspace row rule
+   (ui-conversation's ConversationRoot CSS module) is `padding: 0 16px 0 20px`;
+   these values mirror it deliberately, and the row's own width makes every
+   wrapped chip line start on that same edge. */
 .anchorHero {
-  display: inline-flex;
-  align-items: center;
-  padding-left: 0;
+  padding: 0 16px 0 20px;
 }
 
 .chip {
@@ -128,9 +131,9 @@
   transform: rotate(180deg);
 }
 
-/* Hero seat: the official hero-row chips are transparent 28px pills with
-   label-primary text and interactive-bg hover/open states (the same recipe
-   as WorkspaceChip and AgentPresetSeat in the official UI packages). */
+/* Hero phase: the same pill recipe as the official hero-row chips
+   (WorkspaceChip and AgentPresetSeat in the official UI packages) —
+   transparent 28px pill, label-primary text, interactive-bg hover/open. */
 .chipHero {
   height: auto;
   min-height: 28px;
@@ -173,8 +176,8 @@
    wins without `!important`. */
 .popover {
   position: absolute;
-  /* The selector row sits above the input card: the popover opens UPWARD,
-     capped at the same 360px as the workspace picker menu beside it. */
+  /* The chip row sits above the input card: the popover opens UPWARD, capped
+     at the same 360px as the workspace picker menu beside it. */
   bottom: calc(100% + 8px);
   left: 0;
   z-index: 100;
@@ -184,13 +187,6 @@
   max-height: 360px;
   padding: 4px;
   overflow: hidden;
-}
-
-/* In the hero row the menu opens downward (top: calc(100% + 4px)), matching
-   the official workspace picker anchored under the same chip row. */
-.popoverHero {
-  bottom: auto;
-  top: calc(100% + 4px);
 }
 
 /* The pushed operations panel needs a little more room than the branch list. */

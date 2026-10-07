@@ -22,7 +22,7 @@ export interface ChipProps {
   ariaLabel: string
   open: boolean
   onClick: () => void
-  /** The official hero-row seat style (transparent 28px pill beside the preset chip). */
+  /** Hero-phase pill style (transparent 28px pill, the official hero-row chip recipe). */
   hero?: boolean
   /** Trailing badge (the dirty-file count); omitted when the repository is clean. */
   badge?: ReactNode

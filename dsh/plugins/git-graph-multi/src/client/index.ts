@@ -4,8 +4,9 @@
  * (`conversation.input.selector.context`) beside the official workspace
  * selector. When that shell slot is unavailable, it waits for
  * {@link CONTEXT_FALLBACK_MS} then uses `conversation.input.dock` for the
- * blank-session hero phase, where it joins the official hero chip row after
- * the agent-preset seat. Active sessions render no branch-selection control.
+ * blank-session hero phase, where its row takes its own line under the
+ * official hero workspace row and copies that row's content box so the two
+ * left-align. Active sessions render no branch-selection control.
  *
  * All git facts arrive through this package's host /git routes. The inject
  * face carries the business verbs and the components remain pure props. The

@@ -2,8 +2,12 @@
  * The git branch chip row for blank sessions. It mounts in the selector context
  * hole (`conversation.input.selector.context`) beside the official workspace
  * selector. On shells that dropped the hole, it uses `conversation.input.dock`
- * only for the blank-session hero phase and lifts itself into the official hero
- * chip row. It is intentionally absent while a session is running.
+ * only for the blank-session hero phase: the row then occupies its own line
+ * directly under the official hero workspace row, sharing that row's content
+ * box (the same `0 16px 0 20px` inset) so both rows' chips left-align. The
+ * placement is pure CSS on the row's own box — it never reaches into the
+ * shell's DOM, so no shell class name or mount order can move it. It is
+ * intentionally absent while a session is running.
  *
  * In a multi-repository workspace the row renders one chip per enumerated
  * repository (root checkout first, then by display name): every chip opens that
@@ -15,8 +19,7 @@
  * @module dsh-git-graph-multi/client/chips/BranchChip
  */
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IconBranchOutlineRegular, Toast } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {
@@ -86,36 +89,6 @@ function useStockLightTheme(): boolean {
   return stockLightTheme
 }
 
-function isConnectedElement(node: unknown): node is HTMLElement {
-  return node instanceof HTMLElement && node.isConnected
-}
-
-/**
- * Resolve the hero workspace row element that the branch chip should join
- * during the blank-session hero phase.
- */
-function findHeroRow(anchor: HTMLElement | null): HTMLElement | null {
-  if (anchor === null || !anchor.isConnected) return null
-  const outlet = anchor.parentElement
-  if (outlet === null) return null
-  // 1. Direct previous sibling (the official hero row in ConversationRoot)
-  const prev = outlet.previousElementSibling as HTMLElement | null
-  if (prev !== null && isConnectedElement(prev) && prev.className.includes('heroWorkspaceRow')) {
-    return prev
-  }
-  // 2. Query inside the composerStack parent
-  const stack = outlet.closest('[class*="composerStack"], [class*="composerHero"]')
-  const rowInStack = stack?.querySelector('[class*="heroWorkspaceRow"]') as HTMLElement | null
-  if (rowInStack !== null && isConnectedElement(rowInStack)) return rowInStack
-
-  // 3. Fallback to any heroWorkspaceRow in the document
-  if (typeof document !== 'undefined') {
-    const docRow = document.querySelector('[class*="heroWorkspaceRow"]') as HTMLElement | null
-    if (docRow !== null && isConnectedElement(docRow)) return docRow
-  }
-  return null
-}
-
 /**
  * The git branch chip row for blank sessions.
  * @param props - the composed entry props of whichever seat it mounted in.
@@ -166,11 +139,9 @@ export function BranchChip(props: BranchChipProps) {
   const [groupError, setGroupError] = useState<string | null>(null)
   /** Bumped to force a re-enumeration (panel open, external change, or a finished operation). */
   const [refreshToken, setRefreshToken] = useState(0)
-  const [heroRow, setHeroRow] = useState<HTMLElement | null>(null)
   /** Host toast of the last successful switch (null: none showing). */
   const [toast, setToast] = useState<ChipToast | null>(null)
   const toastSeq = useRef(0)
-  const anchorRef = useRef<HTMLDivElement | null>(null)
   /** The last group operation, replayed for one repository by the result panel's retry. */
   const lastGroupRef = useRef<{ action: 'switch' | 'create'; branch: string; base: GroupBase } | null>(null)
 
@@ -201,28 +172,6 @@ export function BranchChip(props: BranchChipProps) {
   const refreshAll = useCallback((): void => {
     setRefreshToken(token => token + 1)
   }, [])
-
-  // Hero-phase placement: the rc.6 shell renders the dock as its own row
-  // between the official hero chip row and the composer card. In the blank
-  // hero phase, the chip portals directly into that hero row to sit
-  // immediately after the agent-preset seat, matching the official row gap,
-  // tokens, and alignment without manual pixel measurement.
-  useLayoutEffect(() => {
-    if (!heroSeat) {
-      setHeroRow(null)
-      return undefined
-    }
-    const update = (): void => {
-      const found = findHeroRow(anchorRef.current)
-      setHeroRow(prev => (prev === found ? prev : found))
-    }
-    update()
-    const parent = anchorRef.current?.parentElement
-    if (parent === null || parent === undefined || typeof MutationObserver === 'undefined') return undefined
-    const observer = new MutationObserver(update)
-    observer.observe(parent.parentElement ?? parent, { childList: true, subtree: true })
-    return () => { observer.disconnect() }
-  }, [heroSeat])
 
   // Enumerate the workspace's repositories once the selector shows. The scan
   // stays lazy (never part of the status polling) and never starts for an
@@ -446,7 +395,6 @@ export function BranchChip(props: BranchChipProps) {
               />
               {open && panelBranches !== null && (
                 <BranchPopover
-                  hero={heroSeat}
                   view={panelBranches}
                   repoLabel={multi ? entry.name : undefined}
                   onSwitch={(branch) => props.switchBranch(sessionId, branch, entry.path)}
@@ -537,18 +485,5 @@ export function BranchChip(props: BranchChipProps) {
     </div>
   )
 
-  if (heroSeat) {
-    return (
-      <>
-        <div ref={anchorRef} style={{ display: 'none' }} />
-        {heroRow !== null && isConnectedElement(heroRow) ? createPortal(chipNode, heroRow) : chipNode}
-      </>
-    )
-  }
-
-  return (
-    <div ref={anchorRef} style={{ display: 'contents' }}>
-      {chipNode}
-    </div>
-  )
+  return chipNode
 }

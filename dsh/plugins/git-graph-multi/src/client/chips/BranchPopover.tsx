@@ -64,8 +64,6 @@ export interface BranchPopoverProps {
   /** Close the panel (backdrop / after a successful switch). */
   onClose: () => void
   t: Translate<GitGraphKey>
-  /** Open downward from the official hero row (the default opens upward from the dock row). */
-  hero?: boolean
   /** Display name of the repository this panel acts on (multi-repository workspaces); omitted for a single-repository workspace. */
   repoLabel?: string
 }
@@ -84,7 +82,7 @@ type PanelFace = 'list' | 'ops'
  * The branch panel of one repository.
  * @param props - see {@link BranchPopoverProps}.
  */
-export function BranchPopover({ view, onSwitch, onSwitched, onCreate, onGraph, onCreateWorktree, onManageWorktrees, groupOps, onClose, t, hero = false, repoLabel }: BranchPopoverProps) {
+export function BranchPopover({ view, onSwitch, onSwitched, onCreate, onGraph, onCreateWorktree, onManageWorktrees, groupOps, onClose, t, repoLabel }: BranchPopoverProps) {
   const [query, setQuery] = useState('')
   const [pending, setPending] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -234,7 +232,7 @@ export function BranchPopover({ view, onSwitch, onSwitched, onCreate, onGraph, o
       <Backdrop onClose={onClose} />
       <MenuSurface
         compact
-        className={cx(css.popover, hero && css.popoverHero, panel === 'ops' && css.popoverOps)}
+        className={cx(css.popover, panel === 'ops' && css.popoverOps)}
         role={panel === 'list' ? 'listbox' : 'dialog'}
         aria-label={panel === 'list' ? t('branch.search') : t('ops.more')}
         data-gitgraph-popover
