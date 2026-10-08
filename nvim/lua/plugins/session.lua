@@ -51,10 +51,15 @@ return {
           persistence.load()
           restored = true
         end
-        wipe_dir_buffers()
         -- 修复与开树必须延迟到 VimEnter 栈外（栈内事件不派发）：
         -- schedule 在 VimEnter 事件结束后立即执行，此时事件链已恢复，且早于 dashboard
         vim.schedule(function()
+          -- 目录 buffer 的 wipe 也必须在栈外：autocmd 默认非 nested，栈内 wipe 会抑制
+          -- 依赖 BufWipeout 的清理（如 vim.diagnostic 内部缓存回收），残留失效 bufnr，
+          -- 后续任意 vim.diagnostic.config() 会报 "Invalid buffer id"。
+          wipe_dir_buffers()
+          -- 兜底清掉其他来源残留的失效诊断缓存；此时 LSP 尚未 attach，清空无副作用
+          pcall(vim.diagnostic.reset)
           if restored then
             fix_zombies()
             -- 注意：neo-tree 的 action 只有 close/focus/show，reveal 是 flag
