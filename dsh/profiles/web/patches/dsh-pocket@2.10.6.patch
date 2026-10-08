@@ -1,0 +1,13 @@
+diff --git a/lib/index.js b/lib/index.js
+index 79f3c052fc35c96b4bfa5c52f545932a48aad9a3..385f01187837f1ab6c843c0c095703150b55d892 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -287,7 +287,7 @@ export function apply(ctx, config = {}, internals = {}) {
+     // 端口（issue #70）：插件模式优先级 settings.proxyPort > cordis patch config.port > 3081。
+     // 3081 被占时 createPocketService 内部 EADDRINUSE 抛错，按 DSH 插件启动失败处理（用户改端口重启即可）。
+     port: internals.port ?? config.port ?? (proxyPort() || 3081),
+-    home: internals.home,
++    home: internals.home ?? process.env.DSH_HOME ?? join(homedir(), '.dsh'),
+     internals,
+     getLanIpOverride: () => lanIpOverride(),
+     getLanEnabled: () => lanEnabled(),

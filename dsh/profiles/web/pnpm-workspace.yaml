@@ -1,5 +1,7 @@
 packages:
   - .
+autoInstallPeers: false
 
 nodeLinker: hoisted
-autoInstallPeers: false
+patchedDependencies:
+  dsh-pocket@2.10.6: patches/dsh-pocket@2.10.6.patch

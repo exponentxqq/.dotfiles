@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: false
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  dsh-pocket@2.10.6:
+    hash: f06fe37b4a7ee48a28e15e8bebbc8cbf3aac52c42a784715dd00344d94eba9bf
+    path: patches/dsh-pocket@2.10.6.patch
+
 importers:
 
   .:
@@ -28,7 +33,7 @@ importers:
         version: link:../../../../xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
       dsh-pocket:
         specifier: ^2.10.6
-        version: 2.10.6
+        version: 2.10.6(patch_hash=f06fe37b4a7ee48a28e15e8bebbc8cbf3aac52c42a784715dd00344d94eba9bf)
       dshmarket:
         specifier: ^1.66.9
         version: 1.66.9(@deepseek-ai/schemastery@3.18.4)
@@ -345,7 +350,7 @@ snapshots:
       '@deepseek-ai/schemastery': 3.18.4
       zod: 4.6.5
 
-  dsh-pocket@2.10.6:
+  dsh-pocket@2.10.6(patch_hash=f06fe37b4a7ee48a28e15e8bebbc8cbf3aac52c42a784715dd00344d94eba9bf):
     dependencies:
       qrcode: 1.5.4
       qrcode-terminal: 0.12.0
