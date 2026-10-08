@@ -11,6 +11,7 @@
 # Docker 开发环境
 
 - 若 docker 已提供某语言/工具的环境（node、python、rust、go、php 等），执行与建议均**必须使用 docker 提供的环境**，不得使用宿主机系统版本：`pnpm`/`cargo`/`go`/`php`/`composer`/`mysql` 等命令实际是 `~/develop/docker/bin/` 下的包装脚本（已加入 PATH，优先于宿主系统版本）；无包装的命令用 `~/develop/docker/run.sh <service> "<command>"`。Node 版本由 Volta 管理（读项目 `package.json` 的 `volta` 字段）。
+- 例外：已运行在容器内且无 docker CLI 的环境（如 dsh 容器）时，直接使用该容器内自带的工具链执行，不再经过上述包装脚本。
 - 例外：Java 在宿主机运行，不走 docker——JDK 用宿主机版本，构建用项目根的 `./mvnw` / `./gradlew`（wrapper）。
 - 容器身份由 `.env` 的 `HOST_UID`/`HOST_GID`/`HOST_USER` 与宿主机对齐，容器内创建的文件宿主机可直接读写。
 - 可用服务：mysql、postgres、redis、mongo、rabbitmq、rocketmq（namesrv+broker）、nginx、dbx（web 端口 4224）；hermes 为 manual profile 需显式启动；数据目录统一在宿主 `/data`。

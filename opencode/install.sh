@@ -35,6 +35,12 @@ mkdir -p ~/.config
 
 # 备份并符号链接整个 ~/.config/opencode
 if [ -e ~/.config/opencode ] && [ ! -L ~/.config/opencode ]; then
+  # opencode v2 的本地后台服务凭据：软链前先复制到 dotfiles，保证运行中的服务不中断。
+  # service.json 已在 .gitignore 中忽略，不会进版本库；每台机器各自独立。
+  if [ -f ~/.config/opencode/service.json ]; then
+    cp -p ~/.config/opencode/service.json "$BASEDIR/service.json"
+    echo "Preserved service.json to $BASEDIR/service.json (gitignored)"
+  fi
   mv ~/.config/opencode ~/.config/opencode.bak
   echo "Backed up existing ~/.config/opencode to ~/.config/opencode.bak"
 fi

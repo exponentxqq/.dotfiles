@@ -1,0 +1,154 @@
+/* waybar 样式 (Tokyo Night 配色, 与 kitty/dunst 主题一致) */
+/* 来源: dotfiles/hypr/waybar/style.css */
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 14px;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: rgba(26, 27, 38, 0.88);
+    color: #c0caf5;
+    border-radius: 12px;
+}
+
+tooltip {
+    background: rgba(26, 27, 38, 0.96);
+    border: 1px solid rgba(122, 162, 247, 0.6);
+    border-radius: 8px;
+}
+
+tooltip label {
+    color: #c0caf5;
+}
+
+/* ---------- 工作区 ---------- */
+#workspaces {
+    margin: 0 4px;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: #565f89;
+    background: transparent;
+}
+
+#workspaces button:hover {
+    color: #7dcfff;
+    background: rgba(122, 162, 247, 0.12);
+    border-radius: 8px;
+}
+
+#workspaces button.active {
+    color: #1a1b26;
+    background: #7aa2f7;
+    border-radius: 8px;
+}
+
+#workspaces button.urgent {
+    color: #1a1b26;
+    background: #ebcb8b;
+    border-radius: 8px;
+}
+
+/* ---------- 子模式提示 ---------- */
+#submap {
+    color: #ebcb8b;
+    padding: 0 6px;
+}
+
+/* ---------- 活动窗口 ---------- */
+#window {
+    color: #c0caf5;
+    font-style: italic;
+}
+
+window#waybar.empty #window {
+    background: transparent;
+}
+
+/* ---------- 输入法状态 ---------- */
+#custom-fcitx {
+    color: #565f89;
+    padding: 0 8px;
+    margin: 4px 0;
+}
+
+#custom-fcitx.zh {
+    color: #e0af68;
+    font-weight: bold;
+}
+
+/* ---------- 右侧模块 ---------- */
+#tray,
+#pulseaudio,
+#bluetooth,
+#network,
+#cpu,
+#memory,
+#battery,
+#clock {
+    padding: 0 8px;
+    margin: 4px 0;
+}
+
+#pulseaudio {
+    color: #7dcfff;
+}
+
+#pulseaudio.muted {
+    color: #565f89;
+}
+
+#bluetooth {
+    color: #7aa2f7;
+}
+
+#bluetooth.off,
+#bluetooth.disabled {
+    color: #565f89;
+}
+
+#network {
+    color: #bb9af7;
+}
+
+#network.disconnected {
+    color: #f7768e;
+}
+
+#cpu {
+    color: #e0af68;
+}
+
+#memory {
+    color: #9ece6a;
+}
+
+#battery {
+    color: #c0caf5;
+}
+
+#battery.charging {
+    color: #9ece6a;
+}
+
+#battery.warning:not(.charging) {
+    color: #e0af68;
+}
+
+#battery.critical:not(.charging) {
+    color: #f7768e;
+}
+
+#clock {
+    color: #7aa2f7;
+    font-weight: bold;
+}
+
+#tray {
+    margin-right: 4px;
+}

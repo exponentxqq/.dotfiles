@@ -1,7 +1,7 @@
 ---
 description: "Fast agent specialized for exploring codebases. Prioritizes codebase-memory-mcp for graph-driven code intelligence, combines with grep/glob/read for comprehensive exploration."
 mode: subagent
-model: deepseek/deepseek-v4-flash
+model: deepseek/deepseek-flash
 temperature: 0.1
 permission:
   edit: deny

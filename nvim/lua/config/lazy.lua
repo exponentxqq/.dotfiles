@@ -31,6 +31,11 @@ require("lazy").setup({
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
+  rocks = {
+    -- 固定使用 lazy 自带的 hererocks（lua5.1 + luarocks），
+    -- 避免系统 luarocks 影响 rest.nvim 等 rockspec 依赖的安装（官方推荐）
+    hererocks = true,
+  },
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update
