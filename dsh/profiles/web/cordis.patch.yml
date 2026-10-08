@@ -62,3 +62,15 @@
         transport: stdio
         command: npx
         args: [ "-y", "codebase-memory-mcp" ]
+# 启用 browser-use：chrome-devtools-mcp 提供方（实验性，headless 容器模式；chromium 由镜像/apt 提供）
+# executablePath 指向 wrapper（~/.dsh/bin/chromium-launch）：注入 --no-sandbox（容器 seccomp 禁 userns）
+# 与 --disable-dev-shm-usage（/dev/shm 64M 限制）；compose 若放开 seccomp 可改回 /usr/bin/chromium
+- insert:
+    - id: browser-use
+      name: "@deepseek-ai/dsh-browser-use"
+    - id: browser-use-devtools
+      name: "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp"
+      config:
+        mode: launch
+        headless: true
+        executablePath: /home/docker/.dsh/bin/chromium-launch

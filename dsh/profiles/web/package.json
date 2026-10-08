@@ -17,6 +17,8 @@
     }
   },
   "dependencies": {
+    "@deepseek-ai/dsh-browser-use": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp": "0.2.0-rc.2",
     "@linxin666/dsh-client-ui-task-board": "0.4.5",
     "@zzerx/dsh-plugin-notes": "0.4.2",
     "dsh-context": "^0.64.0",
