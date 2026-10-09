@@ -60,8 +60,8 @@ pnpm run build         # esbuild → lib/index.js、lib/invariant.js、lib/clien
 
 ```bash
 cd ~/develop/docker
-./bin/dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
-./bin/dsh --profile web --dump-config-schema   # 校验 host 半可被 Loader 加载
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
+docker exec dsh dsh --profile web --dump-config-schema   # 校验 host 半可被 Loader 加载
 ```
 
 > **重要**：本插件与 `@linxin666/dsh-client-ui-git-graph` 使用同一个 slot 条目 id（`git-graph`）和同一段 `/git/*` 路由前缀，**不可同时启用**。替换顺序：先 `remove` 原插件，再 `add` 本插件。

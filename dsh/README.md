@@ -48,9 +48,12 @@ cd ~/develop/docker && docker compose restart dsh
 ```bash
 cd ~/develop/docker
 
-./bin/dsh --profile web --dump-config          # 查看合成后的配置树（含各 patch 层）
-./bin/dsh --profile web --dump-config-schema   # 校验配置 schema（会 import 插件，可验证插件可加载）
-docker compose logs dsh | grep "dsh web:"      # 取带 token 的启动 URL
+docker exec dsh dsh --profile web --dump-config          # 查看合成后的配置树（含各 patch 层）
+docker exec dsh dsh --profile web --dump-config-schema   # 校验配置 schema（会 import 插件，可验证插件可加载）
+docker compose logs dsh | grep "dsh web:"                # 取带 token 的启动 URL
+
+# 注：`bin/dsh` 包装脚本已删除（dsh 不经包装脚本）；宿主侧一律 `docker exec dsh dsh …`
+# 或 `~/develop/docker/run.sh dsh "dsh …"`，dsh 容器内直接 `dsh …`。
 ```
 
 ## 自定义插件
@@ -68,7 +71,7 @@ plugins/<name>/
 
 ```bash
 cd ~/develop/docker
-./bin/dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/hello
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/hello
 ```
 
 `dsh plugin add` 会自动完成两件事：
@@ -79,7 +82,7 @@ cd ~/develop/docker
 移除：
 
 ```bash
-./bin/dsh plugin --profile web remove dsh-plugin-<name>
+docker exec dsh dsh plugin --profile web remove dsh-plugin-<name>
 ```
 
 `plugins/hello/` 是可直接复制的示例包（也可复制为新插件目录后改名）。
@@ -98,12 +101,12 @@ pnpm install && pnpm run typecheck && pnpm test && pnpm run build
 
 # 2. 替换 profile（容器内执行）
 cd ~/develop/docker
-./bin/dsh plugin --profile web remove @linxin666/dsh-client-ui-git-graph   # 先移除，二者共用 slot id 与 /git/* 前缀
-./bin/dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
-./bin/dsh --profile web --dump-config-schema                              # 校验 host 半可被 Loader 加载
+docker exec dsh dsh plugin --profile web remove @linxin666/dsh-client-ui-git-graph   # 先移除，二者共用 slot id 与 /git/* 前缀
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
+docker exec dsh dsh --profile web --dump-config-schema                              # 校验 host 半可被 Loader 加载
 ```
 
-回滚：`./bin/dsh plugin --profile web remove dsh-plugin-git-graph-multi` 后重新 `add @linxin666/dsh-client-ui-git-graph@0.4.5`。
+回滚：`docker exec dsh dsh plugin --profile web remove dsh-plugin-git-graph-multi` 后重新 `add @linxin666/dsh-client-ui-git-graph@0.4.5`。
 
 ## OpenSpec 变更管理
 
@@ -150,9 +153,10 @@ opencode 侧触发时 CLI 缺失会降级，需要时 `npm i -g @fission-ai/open
 剩余 5 个扩展 skill（`new`/`continue`/`ff`/`bulk-archive`/`onboard`）需要时用 skctl 补装。
 
 > **环境层边界**：dsh 启动时会读取 cwd 的 `.env` 作为环境层，并禁止其中出现 `DSH_*` 变量
-> （只允许来自启动环境）。因此**不要在 `~/develop/docker` 目录下执行 `./bin/dsh <app>`
-> 启动应用**（compose 的 `.env` 含 `DSH_*`，会被拒绝）；`dsh plugin` 管理命令、web 服务
-> （容器 ENTRYPOINT 启动）不受影响。跑 app 时换到无 `.env` 的目录即可。
+> （只允许来自启动环境）。因此不要在含 `DSH_*` 的 `.env` 目录（如 `~/develop/docker`）下
+> 启动应用；`dsh plugin` 管理命令、web 服务（容器 ENTRYPOINT 启动）不受影响。
+> `docker exec dsh dsh <app>` 的默认工作目录是 `${HOST_PROJECT_PATH}`（无 `.env`），
+> 需要换目录时用 `docker exec -w <dir> dsh dsh <app>`。
 
 ## MCP 接入（dbx）
 

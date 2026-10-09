@@ -17,7 +17,7 @@ dsh 自定义插件的最小可用模板（官方组合包 bundle 形式）。
 
 ```bash
 cd ~/develop/docker
-./bin/dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/my-plugin
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/my-plugin
 ```
 
 安装后重启 profile 即生效；之后改 `index.js` 只需重启 profile（link 安装，无需重装）。
