@@ -1,18 +1,131 @@
 #!/usr/bin/env bash
 # codebase-memory-mcp auto-reindex hook
 # $1 = hook name (post-commit, post-merge, post-rewrite)
+#
+# 设计要点（2026-10 修复）：
+# - 命令经 PATH 解析，不硬编码安装路径（二进制由 npm 正常安装）
+# - setsid 重新执行 --run 分支，脱离会话/进程组，防 agent 会话回收时连带击杀
+# - generation 冲突（pre-coordination / unverified CBM generation）按 30s/2m/10m 退避重试
+# - 触发即登记 pending 标记；成功后清除并顺带补跑其它 pending 仓库（自愈历史缺口）
+# - 门卫：仅当该仓库的索引库已存在（<name>.db）才执行，防索引面失控扩散到 yay 等无关仓库
+# - per-repo flock：同仓库并发触发时只跑一个实例，其余让位（marker 保留由 drain 补跑）
 
-set -e
+set -u
 
 HOOK_NAME="${1:-unknown}"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+LOG_FILE="$CACHE_DIR/cbm-hook.log"
+PENDING_DIR="$CACHE_DIR/cbm-hook-pending"
+LOCK_DIR="$CACHE_DIR/cbm-hook-drain.lock"
+# 索引库目录（与二进制解析规则一致：CBM_CACHE_DIR > $HOME/.cache/codebase-memory-mcp）
+CBM_DATA="${CBM_CACHE_DIR:-$HOME/.cache/codebase-memory-mcp}"
+
+# 项目名归一化：绝对路径去前导 / 后将所有 / 替换为 -
+cbm_project_name() {
+    printf '%s' "$1" | sed -e 's#^/##' -e 's#/#-#g'
+}
+
+marker_for() {
+    printf '%s' "$1" | md5sum | cut -d' ' -f1
+}
+
+# ---- 后台执行体（由 setsid 以 --run 进入，stdout/stderr 已重定向到日志） ----
+if [ "$HOOK_NAME" = "--run" ]; then
+    REPO_ROOT="$2"
+    HOOK_LABEL="$3"
+    # 脱离 git 钩子环境变量，防后台 CLI 内部调用 git 时被污染
+    unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_QUARANTINE_PATH 2>/dev/null || true
+    CMD=$(command -v codebase-memory-mcp 2>/dev/null) || {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: codebase-memory-mcp not found in PATH, kept pending marker"
+        exit 0
+    }
+    mkdir -p "$PENDING_DIR"
+
+    # per-repo 并发闸：同仓库已有实例在跑则本次让位（marker 保留，由 drain 补跑）
+    exec 9>>"$PENDING_DIR/.run-$(marker_for "$REPO_ROOT").lock"
+    if ! flock -n 9; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: another instance is indexing $REPO_ROOT, marker kept"
+        exit 0
+    fi
+
+    run_index() {
+        local repo="$1" attempt delay out rc
+        for attempt in 1 2 3 4; do
+            case $attempt in
+                1) delay=0 ;;
+                2) delay=30 ;;
+                3) delay=120 ;;
+                *) delay=600 ;;
+            esac
+            if [ "$delay" -gt 0 ]; then
+                sleep "$delay"
+            fi
+            out=$("$CMD" cli index_repository --repo-path "$repo" 2>&1)
+            rc=$?
+            printf '%s\n' "$out"
+            if [ "$rc" -eq 0 ]; then
+                return 0
+            fi
+            case "$out" in
+                *"pre-coordination"* | *"unverified CBM generation"* | *"conflicting CBM process"*) continue ;;
+                *) return "$rc" ;;
+            esac
+        done
+        return "$rc"
+    }
+
+    # 顺带补跑其它 pending 仓库（单次最多 10 个，防风暴；锁防并发 drain）
+    drain_pending() {
+        local m repo n=0
+        mkdir "$LOCK_DIR" 2>/dev/null || return 0
+        trap 'rmdir "$LOCK_DIR" 2>/dev/null' EXIT
+        for m in "$PENDING_DIR"/*; do
+            [ -e "$m" ] || break
+            [ "$n" -ge 10 ] && break
+            repo=$(cat "$m" 2>/dev/null) || { rm -f "$m"; continue; }
+            if [ "$repo" = "$REPO_ROOT" ] || [ ! -d "$repo" ]; then
+                rm -f "$m"
+                continue
+            fi
+            # 门卫：无索引库的 pending 仓库直接清标记跳过
+            if [ ! -f "$CBM_DATA/$(cbm_project_name "$repo").db" ]; then
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: drain skip $repo (no index db)"
+                rm -f "$m"
+                continue
+            fi
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: retry pending $repo"
+            if run_index "$repo"; then
+                rm -f "$m"
+            fi
+            n=$((n + 1))
+        done
+    }
+
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: indexing $REPO_ROOT"
+    run_index "$REPO_ROOT"
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
+        rm -f "$PENDING_DIR/$(marker_for "$REPO_ROOT")"
+        drain_pending
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: done (0)"
+    else
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_LABEL: failed ($rc), pending marker kept"
+    fi
+    exit 0
+fi
+
+# ---- 前台入口：登记 pending 标记后 setsid 后台执行并立即返回 ----
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 
-LOG_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/cbm-hook.log"
+# 门卫：只为已建索引的仓库工作（新项目首次索引仍走手动 index_repository）
+if [ ! -f "$CBM_DATA/$(cbm_project_name "$REPO_ROOT").db" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_NAME: skip $REPO_ROOT (no index db)" >>"$LOG_FILE" 2>/dev/null
+    exit 0
+fi
 
-(
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_NAME: indexing $REPO_ROOT"
-    /usr/bin/codebase-memory-mcp cli index_repository "{\"repo_path\": \"$REPO_ROOT\"}" 2>&1
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $HOOK_NAME: done ($?)"
-) >> "$LOG_FILE" 2>&1 &
+mkdir -p "$PENDING_DIR"
+MARKER="$PENDING_DIR/$(marker_for "$REPO_ROOT")"
+printf '%s\n' "$REPO_ROOT" >"$MARKER"
 
-disown
+setsid "$0" --run "$REPO_ROOT" "$HOOK_NAME" >>"$LOG_FILE" 2>&1 </dev/null &
+exit 0
