@@ -65,6 +65,12 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 - 提交成功才跳转（`.then`），失败留在当前页走统一 toast；空数组提交前置校验 + toast（在 `submitting=true` 之前）
 - 状态/类型字段用枚举数字 code（后端 tinyint ordinal），不用裸字符串
 
+## 日期与时间
+
+- 日期时间统一收敛 `app/utils/date.ts` 单点：dayjs（含 utc/timezone 插件注册）唯一消费点，页面/组件/composables/测试禁止直接 import 或调用 dayjs；新增日期能力先扩 date.ts，不在调用点散拼
+- date-only 语义（生日、成立日期、截止日等）钉死业务时区（如 Asia/Shanghai，GMT+8 零点），与环境/浏览器时区解耦；统一走 `dateOf()`（设定好业务时区的 dayjs：字符串=业务时区当天零点、毫秒=epochMilli、无参=当前时刻），格式化/加减/比较全在它返回的实例链上做
+- `app/utils/` 顶层导出自动导入，业务代码不写 import（`hooks/` 等非默认扫描目录要配 `imports.dirs`；unit 等纯 node 环境无 auto-import，测试显式 import）
+
 ## 样式（UnoCSS）
 
 - attributify 优先：样式写 DOM 属性（`w="22.625rem"`、`text="1 #666"`）；同一元素同名属性必须合并为单属性空格分隔（重复声明报 TS1117）；attributify 中任意值无需 `[]` 包裹（如 `text="2.625rem"`）
@@ -126,6 +132,7 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 
 - 跑项目自有验证命令（test / format，见各项目 CLAUDE.md/AGENTS.md）
 - [ ] 组件 kebab-case 自动导入，无显式 import（仅 type）
+- [ ] 日期操作全走 `app/utils/date.ts`（无显式 dayjs、无显式 utils import）
 - [ ] 样式 attributify + hex + rem；scoped 仅伪元素；同名属性已合并
 - [ ] 移动端坑已过：手势播放 / dvh / contain / label 激活 / iOS repeat 背景
 - [ ] `??` 兜底、空数据隐藏、稳定 key、nextTick 后操作 ref

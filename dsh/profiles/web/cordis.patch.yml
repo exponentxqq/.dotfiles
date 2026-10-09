@@ -12,8 +12,8 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: zai
-    model: glm-5.3
+    provider: opencode-go
+    model: deepseek-v4.1-flash
     reasoningEffort: max
 # 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
 - id: llm-deepseek
@@ -74,3 +74,41 @@
         mode: launch
         headless: true
         executablePath: /home/docker/.dsh/bin/chromium-launch
+- id: dsh-better-input
+  name: dsh-better-input
+  config:
+    language: zh-CN
+    maxRecordingSeconds: 120
+    polishingEnabled: true
+    polishProvider: opencode-go
+    polishModel: deepseek-v4.1-flash
+    polishReasoningEffort: ""
+    polishPrompt: ""
+    optimizeEnabled: true
+    optimizeProvider: opencode-go
+    optimizeModel: deepseek-v4.1-flash
+    optimizeReasoningEffort: ""
+    optimizePrompt: ""
+    contextTurns: 3
+    ocrProvider: zai
+    ocrModel: glm-5.3-flash
+# 接入 figma MCP（Framelink figma-developer-mcp）：design-to-code 读设计稿（布局/样式精简元数据 + 图片导出）
+# PAT 由图外 compose env_file 从宿主 ~/.secrets 注入容器（FIGMA_API_KEY），此处 !!js 显式传入子进程
+# （dsh-mcp-client 会清洗子进程环境中匹配 KEY|TOKEN|SECRET 的变量，必须显式注入）
+# --image-dir 是图片下载白名单根（项目无关）；调用工具时用 localPath 落到各项目，如 opc 传 company/opc/.figma-assets
+- insert:
+    - id: mcp-figma
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: figma
+        transport: stdio
+        # 预装于宿主 /data/dsh/figma-mcp（容器 /home/docker/.dsh/figma-mcp）：数据目录持久、非 git 仓
+        # 首次安装/升级：docker exec dsh npm install --prefix /home/docker/.dsh/figma-mcp figma-developer-mcp@0.13.2
+        command: /home/docker/.dsh/figma-mcp/node_modules/.bin/figma-developer-mcp
+        args:
+          - "--stdio"
+          - "--no-telemetry"
+          - "--image-dir"
+          - "/home/xuqinqin/develop"
+        env:
+          FIGMA_API_KEY: !!js process.env.FIGMA_API_KEY
