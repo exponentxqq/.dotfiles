@@ -53,15 +53,15 @@
         args: [ "-y", "@dbx-app/mcp-server" ]
         env:
           DBX_WEB_URL: http://dbx:4224
-# 接入 codebase-memory MCP：代码知识图谱检索（agent 指令要求优先使用；镜像预装，npx 免下载）
+# 接入 codebase-memory MCP：代码知识图谱检索（agent 指令要求优先使用；二进制由宿主机 npm 全局包目录挂载提供，见 compose tools.yml）
 - insert:
     - id: mcp-codebase-memory
       name: "@deepseek-ai/dsh-mcp-client"
       config:
         serverName: codebase-memory
         transport: stdio
-        command: npx
-        args: [ "-y", "codebase-memory-mcp" ]
+        command: codebase-memory-mcp
+        args: []
 # 启用 browser-use：chrome-devtools-mcp 提供方（实验性，headless 容器模式；chromium 由镜像/apt 提供）
 # executablePath 指向 wrapper（~/.dsh/bin/chromium-launch）：注入 --no-sandbox（容器 seccomp 禁 userns）
 # 与 --disable-dev-shm-usage（/dev/shm 64M 限制）；compose 若放开 seccomp 可改回 /usr/bin/chromium
