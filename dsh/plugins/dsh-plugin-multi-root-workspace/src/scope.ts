@@ -8,6 +8,17 @@
  * statement of that topology, so every enforcing provider (fs fence,
  * kernel-sandbox dialects) and the prompt snapshot all resolve the same scope.
  *
+ * Two populations make up the additional roots, and they are merged HERE because
+ * this is the one place every provider asks:
+ *
+ * - **Registered roots**, keyed by canonical primary root, published by the
+ *   registry from its store. They belong to one workspace.
+ * - **Common roots** (`setCommonRoots`), configuration-supplied and granted to
+ *   every primary root — the machine-wide directories nearly every project
+ *   needs, which would otherwise have to be registered per project. They are
+ *   merged after the registered ones, so a registration keeps its position and
+ *   its ordinal while a duplicate is granted exactly once.
+ *
  * The root table is still filled by the registry's own API (tests and smoke
  * scripts today; plugin storage in M3). Keeping the empty case on the same code
  * path as the populated one is deliberate — the pass-through safety net must
@@ -29,9 +40,14 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-/** One configured additional root, as the registry persists it. */
+/**
+ * One additional root as the scope receives it: a registration the registry read
+ * back from its store, or a common root it resolved from configuration. The two
+ * are deliberately the same shape, so one sanitizer and one provider path handle
+ * both and no provider can tell (or need to tell) which is which.
+ */
 export interface AdditionalWorkspaceRoot {
-  /** Stable registry identity (opaque; M3 brands it). */
+  /** Stable identity: the registry's uuid, or a synthetic `common:` id. */
   id: string
   /** Canonical absolute directory, as spelled in the registration. */
   path: string
@@ -130,6 +146,12 @@ export function renderWorkspaceRootsContext(primaryRoot: string, additionalRoots
 export class MultiRootScopeService extends Service {
   /** Additional roots keyed by canonical primary root; empty until roots are registered. */
   private readonly rootsByPrimary = new Map<string, readonly AdditionalWorkspaceRoot[]>()
+  /**
+   * Roots granted to every primary root, whatever its registrations hold.
+   * Configuration-derived: this list is never persisted anywhere, so changing
+   * the configuration is the only way to change what it grants.
+   */
+  private commonRoots: readonly AdditionalWorkspaceRoot[] = []
   private readonly listeners = new Set<() => void>()
 
   /** Observe registry publications; consumers still resolve authority from scopeOf(). */
@@ -178,14 +200,43 @@ export class MultiRootScopeService extends Service {
   }
 
   /**
-   * The additional roots registered for one canonical primary root.
+   * The additional roots of one canonical primary root: its registrations
+   * followed by the configured common roots, in that order.
+   *
+   * Order is what keeps the two surfaces stable — a registration never loses its
+   * position (or its displayed number) because a common root was added — and the
+   * sanitizer drops a common root a registration already grants, so a directory
+   * that is both registered and configured is still granted exactly once.
    * @param primaryRoot - canonical primary root (or any spelling thereof).
    * @returns the canonical additional roots; empty when none are registered.
    */
   scopeOf(primaryRoot: string): readonly string[] {
-    const registered = this.rootsByPrimary.get(canonicalPath(primaryRoot))
-    if (registered === undefined) return []
-    return sanitizeAdditionalRoots(canonicalPath(primaryRoot), registered)
+    const key = canonicalPath(primaryRoot)
+    const registered = this.rootsByPrimary.get(key)
+    if (registered === undefined && this.commonRoots.length === 0) return []
+    return sanitizeAdditionalRoots(key, [...registered ?? [], ...this.commonRoots])
+  }
+
+  /**
+   * Replace the roots granted to EVERY primary root.
+   *
+   * The registry publishes this list from its `commonRoots` configuration once
+   * it is the Registry Authority, and withdraws it (empty) whenever it is not:
+   * a process that grants no registrations must not hand out configured roots
+   * either. A common root passes the same sanitizer as a registration, so a
+   * directory that is absent, that was replaced by a symlink, or that IS the
+   * session's own workspace root is withheld rather than granted.
+   * @param roots - the common roots, in configuration order.
+   */
+  setCommonRoots(roots: readonly AdditionalWorkspaceRoot[]): void {
+    const changed = roots.length !== this.commonRoots.length
+      || roots.some((root, index) => {
+        const current = this.commonRoots[index]
+        return current === undefined || current.recordedPath !== root.recordedPath || current.path !== root.path
+      })
+    if (!changed) return
+    this.commonRoots = [...roots]
+    for (const listener of this.listeners) listener()
   }
 
   /**

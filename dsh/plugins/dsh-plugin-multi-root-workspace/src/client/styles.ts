@@ -255,6 +255,19 @@ export const STYLES = /* css */ `
   color: var(--dsw-alias-state-warn-primary);
 }
 
+/* The "common" badge: a root the plugin configuration grants to every
+   workspace. It is a neutral tag, not a warning — the root is perfectly
+   usable; only its actions are owned by the configuration instead of the panel. */
+.mrfw-sourceBadge {
+  flex: none;
+  padding: 0 6px;
+  border: 1px solid var(--dsw-alias-border-secondary);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-secondary);
+}
+
 .mrfw-btn {
   display: inline-flex;
   flex: none;

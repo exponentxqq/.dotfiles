@@ -48,6 +48,7 @@ describe('panel dictionaries', () => {
       'invalid-alias',
       'not-found',
       'invalid-ref',
+      'common-root',
       'storage-unavailable',
       'registry-contended',
       'reveal-unavailable',
@@ -60,8 +61,13 @@ describe('panel dictionaries', () => {
   })
 
   it('covers every state the panel renders', () => {
-    for (const state of ['available', 'missing', 'invalid']) {
+    for (const state of ['available', 'missing', 'redirected', 'invalid']) {
       expect(Object.keys(zh)).toContain(`state.${state}`)
     }
+  })
+
+  it('covers the source badge a configured root is marked with', () => {
+    expect(Object.keys(zh)).toContain('root.sourceCommon')
+    expect(Object.keys(zh)).toContain('root.sourceCommonTitle')
   })
 })

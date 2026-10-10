@@ -67,6 +67,13 @@ export const inject = ['commands', 'sandboxPolicy', 'multiRootRegistry']
 /** The command name, without the leading slash. */
 export const COMMAND_NAME = 'workspace-folders'
 
+/**
+ * How the report marks a root the plugin configuration grants to every
+ * workspace (not an alias a localization layer may rename: the report is
+ * English-only, like every host-side command result).
+ */
+export const COMMON_MARKER = 'common'
+
 /** One parsed command line. */
 export interface FoldersCommand {
   /** The subcommand; `list` when the line named none. */
@@ -114,8 +121,13 @@ function unquote(text: string): string {
  * Render the roots report the command returns. Additional roots are numbered
  * from 1, which is the numbering every other subcommand accepts; the workspace
  * root is never numbered because it cannot be removed.
+ *
+ * A root the plugin configuration grants to every workspace is marked `[common]`
+ * and counted separately: it is listed because it is part of the scope, and
+ * marked because no subcommand can change it (`remove`/`alias` answer
+ * `common-root`).
  * @param primaryRoot - the canonical workspace root.
- * @param statuses - the registry's status list.
+ * @param statuses - the registry's status list, common roots included.
  * @param unavailable - the store failure, when the registry could not read it.
  * @returns the report text.
  */
@@ -136,9 +148,11 @@ export function renderRootsReport(
   for (const [index, status] of statuses.entries()) {
     const alias = status.alias === undefined ? '' : ` [${status.alias}]`
     const state = status.state === 'available' ? '' : ` (${status.state}: ${status.detail ?? 'unavailable'})`
-    lines.push(`  ${index + 1} ${status.path}${alias}${state}`)
+    const common = status.source === 'common' ? ` [${COMMON_MARKER}]` : ''
+    lines.push(`  ${index + 1} ${status.path}${alias}${common}${state}`)
   }
-  const withheld = statuses.length - availableRoots(statuses).length
+  const registered = statuses.filter(status => status.source !== 'common')
+  const withheld = registered.length - availableRoots(registered).length
   if (withheld > 0) {
     lines.push(
       `${withheld} root(s) are registered but not writable right now;`
@@ -146,6 +160,13 @@ export function renderRootsReport(
     )
   }
   lines.push(`Writable additional roots: ${availableRoots(statuses).length} of ${statuses.length}.`)
+  const common = statuses.length - registered.length
+  if (common > 0) {
+    lines.push(
+      `${common} of them are ${COMMON_MARKER} roots: this plugin's commonRoots configuration grants them to every`
+      + ' workspace, so they are changed in that configuration (cordis.patch.yml), not here.',
+    )
+  }
   return lines.join('\n')
 }
 
@@ -264,6 +285,8 @@ function helpText(): string {
     `  /${COMMAND_NAME} reveal <n|path>`,
     'Roots are canonicalized before they are stored: `~` expands, and a duplicate, a nested directory,',
     "or this session's own workspace root is rejected.",
+    `A root marked [${COMMON_MARKER}] comes from the plugin configuration and is granted to every`,
+    'workspace; change it in cordis.patch.yml rather than with remove/alias.',
   ].join('\n')
 }
 
@@ -358,6 +381,7 @@ function toRootView(status: RootStatus, index: number): RootView {
     addedAt: status.addedAt,
     state: status.state,
     ...(status.detail === undefined ? {} : { detail: status.detail }),
+    ...(status.source === undefined ? {} : { source: status.source }),
   }
 }
 

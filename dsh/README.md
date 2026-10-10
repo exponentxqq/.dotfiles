@@ -116,7 +116,9 @@ docker exec dsh dsh --profile web --dump-config-schema                          
 
 它**不放宽沙箱档位**：以 bundle patch 禁用上游 `fs-sandbox` / `sandbox` 两行、插入多根子类；附加根与主根同权，仍走进程内 fs fence + 内核级 runner（Linux: bwrap → Landlock），不是 `danger-full-access`。版本闸是精确 allowlist，宿主版本不在清单内或核心包混装时相关行直接不启动（退化为「没装」），不会静默放宽。
 
-**本地扩展（上游没有）：附加根一次性播种。** registry 行新增 `seedRoots` / `seedPrimaryRoots`；某个主根在登记表中尚无记录时，按普通 `add` 路径逐条注册（照常走根规则校验）。只有**全部候选都成功**的那次播种才写入 store 级台账 `$DSH_HOME/storages/multi_root_workspace.seeded.json`，因此**删除已播种的根是永久的**；被跳过的播种保持未记录，下次启动重试。语义与配置见插件 [`docs/reference/additional-root-seeding.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/additional-root-seeding.md)，用例 `tests/registry-seed.spec.ts`。
+**本地扩展（上游没有）：附加根一次性播种。** registry 行新增 `seedRoots` / `seedPrimaryRoots`；某个主根在登记表中尚无记录时，按普通 `add` 路径逐条注册（照常走根规则校验）。只有**没有候选被跳过**的那次播种才写入 store 级台账 `$DSH_HOME/storages/multi_root_workspace.seeded.json`，因此**删除已播种的根是永久的**；被跳过的播种保持未记录，下次启动重试。语义与配置见插件 [`docs/reference/additional-root-seeding.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/additional-root-seeding.md)，用例 `tests/registry-seed.spec.ts`。
+
+**本地扩展（上游没有）：通用附加根 `commonRoots`。** 同一 registry 行新增 `commonRoots`：列出的目录对**所有主根**生效——配置即授予，不写登记表、不写台账、不需要为新项目改配置；目录出现即生效（无需重启），从配置里删掉即撤销。通用条目在列表里排在登记项之后（**已有编号不变**），与登记项重复时只授予一次、不重复显示，并被标为 `[common]`／「通用」；面板与命令行不能移除/改名/排序它（`common-root`），`add` 一个已由配置授予的目录报 `duplicate`。另一个 DSH 进程持有登记表租约时同样不授予（fail-closed）。语义、与播种的分工及迁移步骤见插件 [`docs/reference/common-additional-roots.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/common-additional-roots.md)，用例 `tests/registry-common.spec.ts`。
 
 与 `git-graph-multi` 同为**双面插件 + 构建产物**：源码在 `src/`，`lib/` 与 `node_modules/` 均不入库。
 
@@ -134,7 +136,7 @@ docker exec dsh dsh --profile web --dump-config-schema   # 校验组合可加载
 #    侧栏底部 Folders（🗂）面板是同一能力的图形入口
 ```
 
-播种内容配置在 `dsh/profiles/web/cordis.patch.yml` 的 `multi-root-registry` 行（当前：docker / dotfiles / apigen / `~/.cache`，主根 `/home/xuqinqin/develop/company/opc`）。其中 `~/.cache` 是为了让 post-commit 的 codebase-memory 重建 hook（`cbm-hook-pending`、`cbm-hook.log` 与索引库）在会话沙箱内可写——不加入时该 hook 会因 EACCES 静默失败、索引停在旧版本。
+附加根配置在 `dsh/profiles/web/cordis.patch.yml` 的 `multi-root-registry` 行：`seedRoots` / `seedPrimaryRoots` 是 opc 的跨仓联动根（docker / dotfiles / apigen / skills，主根 `/home/xuqinqin/develop/company/opc`）；`commonRoots` 里的 `~/.cache` 对**所有项目**生效，用于让 post-commit 的 codebase-memory 重建 hook（`cbm-hook-pending`、`cbm-hook.log` 与索引库）在会话沙箱内可写——不加入时该 hook 会因 EACCES 静默失败、索引停在旧版本。（opc 登记表里若还留着早先播种出的同名条目，在面板或 `/workspace-folders remove` 删一次即可，之后只剩通用条目。）
 
 跨进程注意：同一 `$DSH_HOME` 同时只允许一个 DSH 进程持有根登记表，另一个进程显示 `registry-contended` 并 fail-closed（持锁者退出后刷新即接管）。
 

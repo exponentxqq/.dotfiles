@@ -92,6 +92,16 @@ export interface RootStatus extends RegisteredRoot {
   readonly state: RootState
   /** Why the root is not `available`; absent otherwise. */
   readonly detail?: string
+  /**
+   * Where the entry comes from: absent for a record the store holds, `'common'`
+   * for one synthesized from the plugin's `commonRoots` configuration.
+   *
+   * A common entry is granted to EVERY primary root (that is what makes a
+   * machine-wide directory available without registering it per project), it
+   * never appears in the store, and it cannot be mutated: it disappears only
+   * when the configuration changes.
+   */
+  readonly source?: 'common'
 }
 
 /** One status together with the 1-based ordinal the surfaces accept for it. */
@@ -127,6 +137,7 @@ export type RootValidationCode =
   | 'invalid-alias'
   | 'not-found'
   | 'invalid-ref'
+  | 'common-root'
   | 'storage-unavailable'
   | 'registry-contended'
   | 'reveal-unavailable'
@@ -176,6 +187,22 @@ function comparable(path: string): string {
 /** Whether two canonical paths name the same directory on this platform. */
 function samePath(left: string, right: string): boolean {
   return comparable(left) === comparable(right)
+}
+
+/**
+ * Whether two ALREADY canonical paths name the same directory on this platform.
+ *
+ * Exported for the callers that must dedup one root list against another without
+ * re-resolving anything (the registry's configured common roots against the
+ * registrations of one workspace): comparing the raw strings would be wrong on a
+ * case-insensitive filesystem, and re-canonicalizing there would be work the
+ * comparison neither needs nor owns.
+ * @param left - one canonical path.
+ * @param right - the other canonical path.
+ * @returns whether both name the same directory.
+ */
+export function sameCanonicalPath(left: string, right: string): boolean {
+  return samePath(left, right)
 }
 
 /**

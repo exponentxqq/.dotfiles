@@ -594,6 +594,42 @@ describe('the panel dialog', () => {
     await waitFor(() => { expect(screen.getByText(`${NS}.state.redirected`)).toBeTruthy() })
   })
 
+  it('marks a configured common root and disables the actions the configuration owns', async () => {
+    const harness = mount()
+    harness.setView({
+      primaryRoot: '/repos/primary',
+      roots: [
+        ROOT_A,
+        {
+          ordinal: 2,
+          id: 'common:/repos/cache',
+          path: '/repos/cache',
+          addedAt: '2026-10-10T00:00:00.000Z',
+          state: 'available',
+          source: 'common',
+        },
+      ],
+    })
+    renderPanel(harness)
+    fireEvent.click(screen.getByRole('button', { name: /action.label/ }))
+    await waitFor(() => { expect(screen.getByText('/repos/cache')).toBeTruthy() })
+
+    // The badge says who owns the grant...
+    expect(screen.getByText(`${NS}.root.sourceCommon`)).toBeTruthy()
+
+    // ...the last registration has nothing of its own below it to swap with, and
+    // the common row itself can neither move nor be renamed or removed.
+    const down = screen.getAllByRole('button', { name: `${NS}.panel.moveDown` })
+    const up = screen.getAllByRole('button', { name: `${NS}.panel.moveUp` })
+    expect(down[0]).toHaveProperty('disabled', true)
+    expect(down[1]).toHaveProperty('disabled', true)
+    expect(up[1]).toHaveProperty('disabled', true)
+
+    fireEvent.click(screen.getAllByRole('button', { name: `${NS}.panel.more` })[1]!)
+    expect(screen.getAllByRole('button', { name: `${NS}.panel.rename` })[0]).toHaveProperty('disabled', true)
+    expect(screen.getAllByRole('button', { name: `${NS}.panel.remove` })[0]).toHaveProperty('disabled', true)
+  })
+
   it('localizes a failure by its code instead of showing host prose', async () => {
     const harness = mount()
     harness.setFailure({ code: 'nested', message: 'host prose the panel must not show' })

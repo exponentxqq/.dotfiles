@@ -466,11 +466,26 @@ function WorkspaceFoldersDialog(props: WorkspaceFoldersActionProps & { onClose: 
             ) : null}
             {roots.map((root, index) => {
               const key = rowKey(root)
+              // A `common` row is granted by the plugin configuration to every
+              // workspace: it is listed (and browsable) like any other root, but
+              // this panel cannot rename, remove or reorder it — the host answers
+              // `common-root` if it tries. The move anchors are computed from the
+              // rendered neighbours and the common rows always sit after every
+              // registration, so the last registration has nothing to swap with
+              // below it and a common row can never move at all.
+              const isCommon = root.source === 'common'
+              const canMoveUp = !isCommon && index > 0
+              const canMoveDown = !isCommon && index < roots.length - 1 && roots[index + 1]?.source !== 'common'
               return <div key={key} className="mrfw-row">
                 <div className="mrfw-rootText">
                   <span className="mrfw-rootName">{displayNameOf(root)}</span>
                   <span className="mrfw-rootPath">{root.path}</span>
                 </div>
+                {isCommon ? (
+                  <span title={t('root.sourceCommonTitle')} className="mrfw-sourceBadge">
+                    {t('root.sourceCommon')}
+                  </span>
+                ) : null}
                 {root.state === 'available' ? null : (
                   <span title={root.detail} className="mrfw-stateWarn">
                     {t(stateKey(root.state))}
@@ -488,13 +503,13 @@ function WorkspaceFoldersDialog(props: WorkspaceFoldersActionProps & { onClose: 
                   label={t('panel.reveal')}
                 />
                 <IconButton
-                  disabled={state.busy || index === 0}
+                  disabled={state.busy || !canMoveUp}
                   onClick={() => { void move(root, roots[index - 1]) }}
                   icon={<IconChevronUp />}
                   label={t('panel.moveUp')}
                 />
                 <IconButton
-                  disabled={state.busy || index === roots.length - 1}
+                  disabled={state.busy || !canMoveDown}
                   onClick={() => { void move(root, roots[index + 2]) }}
                   icon={<IconChevronDown />}
                   label={t('panel.moveDown')}
@@ -503,8 +518,8 @@ function WorkspaceFoldersDialog(props: WorkspaceFoldersActionProps & { onClose: 
                   open={menuFor === key}
                   onClose={() => { setMenuFor(undefined) }}
                   items={[
-                    { id: 'rename', label: t('panel.rename'), icon: <IconEdit /> },
-                    { id: 'remove', label: t('panel.remove'), icon: <IconTrash />, danger: true, disabled: state.busy },
+                    { id: 'rename', label: t('panel.rename'), icon: <IconEdit />, disabled: state.busy || isCommon },
+                    { id: 'remove', label: t('panel.remove'), icon: <IconTrash />, danger: true, disabled: state.busy || isCommon },
                   ]}
                   onSelect={(id) => {
                     setMenuFor(undefined)

@@ -75,6 +75,13 @@ export interface RootView {
   readonly state: RootState
   /** Why the root is not `available`; a code the panel localizes. */
   readonly detail?: string
+  /**
+   * `'common'` for a root the plugin's `commonRoots` configuration grants to
+   * every workspace; absent for a root this workspace registered. A common root
+   * is listed and revealed like any other, but no endpoint can change it: the
+   * panel disables its actions and the host answers `common-root`.
+   */
+  readonly source?: 'common'
 }
 
 /** Exact identity of one row in a returned list snapshot. */
@@ -200,6 +207,7 @@ const rootViewSchema = z.object({
   addedAt: z.string(),
   state: z.enum(['available', 'missing', 'redirected', 'invalid']),
   detail: z.string().optional(),
+  source: z.literal('common').optional(),
 })
 
 const rootsViewSchema = z.object({
@@ -317,6 +325,7 @@ function narrowRootView(value: z.infer<typeof rootViewSchema>): RootView {
     state: value.state,
     ...(value.alias === undefined ? {} : { alias: value.alias }),
     ...(value.detail === undefined ? {} : { detail: value.detail }),
+    ...(value.source === undefined ? {} : { source: value.source }),
   }
 }
 

@@ -53,7 +53,14 @@ export { MultiRootSandboxProvider } from './sandbox.ts'
 export type { Config as SandboxConfig } from './sandbox.ts'
 export { MultiRootScopeService, sanitizeAdditionalRoots, renderWorkspaceRootsContext } from './scope.ts'
 export type { AdditionalWorkspaceRoot, FilesystemScope } from './scope.ts'
-export { MultiRootRegistry, DOMAIN_NAME, MAX_ALIAS_LENGTH, REGISTRY_CONTENDED_MESSAGE, multiRootDomainSpec } from './registry.ts'
+export {
+  MultiRootRegistry,
+  COMMON_ROOT_ID_PREFIX,
+  DOMAIN_NAME,
+  MAX_ALIAS_LENGTH,
+  REGISTRY_CONTENDED_MESSAGE,
+  multiRootDomainSpec,
+} from './registry.ts'
 export type { AddRootInput, Config as RegistryConfig, PersistedPrimaryRoot, RegistryAuthorityState } from './registry.ts'
 export { RegistryAuthorityLease, RegistryLeaseContendedError } from './registry-lease.ts'
 export {
@@ -67,6 +74,7 @@ export {
   removeStatusAt,
   resolveRootRef,
   RootValidationError,
+  sameCanonicalPath,
   validateRootCandidate,
 } from './roots.ts'
 export type {
@@ -77,7 +85,7 @@ export type {
   RootStatus,
   RootValidationCode,
 } from './roots.ts'
-export { COMMAND_NAME, parseFoldersCommand, renderRootsReport, resolvePanelPrimaryRoot, revealArgv } from './command.ts'
+export { COMMAND_NAME, COMMON_MARKER, parseFoldersCommand, renderRootsReport, resolvePanelPrimaryRoot, revealArgv } from './command.ts'
 export type { FoldersCommand } from './command.ts'
 export { PANEL_CHANNEL, PANEL_ENDPOINTS, parsePanelCall, parseRevealedView, parseRootsView, parseFilesView, parseFilePreview } from './contract.ts'
 export type {

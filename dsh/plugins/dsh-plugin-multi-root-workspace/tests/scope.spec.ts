@@ -109,6 +109,42 @@ describe('scope resolution', () => {
   })
 })
 
+describe('common roots', () => {
+  it('merges configuration roots after the registrations of every primary root', () => {
+    const cache = `${fixture.base}/cache`
+    mkdirSync(cache)
+    ctx.multiRootScope.setAdditionalRoots(fixture.workspace, [root('r', fixture.outside)])
+    ctx.multiRootScope.setCommonRoots([root('common', cache)])
+
+    // The registration keeps its position and the configured root follows it; a
+    // session that registered nothing at all still gets the configured one.
+    expect(ctx.multiRootScope.scopeOf(fixture.workspace)).toEqual([fixture.outside, canonicalPath(cache)])
+    expect(ctx.multiRootScope.scopeOf(fixture.base)).toEqual([canonicalPath(cache)])
+  })
+
+  it('grants a common root once when a registration already covers the directory', () => {
+    ctx.multiRootScope.setAdditionalRoots(fixture.workspace, [root('r', fixture.outside)])
+    ctx.multiRootScope.setCommonRoots([root('common', fixture.outside)])
+
+    expect(ctx.multiRootScope.scopeOf(fixture.workspace)).toEqual([fixture.outside])
+  })
+
+  it('withholds a common root that is the primary root itself, for that primary root only', () => {
+    ctx.multiRootScope.setCommonRoots([root('common', fixture.workspace)])
+
+    expect(ctx.multiRootScope.scopeOf(fixture.workspace)).toEqual([])
+    expect(ctx.multiRootScope.scopeOf(fixture.base)).toEqual([fixture.workspace])
+  })
+
+  it('clears the configured roots when an empty list is set', () => {
+    ctx.multiRootScope.setCommonRoots([root('common', fixture.outside)])
+    expect(ctx.multiRootScope.scopeOf(fixture.base)).toEqual([fixture.outside])
+
+    ctx.multiRootScope.setCommonRoots([])
+    expect(ctx.multiRootScope.scopeOf(fixture.base)).toEqual([])
+  })
+})
+
 describe('root sanitization', () => {
   it('is pure and never mutates its input', () => {
     const roots = [root('x', fixture.outside)]

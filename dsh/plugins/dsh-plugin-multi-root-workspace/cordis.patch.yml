@@ -59,6 +59,14 @@
         #   - ~/develop/docker
         # seedPrimaryRoots:
         #   - /home/xuqinqin/develop/company/opc
+        # Optional common roots (local extension, see
+        # docs/reference/common-additional-roots.md): directories granted to
+        # EVERY primary root, without registering them anywhere, for the few
+        # machine-wide ones nearly every project needs (a cache the toolchain
+        # writes, say). A leading `~` expands against the host home directory.
+        # Leave it empty — the default — to grant nothing extra.
+        # commonRoots:
+        #   - ~/.cache
     # Upstream `agent-instructions` only discovers instruction files from the
     # session cwd upward, so an additional root's own AGENTS.md is invisible to
     # the model. This row closes that gap for the additional roots only; the

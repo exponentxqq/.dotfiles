@@ -213,6 +213,30 @@ describe('renderRootsReport', () => {
     expect(text).toContain('2 root(s) are registered but not writable right now')
   })
 
+  it('marks a configured common root, counts it, and says where to change it', () => {
+    const text = renderRootsReport('/ws', [
+      status({ path: '/extra' }),
+      status({ path: '/cache', source: 'common' }),
+    ])
+    expect(text).toContain('  1 /extra')
+    expect(text).toContain('  2 /cache [common]')
+    expect(text).toContain('Writable additional roots: 2 of 2.')
+    expect(text).toContain('1 of them are common roots')
+    // A common root is granted, not registered: the "restore the directory or
+    // remove the entry" advice keeps applying to registrations only.
+    expect(text).not.toContain('not writable right now')
+  })
+
+  it('keeps the withheld sentence about registrations while a common root is listed', () => {
+    const text = renderRootsReport('/ws', [
+      status({ path: '/gone', state: 'missing', detail: 'the directory is not present right now' }),
+      status({ path: '/cache', source: 'common' }),
+    ])
+    expect(text).toContain('Writable additional roots: 1 of 2.')
+    expect(text).toContain('1 root(s) are registered but not writable right now')
+    expect(text).toContain('1 of them are common roots')
+  })
+
   it('explains an unusable store instead of showing an empty list', () => {
     const text = renderRootsReport('/ws', [], 'multi_root_workspace: file is not valid JSON')
     expect(text).toContain('Root registry unavailable:')

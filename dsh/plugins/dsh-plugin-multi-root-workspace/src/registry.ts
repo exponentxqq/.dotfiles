@@ -38,12 +38,19 @@
  *   root cannot each keep a live domain snapshot. A store-wide kernel lease
  *   (ADR-0007) elects one authority; a contended process publishes an empty
  *   scope, rejects mutations, and retries the lease from {@link MultiRootRegistry.refresh}.
+ * - **Configured common roots are granted, not stored.** {@link Config.commonRoots}
+ *   names directories every workspace gets (a machine-wide cache, say). While this
+ *   process is the authority they are published into the scope as its common roots
+ *   (`setCommonRoots` in `src/scope.ts`) and withdrawn when it is not; they never
+ *   appear in the store, and no surface can mutate one — the grant lives and dies
+ *   with the configuration. They are appended to the READ surfaces' lists after
+ *   the registrations, so an existing ordinal never moves.
  *
  * @module dsh-plugin-multi-root-workspace/registry
  */
 
 import { randomUUID } from 'node:crypto'
-import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { isAbsolute } from 'node:path'
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
@@ -56,9 +63,11 @@ import {
   availableRoots,
   canonicalRoot,
   classifyStoredRoots,
+  expandRootInput,
   removeStatusAt,
   resolveRootIndex,
   RootValidationError,
+  sameCanonicalPath,
   validateRootCandidate,
   type AdditionalRootId,
   type RegisteredRoot,
@@ -67,7 +76,7 @@ import {
 } from './roots.ts'
 // Type-only: publishes the `ctx.multiRootScope` augmentation. The scope service
 // is injected, never constructed here.
-import type {} from './scope.ts'
+import type { AdditionalWorkspaceRoot } from './scope.ts'
 
 /** The domain name; also the store file stem (`$DSH_HOME/storages/<name>.json`). */
 export const DOMAIN_NAME = 'multi_root_workspace'
@@ -75,6 +84,12 @@ export const DOMAIN_NAME = 'multi_root_workspace'
 export const TABLE_NAME = 'roots'
 /** Longest accepted display alias. */
 export const MAX_ALIAS_LENGTH = 120
+/**
+ * The prefix of a synthesized id for a configured common root
+ * (`common:<canonical path>`). It is stable across restarts because it is
+ * derived from the path, and it can never collide with a stored uuid.
+ */
+export const COMMON_ROOT_ID_PREFIX = 'common:'
 /**
  * Operator-facing English for a contended lease. Host-side commands have no
  * locale; the panel also shows this string verbatim via `RootsView.unavailable`.
@@ -112,13 +127,36 @@ export interface Config {
    * use). Empty — the default — disables seeding, so an install that does not
    * configure it behaves exactly as before.
    *
-   * A pass that registers every candidate is recorded in the store-scoped
-   * ledger beside the domain document (see
+   * A pass that leaves no candidate unsatisfied — every directory registered, or
+   * already granted by {@link Config.commonRoots} — is recorded in the
+   * store-scoped ledger beside the domain document (see
    * docs/reference/additional-root-seeding.md); removing a seeded root is then
    * permanent, and deleting the ledger entry is what asks for a re-seed. A pass
    * that skipped a candidate is not recorded and is retried at the next start.
    */
   readonly seedPrimaryRoots?: readonly string[]
+  /**
+   * Directories granted as additional roots to EVERY primary root, not only to
+   * the ones named in {@link Config.seedPrimaryRoots}. A leading `~` expands
+   * against the host home directory, exactly as it does in `add`.
+   *
+   * This is the configuration-shaped half of the feature, and it differs from
+   * seeding in every property that matters operationally:
+   *
+   * - It applies to a primary root the store has NEVER seen: no ledger, no
+   *   first-use pass, no restart — a new project gets these roots because they
+   *   are configured, not because something registered them.
+   * - It is never written to the store. The list IS the grant: deleting an entry
+   *   revokes the root at the next start, and no panel action can remove one
+   *   (they answer `common-root` instead).
+   * - A directory that is absent right now is kept and reported `missing`
+   *   rather than dropped, and it is granted again as soon as it exists — the
+   *   scope re-checks the filesystem on every resolution.
+   *
+   * Empty — the default — grants nothing extra and changes no existing
+   * behaviour. See docs/reference/common-additional-roots.md.
+   */
+  readonly commonRoots?: readonly string[]
 }
 
 declare module '@deepseek-ai/cordis' {
@@ -208,16 +246,29 @@ export class MultiRootRegistry extends Service {
   private readonly seedRoots: readonly string[]
   /** Primary roots the seed list applies to; empty disables seeding. */
   private readonly seedPrimaryRoots: readonly string[]
+  /** Directories granted to every primary root; empty disables common roots. */
+  private readonly commonRoots: readonly string[]
+  /**
+   * The common roots as published: resolved once per authority, so the recorded
+   * grant is what the path was captured as — a path that later resolves
+   * elsewhere is withheld instead of silently granting its new target.
+   */
+  private commonEntries: readonly CommonEntry[] = []
+  /** The instant the current common entries were captured; their synthesized `addedAt`. */
+  private commonAddedAt = ''
+  /** Common-root spellings already reported as unusable, so a warning is not repeated. */
+  private readonly warnedCommon = new Set<string>()
 
   /**
    * @param ctx - the host context; `storageDomain` and `multiRootScope` are injected.
-   * @param config - the patch row's `leasePath`, plus the optional seed lists.
+   * @param config - the patch row's `leasePath`, plus the optional seed and common lists.
    */
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'multiRootRegistry')
     this.leasePath = config.leasePath
     this.seedRoots = config.seedRoots ?? []
     this.seedPrimaryRoots = config.seedPrimaryRoots ?? []
+    this.commonRoots = config.commonRoots ?? []
   }
 
   /**
@@ -237,6 +288,76 @@ export class MultiRootRegistry extends Service {
   }
 
   /**
+   * Resolve {@link Config.commonRoots} and publish them as the scope's common
+   * roots: the directories every primary root gets, whether or not the store has
+   * ever seen that primary root.
+   *
+   * It runs at every authority transition — acquisition (from `openDomain`) and
+   * teardown (from `withdrawPublished`) — and each capture re-reads the
+   * configured spellings, because a directory that was absent at one transition
+   * may exist at the next. What is deliberately NOT re-read on every scope
+   * resolution is the grant itself: `recordedPath` is fixed here, so a path
+   * replaced by a symlink afterwards is withheld by the sanitizer (re-resolving
+   * a path is not re-authorizing it), while a directory that merely appears or
+   * disappears is picked up without a restart.
+   *
+   * A missing directory is KEPT, not dropped: dropping it would silently forget
+   * the configuration, and the sanitizer already reports and withholds it.
+   */
+  private pushCommonRoots(): void {
+    if (this.commonRoots.length === 0 || this.authorityState.kind !== 'active') {
+      // Fail closed, exactly like the registry itself: a process that is not the
+      // Registry Authority grants nothing, and that promise covers the roots
+      // configuration hands out just as it covers stored ones. An empty
+      // configuration also clears the published list, so a restart without the
+      // key does not keep granting what a previous run published.
+      this.commonEntries = []
+      this.commonAddedAt = ''
+      this.ctx.multiRootScope.setCommonRoots([])
+      return
+    }
+    const addedAt = new Date().toISOString()
+    const entries: CommonEntry[] = []
+    for (const raw of this.commonRoots) {
+      const expanded = expandRootInput(raw)
+      if (!isAbsolute(expanded)) {
+        this.warnCommonOnce(raw, 'is not an absolute path; give an absolute directory or one starting with "~/"')
+        continue
+      }
+      const canonical = canonicalRoot(expanded)
+      if (!isDirectory(canonical)) {
+        this.warnCommonOnce(
+          raw,
+          `"${expanded}" is not a directory right now; it is granted as soon as it exists`,
+        )
+      }
+      entries.push({ raw, path: canonical, id: `${COMMON_ROOT_ID_PREFIX}${canonical}` })
+    }
+    this.commonEntries = entries
+    this.commonAddedAt = addedAt
+    // The scope speaks the same root shape as a registration, minus the
+    // registration instant it has no use for (the read surfaces take it from
+    // `commonAddedAt`, which the statuses synthesize).
+    this.ctx.multiRootScope.setCommonRoots(entries.map((entry): AdditionalWorkspaceRoot => ({
+      id: entry.id,
+      path: entry.path,
+      recordedPath: entry.path,
+    })))
+    if (entries.length > 0) {
+      this.ctx.logger.info(
+        `multi-root-registry: ${entries.length} common root(s) granted to every workspace (${entries.map(entry => entry.path).join(', ')})`,
+      )
+    }
+  }
+
+  /** Warn once per configured spelling, so a bad entry is reported without repeating at every transition. */
+  private warnCommonOnce(raw: string, reason: string): void {
+    if (this.warnedCommon.has(raw)) return
+    this.warnedCommon.add(raw)
+    this.ctx.logger.warn(`multi-root-registry: common root ${raw} ${reason}`)
+  }
+
+  /**
    * Register {@link Config.seedRoots} for every {@link Config.seedPrimaryRoots}
    * entry that has no registration stored yet.
    *
@@ -250,8 +371,8 @@ export class MultiRootRegistry extends Service {
    * {@link MultiRootRegistry.refresh}: refresh is the read-only revalidation
    * path that `list` and the panel share, and it must never write storage.
    *
-   * Seeding is per primary root, and a pass that registered every candidate is
-   * one-shot: that state lives in a store-scoped ledger BESIDE the domain
+   * Seeding is per primary root, and a pass that left no candidate unsatisfied
+   * is one-shot: that state lives in a store-scoped ledger BESIDE the domain
    * document — not in the domain itself.
    * The domain cannot carry it: removing the last root deletes the record
    * outright, so "already seeded" and "seeded, then emptied on purpose" would be
@@ -286,9 +407,27 @@ export class MultiRootRegistry extends Service {
       // already ran for it (recorded in the ledger, so a deliberate removal is
       // not undone).
       if (this.lookupRecords(key) !== undefined || ledger.has(key)) continue
+      // A candidate the commonRoots configuration already grants needs no record:
+      // the directory is available for this workspace either way, and writing it
+      // would only create the duplicate the read surfaces then have to dedup.
+      const granted = this.commonGrantedFor(key)
+      const alreadyGranted = (candidate: string): boolean => {
+        const expanded = expandRootInput(candidate)
+        if (!isAbsolute(expanded)) return false
+        const canonical = canonicalRoot(expanded)
+        return granted.some(path => sameCanonicalPath(path, canonical))
+      }
       let registered = 0
+      let satisfied = 0
       let skipped = 0
       for (const candidate of this.seedRoots) {
+        if (alreadyGranted(candidate)) {
+          satisfied += 1
+          this.ctx.logger.info(
+            `multi-root-registry: seed ${candidate} for ${key} is already granted by the commonRoots configuration`,
+          )
+          continue
+        }
         try {
           await this.add(key, { path: candidate })
           registered += 1
@@ -301,13 +440,15 @@ export class MultiRootRegistry extends Service {
           this.ctx.logger.warn(`multi-root-registry: seed ${candidate} for ${key} skipped: ${reason}`)
         }
       }
-      // Recorded only by a pass that registered every candidate. A clean pass is
-      // what settles the primary root for good — which is what makes removing a
-      // seeded root permanent. A pass that skipped something stays unrecorded and
-      // is retried at the next start, because sealing it would turn one mistyped
-      // path into a directory that can never be seeded again; re-adding an already
-      // registered root is an idempotent update, not a duplicate.
-      if (skipped === 0 && registered > 0) {
+      // Recorded only by a pass that left no candidate unsatisfied: every
+      // directory in the list is either registered now or already granted by the
+      // configuration. A clean pass is what settles the primary root for good —
+      // which is what makes removing a seeded root permanent. A pass that skipped
+      // something stays unrecorded and is retried at the next start, because
+      // sealing it would turn one mistyped path into a directory that can never
+      // be seeded again; re-adding an already registered root is an idempotent
+      // update, not a duplicate.
+      if (skipped === 0 && registered + satisfied > 0) {
         ledger.add(key)
         writeSeedLedger(ledgerFile, ledger, this.ctx.logger)
       }
@@ -360,14 +501,17 @@ export class MultiRootRegistry extends Service {
 
   /**
    * Every registration of one primary root, in registry order, as last
-   * classified. A READ of the in-memory state: it never touches the filesystem
-   * and never writes. Surfaces that must re-check the directories first call
+   * classified, followed by the configured common roots (see
+   * {@link MultiRootRegistry.withCommon}). A READ: it re-`stat`s the common
+   * roots (their state is not cached anywhere) and never writes. Surfaces
+   * that must re-check the directories first call
    * {@link MultiRootRegistry.refresh}.
    * @param primaryRoot - the session workspace root (any spelling).
-   * @returns the statuses; empty when nothing is registered.
+   * @returns the statuses; empty when nothing is registered and nothing is configured.
    */
   list(primaryRoot: string): readonly RootStatus[] {
-    return this.statusesOf(canonicalRoot(primaryRoot))
+    const key = canonicalRoot(primaryRoot)
+    return this.withCommon(key, this.statusesOf(key))
   }
 
   /**
@@ -390,13 +534,14 @@ export class MultiRootRegistry extends Service {
    * the previous holder exits, re-open the domain from disk, and publish the
    * last durable state — without a restart.
    * @param primaryRoot - the session workspace root to re-check.
-   * @returns the refreshed status list.
+   * @returns the refreshed status list, common roots included.
    */
   async refresh(primaryRoot: string): Promise<readonly RootStatus[]> {
     await this.ensureAuthority()
     if (this.authorityState.kind !== 'active') return []
     const key = canonicalRoot(primaryRoot)
-    return await this.serialize(key, () => this.reclassify(key))
+    const stored = await this.serialize(key, () => this.reclassify(key))
+    return this.withCommon(key, stored)
   }
 
   /**
@@ -412,11 +557,31 @@ export class MultiRootRegistry extends Service {
     const key = canonicalRoot(primaryRoot)
     return await this.serialize(key, async () => {
       const statuses = this.statusesOf(key)
+      const common = this.commonGrantedFor(key)
+      // A candidate the configuration already grants is refused with the message
+      // that says where the fix is (`duplicate` would send the operator looking
+      // for a registration that does not exist).
+      const typed = expandRootInput(input.path)
+      if (isAbsolute(typed)) {
+        const candidate = canonicalRoot(typed)
+        const conflict = common.find(path => sameCanonicalPath(path, candidate))
+        if (conflict !== undefined) {
+          throw new RootValidationError(
+            'duplicate',
+            `"${conflict}" is already granted by the commonRoots configuration of this plugin,`
+            + ' which applies to every workspace and needs no registration',
+            { conflict, reference: candidate },
+          )
+        }
+      }
       const canonical = validateRootCandidate(input.path, {
         primaryRoot: key,
         // A withheld or unusable registration grants nothing, so it may not block
         // re-registering the very directory the operator is trying to restore.
-        existing: availableRoots(statuses),
+        // The common roots are the other way round — they DO grant — so they take
+        // part in the rules too: a candidate that duplicates or nests inside one
+        // is rejected exactly as it would be against a registration.
+        existing: [...availableRoots(statuses), ...common],
       })
       const alias = normalizeAlias(input.alias)
       // Reviving looks at BOTH spellings of an existing registration: the
@@ -477,7 +642,10 @@ export class MultiRootRegistry extends Service {
     await this.ensureAuthority()
     this.requireActive()
     const key = canonicalRoot(primaryRoot)
-    return await this.serialize(key, async () => await this.persist(key, removeStatusAt(this.statusesOf(key), ref)))
+    return await this.serialize(key, async () => {
+      this.rejectCommonRef(key, ref)
+      return await this.persist(key, removeStatusAt(this.statusesOf(key), ref))
+    })
   }
 
   /**
@@ -493,6 +661,7 @@ export class MultiRootRegistry extends Service {
     this.requireActive()
     const key = canonicalRoot(primaryRoot)
     return await this.serialize(key, async () => {
+      this.rejectCommonRef(key, ref)
       const statuses = this.statusesOf(key)
       const targetIndex = resolveRootIndex(statuses, ref)
       const normalized = normalizeAlias(alias)
@@ -518,9 +687,12 @@ export class MultiRootRegistry extends Service {
     this.requireActive()
     const key = canonicalRoot(primaryRoot)
     return await this.serialize(key, async () => {
+      this.rejectCommonRef(key, ref)
       const statuses = this.statusesOf(key)
       const targetIndex = resolveRootIndex(statuses, ref)
-      const anchorIndex = beforeRef === undefined ? undefined : resolveRootIndex(statuses, beforeRef)
+      const anchorIndex = beforeRef === undefined
+        ? undefined
+        : this.storedAnchorIndex(key, statuses, beforeRef)
       if (anchorIndex === targetIndex) return statuses
       const target = statuses[targetIndex]!
       const without = statuses.filter((_status, index) => index !== targetIndex)
@@ -708,6 +880,148 @@ export class MultiRootRegistry extends Service {
   }
 
   /**
+   * The configured common roots as statuses for one primary root, in
+   * configuration order — the read-side projection of the list the scope grants.
+   *
+   * It is not a second source of truth: every directory is `stat`ed again and
+   * every path is resolved again against the directory captured at publish time,
+   * which are exactly the checks {@link sanitizeAdditionalRoots} applies, so what
+   * the surfaces show and what the providers enforce cannot drift.
+   * @param key - the canonical primary root the statuses are projected for.
+   * @returns one status per configured entry, never reordered.
+   */
+  private commonStatusesFor(key: string): readonly RootStatus[] {
+    if (this.commonEntries.length === 0) return []
+    const primary = canonicalRoot(key)
+    const statuses: RootStatus[] = []
+    for (const entry of this.commonEntries) {
+      const canonical = canonicalRoot(entry.path)
+      const common = {
+        id: additionalRootId(entry.id),
+        recordedPath: entry.path,
+        addedAt: this.commonAddedAt,
+        source: 'common' as const,
+      }
+      if (!sameCanonicalPath(canonical, entry.path)) {
+        // The reported path stays the CONFIGURED spelling: naming the new
+        // resolution would show a directory the configuration never mentioned.
+        statuses.push({
+          ...common,
+          path: entry.path,
+          state: 'redirected',
+          detail: `the path now resolves to "${canonical}" instead of the configured "${entry.path}"`,
+        })
+        continue
+      }
+      if (sameCanonicalPath(canonical, primary)) {
+        statuses.push({
+          ...common,
+          path: canonical,
+          state: 'invalid',
+          detail: 'this is the workspace root of a session it is granted to, which needs no additional grant',
+        })
+        continue
+      }
+      if (!isDirectory(canonical)) {
+        statuses.push({
+          ...common,
+          path: canonical,
+          state: 'missing',
+          detail: 'the directory is not present right now; it is granted as soon as it exists',
+        })
+        continue
+      }
+      statuses.push({ ...common, path: canonical, state: 'available' })
+    }
+    return statuses
+  }
+
+  /**
+   * A stored status list followed by the common roots this process is granting.
+   *
+   * Registrations come first and unchanged, so every ordinal a surface already
+   * handed out keeps naming the same registration. A common root whose canonical
+   * directory an AVAILABLE registration already grants is dropped rather than
+   * repeated: the scope's sanitizer dedups in this same order, so the list still
+   * shows exactly the enforced set. A common root the store holds a WITHHELD
+   * registration for is kept — the configuration is what grants it then.
+   */
+  private withCommon(key: string, stored: readonly RootStatus[]): readonly RootStatus[] {
+    if (this.commonEntries.length === 0 || this.authorityState.kind !== 'active') return stored
+    const common = this.commonStatusesFor(key)
+    if (common.length === 0) return stored
+    const claimed = availableRoots(stored)
+    const distinct = common.filter(status =>
+      status.state !== 'available' || !claimed.some(path => sameCanonicalPath(path, status.path)))
+    return [...stored, ...distinct]
+  }
+
+  /**
+   * The canonical directories the configuration grants to one primary root right
+   * now: what `add` must treat as already granted, and what a duplicate has to
+   * name as its conflict.
+   */
+  private commonGrantedFor(key: string): readonly string[] {
+    if (this.authorityState.kind !== 'active') return []
+    return this.commonStatusesFor(key)
+      .filter(status => status.state === 'available')
+      .map(status => status.path)
+  }
+
+  /**
+   * Reject a mutation that only a configured common root can satisfy.
+   *
+   * The stored registrations are tried FIRST, so a reference naming a real
+   * registration keeps working even while a common root happens to duplicate it:
+   * a rename or a removal of a stored root is never mistaken for a configuration
+   * edit. Only when nothing stored matches is the merged list consulted, to
+   * answer with the code that says where the fix actually is — the plugin
+   * configuration, not this panel.
+   * @param key - the canonical primary root.
+   * @param ref - the reference the operator sent.
+   * @throws {RootValidationError} `common-root` when the reference names a configured root;
+   *   `not-found`/`invalid-ref` when it names nothing, or several rows.
+   */
+  private rejectCommonRef(key: string, ref: RootRef): void {
+    const stored = this.statusesOf(key)
+    if (resolvesWithin(stored, ref)) return
+    const merged = this.withCommon(key, stored)
+    const index = resolveRootIndex(merged, ref)
+    if (index < stored.length) return
+    const target = merged[index]!
+    throw new RootValidationError(
+      'common-root',
+      `"${target.path}" is granted by the commonRoots configuration of this plugin and applies to every workspace;`
+      + ' edit that configuration (cordis.patch.yml) instead of changing it here',
+      { reference: target.path },
+    )
+  }
+
+  /**
+   * Resolve a `move` anchor within the stored rows, mapping an anchor that names
+   * a COMMON root onto "the end" (`undefined`).
+   *
+   * The panel derives a move anchor from the row it renders below the target, and
+   * the common roots are part of that list: an anchor pointing at one asks for
+   * the target to go after every registration — which is what no anchor means.
+   * Reporting `not-found` there would make the last registration impossible to
+   * move down while a common root exists.
+   * @param key - the canonical primary root.
+   * @param statuses - the stored statuses of that key.
+   * @param beforeRef - the anchor the caller sent.
+   * @returns the stored position to move in front of, or `undefined` for the end.
+   * @throws {RootValidationError} `not-found`/`invalid-ref` when the anchor names nothing, or several rows.
+   */
+  private storedAnchorIndex(key: string, statuses: readonly RootStatus[], beforeRef: RootRef): number | undefined {
+    if (resolvesWithin(statuses, beforeRef)) return resolveRootIndex(statuses, beforeRef)
+    // Not a stored row. Consulting the merged list is what keeps the original
+    // error for an anchor that names nothing at all; a common root, which the
+    // merged list can name, means the end of the stored order.
+    resolveRootIndex(this.withCommon(key, statuses), beforeRef)
+    return undefined
+  }
+
+  /**
    * The open table.
    * @returns the live table.
    * @throws {RootValidationError} `registry-contended` when another DSH process
@@ -811,6 +1125,10 @@ export class MultiRootRegistry extends Service {
     for (const [primaryRoot, record] of this.table.entries()) {
       this.accept(primaryRoot, record)
     }
+    // After the store is published, so a common root never appears to outlive an
+    // authority that failed to open: this is also the path a contended process
+    // takes when it later wins the lease (refresh → ensureAuthority → here).
+    this.pushCommonRoots()
   }
 
   /** Fail closed: empty scope, no table, contended state. */
@@ -841,6 +1159,12 @@ export class MultiRootRegistry extends Service {
     }
     this.published.clear()
     this.cache.clear()
+    // The common roots are a grant too, and they belong to no single key: they
+    // are withdrawn here rather than per key, so "no authority ⇒ no grant" holds
+    // for a store that failed to open and for a contended process alike.
+    this.commonEntries = []
+    this.commonAddedAt = ''
+    this.ctx.multiRootScope.setCommonRoots([])
   }
 
   /**
@@ -909,6 +1233,46 @@ export class MultiRootRegistry extends Service {
     const run = previous.then(job)
     this.authorityChain = run.then(() => undefined, () => undefined)
     return await run
+  }
+}
+
+/** One configured common root, resolved once per authority transition. */
+interface CommonEntry {
+  /** The spelling the configuration used, for messages. */
+  readonly raw: string
+  /**
+   * Canonical directory: the `realpath` captured at publish time, or the lexical
+   * spelling while the directory is absent (see `canonicalPath`). It doubles as
+   * the `recordedPath` of the published root, which is what makes a later
+   * symlink swap a withholding rather than a re-grant.
+   */
+  readonly path: string
+  /** Stable synthetic id, derived from the path so it survives a restart. */
+  readonly id: string
+}
+
+/** Whether a canonical path is an existing directory right now. */
+function isDirectory(path: string): boolean {
+  try {
+    return statSync(path).isDirectory()
+  }
+  catch {
+    return false
+  }
+}
+
+/**
+ * Whether a reference resolves within one status list, without reporting why it
+ * does not: the caller uses it to choose between two lists, not to explain a
+ * failure (the later {@link resolveRootIndex} call owns that).
+ */
+function resolvesWithin(statuses: readonly RootStatus[], ref: RootRef): boolean {
+  try {
+    resolveRootIndex(statuses, ref)
+    return true
+  }
+  catch {
+    return false
   }
 }
 
