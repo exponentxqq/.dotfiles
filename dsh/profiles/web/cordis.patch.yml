@@ -113,7 +113,7 @@
         env:
           FIGMA_API_KEY: !!js process.env.FIGMA_API_KEY
 
-# 多根工作区（本地 fork：dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace）
+# 多根工作区（本地 fork：dsh-plugins 仓库 plugins/dsh-plugin-multi-root-workspace，见 ~/develop/person/dsh-plugins）
 # 附加根与主根同权、仍走内核级方言，不降级 danger-full-access。
 # seedRoots/seedPrimaryRoots：首次使用某个主根时播种下列根；台账在
 # $DSH_HOME/storages/multi_root_workspace.seeded.json，删除已播种的根是永久的，

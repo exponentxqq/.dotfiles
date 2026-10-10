@@ -21,12 +21,12 @@
   "dependencies": {
     "@deepseek-ai/dsh-browser-use": "0.2.0-rc.2",
     "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp": "0.2.0-rc.2",
-    "dsh-plugin-multi-root-workspace": "link:/home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace",
     "@linxin666/dsh-client-ui-task-board": "0.4.5",
     "@zzerx/dsh-plugin-notes": "0.4.3",
     "dsh-better-input": "0.2.5",
     "dsh-context": "^0.66.0",
-    "dsh-plugin-git-graph-multi": "link:/home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi",
+    "dsh-plugin-git-graph-multi": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/git-graph-multi",
+    "dsh-plugin-multi-root-workspace": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/dsh-plugin-multi-root-workspace",
     "dsh-pocket": "^2.10.6",
     "dshmarket": "^1.66.14"
   }

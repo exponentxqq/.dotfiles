@@ -19,9 +19,6 @@ importers:
       '@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/dsh-browser-use@0.2.0-rc.2)
-      dsh-plugin-multi-root-workspace:
-        specifier: link:/home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
-        version: link:../../../../xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
       '@linxin666/dsh-client-ui-task-board':
         specifier: 0.4.5
         version: 0.4.5
@@ -35,8 +32,11 @@ importers:
         specifier: ^0.66.0
         version: 0.66.0(@deepseek-ai/schemastery@3.18.4)
       dsh-plugin-git-graph-multi:
-        specifier: link:/home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
-        version: link:../../../../xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
+        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/git-graph-multi
+        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/git-graph-multi
+      dsh-plugin-multi-root-workspace:
+        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/dsh-plugin-multi-root-workspace
+        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/dsh-plugin-multi-root-workspace
       dsh-pocket:
         specifier: ^2.10.6
         version: 2.10.6(patch_hash=f06fe37b4a7ee48a28e15e8bebbc8cbf3aac52c42a784715dd00344d94eba9bf)
