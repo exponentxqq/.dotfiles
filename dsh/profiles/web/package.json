@@ -25,8 +25,8 @@
     "@zzerx/dsh-plugin-notes": "0.4.3",
     "dsh-better-input": "0.2.5",
     "dsh-context": "^0.66.0",
-    "dsh-plugin-git-graph-multi": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/git-graph-multi",
-    "dsh-plugin-multi-root-workspace": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/dsh-plugin-multi-root-workspace",
+    "dsh-plugin-git-graph-multi": "github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/git-graph-multi",
+    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/dsh-plugin-multi-root-workspace",
     "dsh-pocket": "^2.10.6",
     "dshmarket": "^1.66.14"
   }

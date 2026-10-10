@@ -5,3 +5,13 @@ autoInstallPeers: false
 nodeLinker: hoisted
 patchedDependencies:
   dsh-pocket@2.10.6: patches/dsh-pocket@2.10.6.patch
+
+# pnpm ≥10 默认不执行依赖的构建脚本。git 来源的插件要在安装现场跑 `prepare` 构建 lib/，
+# 而 pnpm 10 对 git 依赖只做**精确 dep path 匹配**（包名或通配都不认），键里因此带着
+# 解析出来的 commit：每次改 profile 里的 tag，都要按首次安装失败时 pnpm 打印的那行刷新
+# 下面两条；`koffi` 是注册表依赖（多根插件的原生依赖），用包名即可。
+# 升级步骤：改 tag → 跑安装 → 用新打印的 dep path 替换旧行 → 重跑安装。
+onlyBuiltDependencies:
+  - 'dsh-plugin-git-graph-multi@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/git-graph-multi'
+  - 'dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/dsh-plugin-multi-root-workspace'
+  - koffi
