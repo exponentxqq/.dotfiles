@@ -1,14 +1,13 @@
 # dsh (DeepSeek Harness) 配置
 
-统一管理 dsh 的 profile 配置与自定义插件。运行时数据（API Key、会话）不在本目录，见下文「挂载机制」。
+统一管理 dsh 的 profile 配置。自定义插件源码已独立成仓（`~/develop/person/dsh-plugins`），本目录只保留 profile 与其插件依赖清单。运行时数据（API Key、会话）不在本目录，见下文「挂载机制」。
 
 ## 目录结构
 
 | 路径                               | 说明                                                                 |
 | ---------------------------------- | -------------------------------------------------------------------- |
 | `profiles/<name>/cordis.patch.yml` | 用户配置层（主题、默认模型、provider 等），每个 profile 一份          |
-| `profiles/<name>/package.json`     | profile manifest：bundles 列表与树外插件依赖（由 pnpm / dsh plugin 维护） |
-| `plugins/<name>/`                  | 自定义插件源码（官方组合包 bundle 形式）                              |
+| `profiles/<name>/package.json`     | profile manifest：bundles 列表与树外插件依赖（按 tag 的 git spec，由 pnpm / dsh plugin 维护） |
 | `install.sh`                       | 安装脚本：纳管旧布局 profile、保障目录，幂等可重复执行                |
 
 ## 挂载机制
@@ -58,32 +57,44 @@ docker compose logs dsh | grep "dsh web:"                # 取带 token 的启�
 
 ## 自定义插件（已独立成仓）
 
-自定义插件不再放在本仓库，统一迁到 `~/develop/person/dsh-plugins`（pnpm workspace 单仓多包）：
+自定义插件不再放在本仓库，统一迁到 `~/develop/person/dsh-plugins`（pnpm workspace 单仓多包），并按 **GitHub tag** 安装：
 
 | 插件 | 说明 |
 | --- | --- |
 | `dsh-plugin-multi-root-workspace` | 多工作区附加根；本 fork 含附加根播种与通用附加根 `commonRoots` |
 | `dsh-plugin-git-graph-multi` | 单工作区多仓 Git Graph（上游 `@linxin666/dsh-client-ui-git-graph@0.4.5` 的 fork） |
-| `hello` | 最小插件模板（复制即新插件的起点） |
 
-工作流（新仓库 `README.md` 有完整说明，各插件文档在其目录内）：
+开发与发布（新仓库 `README.md` 有完整说明，各插件文档在其目录内）：
 
 ```bash
 cd ~/develop/person/dsh-plugins
-pnpm install    # 装齐全部插件依赖（会触发多根插件的 prepare 构建）
-pnpm build      # 产物 lib/ 不入库，装入 profile 前必须先构建
+pnpm install          # 装齐全部插件依赖（会触发各插件的 prepare 构建）
+pnpm verify           # 发布前自检
+pnpm release 1.0.0    # 同步版本 + 发布提交 + tag v1.0.0
+git push origin main --tags   # 在宿主执行（容器内没有 ssh）
+```
 
-cd ~/develop/docker
-docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>
+装到 profile（`#<tag>&path:` 同时指定版本与单仓子目录）：
+
+```bash
+docker exec dsh dsh plugin --profile web add \
+  "github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/dsh-plugin-multi-root-workspace"
 docker exec dsh dsh --profile web --dump-config-schema   # 校验配置可加载（会 import 插件）
 ```
 
 `dsh plugin add` 会自动完成两件事：
 
-1. 以 `link:` 形式写入 profile 的 `package.json` 依赖（pnpm symlink 指向源码目录，**改源码重启 profile 即生效**，无需重装）
+1. 把 git spec 写进 profile 的 `package.json` 依赖（tag 锁定的源码，安装时由 `prepare` 现场构建）
 2. 因包声明了 `dsh.bundle`，自动把包名追加进 `dsh.profile.bundles` 列表并激活其 patch 层
 
-移除：`docker exec dsh dsh plugin --profile web remove dsh-plugin-<name>`。
+移除：`docker exec dsh dsh plugin --profile web remove dsh-plugin-<name>`。升级 profile：改 spec 里的 tag → 重装 → 重启 profile。
+
+两个常见阻碍：
+
+- **构建授权**：git 来源要在安装现场跑 `prepare`，pnpm ≥10 默认拦下依赖构建脚本，首次 `add` 会以非 0 退出并把待决项写进 `dsh/profiles/web/pnpm-workspace.yaml`（`allowBuilds:` 下 `koffi`、插件包名等占位 `set this to true or false`）；改成 `true` 后重跑。
+- **`insteadOf` 陷阱**：宿主 `~/.gitconfig` 的 `url.git@github.com:.insteadOf = https://github.com/` 会随只读挂载进入 dsh 容器，容器内 `git ls-remote` 被改写成 ssh 而容器没有 ssh，安装必败。推荐把该段拆到宿主专属的 `~/.gitconfig-github-ssh` 并用 `[include]` 引回（容器读不到即静默跳过）；临时办法是给命令加 `-e GIT_CONFIG_GLOBAL=/dev/null`。
+
+本地开发调试仍可用 `link:`：`docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>`（改源码重启 profile 即生效，无需发布）。
 
 > `dsh-plugin-git-graph-multi` 与 `@linxin666/dsh-client-ui-git-graph` 共用 slot id（`git-graph`）与 `/git/*` 路由前缀，**不可同时启用**：先 `remove` 再 `add`。
 
