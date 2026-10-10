@@ -56,22 +56,26 @@ docker compose logs dsh | grep "dsh web:"                # 取带 token 的启�
 # 或 `~/develop/docker/run.sh dsh "dsh …"`，dsh 容器内直接 `dsh …`。
 ```
 
-## 自定义插件
+## 自定义插件（已独立成仓）
 
-插件采用官方组合包（bundle）形式，一个插件一个目录：
+自定义插件不再放在本仓库，统一迁到 `~/develop/person/dsh-plugins`（pnpm workspace 单仓多包）：
 
-```
-plugins/<name>/
-├── package.json       # name 建议 dsh-plugin-<name>；声明 dsh.bundle.patch
-├── cordis.patch.yml   # insert 本包注册的插件行（按包名引用）
-└── index.js           # 插件实现（纯 ESM，导出 name / apply）
-```
+| 插件 | 说明 |
+| --- | --- |
+| `dsh-plugin-multi-root-workspace` | 多工作区附加根；本 fork 含附加根播种与通用附加根 `commonRoots` |
+| `dsh-plugin-git-graph-multi` | 单工作区多仓 Git Graph（上游 `@linxin666/dsh-client-ui-git-graph@0.4.5` 的 fork） |
+| `hello` | 最小插件模板（复制即新插件的起点） |
 
-安装到 profile（容器内路径与宿主一致，用绝对路径即可）：
+工作流（新仓库 `README.md` 有完整说明，各插件文档在其目录内）：
 
 ```bash
+cd ~/develop/person/dsh-plugins
+pnpm install    # 装齐全部插件依赖（会触发多根插件的 prepare 构建）
+pnpm build      # 产物 lib/ 不入库，装入 profile 前必须先构建
+
 cd ~/develop/docker
-docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/hello
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>
+docker exec dsh dsh --profile web --dump-config-schema   # 校验配置可加载（会 import 插件）
 ```
 
 `dsh plugin add` 会自动完成两件事：
@@ -79,64 +83,13 @@ docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh
 1. 以 `link:` 形式写入 profile 的 `package.json` 依赖（pnpm symlink 指向源码目录，**改源码重启 profile 即生效**，无需重装）
 2. 因包声明了 `dsh.bundle`，自动把包名追加进 `dsh.profile.bundles` 列表并激活其 patch 层
 
-移除：
+移除：`docker exec dsh dsh plugin --profile web remove dsh-plugin-<name>`。
 
-```bash
-docker exec dsh dsh plugin --profile web remove dsh-plugin-<name>
-```
+> `dsh-plugin-git-graph-multi` 与 `@linxin666/dsh-client-ui-git-graph` 共用 slot id（`git-graph`）与 `/git/*` 路由前缀，**不可同时启用**：先 `remove` 再 `add`。
 
-`plugins/hello/` 是可直接复制的示例包（也可复制为新插件目录后改名）。
+### 附加根配置（profile 侧，仍在本仓库）
 
-### git-graph-multi（单工作区多仓 Git Graph）
-
-`plugins/git-graph-multi/` 是 `@linxin666/dsh-client-ui-git-graph@0.4.5`（Apache-2.0）的本地 fork，把分支芯片从「工作区根那一个仓库」扩展为「工作区内每仓一个平铺分支芯片 + 各仓自己的操作面板 + 跨仓（组）分支操作」，同时把 `/git/*` 的门控从「路径全等」放宽为「工作区内 + git 顶层围栏」，并删除了上游的匿名遥测。行为语义与验收场景见
-[`openspec/specs/dsh-multi-repo-git-graph/spec.md`](../openspec/specs/dsh-multi-repo-git-graph/spec.md)（三次变更的规划工件已归档在 [`openspec/changes/archive/`](../openspec/changes/archive/)），插件自身说明见 [`plugins/git-graph-multi/README.md`](plugins/git-graph-multi/README.md)。
-
-与 `plugins/hello/` 这类单文件插件不同，它是**双面插件 + 构建产物**：源码在 `src/`（host / core / client），`lib/` 由 esbuild 按需构建且不入库。
-
-```bash
-# 1. 构建（产物自包含：link: 安装不会为被链接包装依赖）
-cd ~/develop/dotfiles/dsh/plugins/git-graph-multi
-pnpm install && pnpm run typecheck && pnpm test && pnpm run build
-
-# 2. 替换 profile（容器内执行）
-cd ~/develop/docker
-docker exec dsh dsh plugin --profile web remove @linxin666/dsh-client-ui-git-graph   # 先移除，二者共用 slot id 与 /git/* 前缀
-docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/git-graph-multi
-docker exec dsh dsh --profile web --dump-config-schema                              # 校验 host 半可被 Loader 加载
-```
-
-回滚：`docker exec dsh dsh plugin --profile web remove dsh-plugin-git-graph-multi` 后重新 `add @linxin666/dsh-client-ui-git-graph@0.4.5`。
-
-### dsh-plugin-multi-root-workspace（多工作区附加根）
-
-`plugins/dsh-plugin-multi-root-workspace/` 是 **本地 fork**（包名 `dsh-plugin-multi-root-workspace`，已去掉上游的 `@dsh-electron` 作用域；MIT，上游 [`cherrchen/dsh-plugin-multi-root-workspace`](https://github.com/cherrchen/dsh-plugin-multi-root-workspace)，基线 `f149fa4`，在 v0.1.5 之后一个提交）：把 Workspace 的可写范围从「一个主根」扩展为「主根 + N 个附加根」，用于跨仓联动（opc + docker + dotfiles + apigen …）。
-
-上游式 CHANGELOG、`docs/plans/`、`docs/requirements/` 与 `.github/` CI/发版车道已随 fork 清理（ADR、架构、开发工作流、排查与上游调研保留）；本插件的变更记录以本节与 dotfiles 提交历史为准。
-
-它**不放宽沙箱档位**：以 bundle patch 禁用上游 `fs-sandbox` / `sandbox` 两行、插入多根子类；附加根与主根同权，仍走进程内 fs fence + 内核级 runner（Linux: bwrap → Landlock），不是 `danger-full-access`。版本闸是精确 allowlist，宿主版本不在清单内或核心包混装时相关行直接不启动（退化为「没装」），不会静默放宽。
-
-**本地扩展（上游没有）：附加根一次性播种。** registry 行新增 `seedRoots` / `seedPrimaryRoots`；某个主根在登记表中尚无记录时，按普通 `add` 路径逐条注册（照常走根规则校验）。只有**没有候选被跳过**的那次播种才写入 store 级台账 `$DSH_HOME/storages/multi_root_workspace.seeded.json`，因此**删除已播种的根是永久的**；被跳过的播种保持未记录，下次启动重试。语义与配置见插件 [`docs/reference/additional-root-seeding.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/additional-root-seeding.md)，用例 `tests/registry-seed.spec.ts`。
-
-**本地扩展（上游没有）：通用附加根 `commonRoots`。** 同一 registry 行新增 `commonRoots`：列出的目录对**所有主根**生效——配置即授予，不写登记表、不写台账、不需要为新项目改配置；目录出现即生效（无需重启），从配置里删掉即撤销。通用条目在列表里排在登记项之后（**已有编号不变**），与登记项重复时只授予一次、不重复显示，并被标为 `[common]`／「通用」；面板与命令行不能移除/改名/排序它（`common-root`），`add` 一个已由配置授予的目录报 `duplicate`。另一个 DSH 进程持有登记表租约时同样不授予（fail-closed）。语义、与播种的分工及迁移步骤见插件 [`docs/reference/common-additional-roots.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/common-additional-roots.md)，用例 `tests/registry-common.spec.ts`。
-
-与 `git-graph-multi` 同为**双面插件 + 构建产物**：源码在 `src/`，`lib/` 与 `node_modules/` 均不入库。
-
-```bash
-# 1. 构建（link: 安装不会为被链接包装依赖，必须在本目录装）
-cd ~/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
-pnpm install && pnpm typecheck && pnpm test && pnpm build
-
-# 2. 装入 profile（容器内执行）
-cd ~/develop/docker
-docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
-docker exec dsh dsh --profile web --dump-config-schema   # 校验组合可加载
-
-# 3. 运行期管理（会话内）：/workspace-folders list | add <path> | remove <ref>
-#    侧栏底部 Folders（🗂）面板是同一能力的图形入口
-```
-
-附加根配置在 `dsh/profiles/web/cordis.patch.yml` 的 `multi-root-registry` 行：`seedRoots` / `seedPrimaryRoots` 是 opc 的跨仓联动根（docker / dotfiles / apigen / skills，主根 `/home/xuqinqin/develop/company/opc`）；`commonRoots` 里的 `~/.cache` 对**所有项目**生效，用于让 post-commit 的 codebase-memory 重建 hook（`cbm-hook-pending`、`cbm-hook.log` 与索引库）在会话沙箱内可写——不加入时该 hook 会因 EACCES 静默失败、索引停在旧版本。（opc 登记表里若还留着早先播种出的同名条目，在面板或 `/workspace-folders remove` 删一次即可，之后只剩通用条目。）
+多根插件的附加根配置在 `dsh/profiles/web/cordis.patch.yml` 的 `multi-root-registry` 行：`seedRoots` / `seedPrimaryRoots` 是 opc 的跨仓联动根（docker / dotfiles / apigen / skills，主根 `/home/xuqinqin/develop/company/opc`）；`commonRoots` 里的 `~/.cache` 对**所有项目**生效，用于让 post-commit 的 codebase-memory 重建 hook（`cbm-hook-pending`、`cbm-hook.log` 与索引库）在会话沙箱内可写——不加入时该 hook 会因 EACCES 静默失败、索引停在旧版本。（opc 登记表里若还留着早先播种出的同名条目，在面板或 `/workspace-folders remove` 删一次即可，之后只剩通用条目。）
 
 跨进程注意：同一 `$DSH_HOME` 同时只允许一个 DSH 进程持有根登记表，另一个进程显示 `registry-contended` 并 fail-closed（持锁者退出后刷新即接管）。
 
@@ -151,14 +104,8 @@ openspec validate <change> --strict # 校验工件
 openspec archive <change>           # 评审通过后归档
 ```
 
+> 与插件相关的规范工件（`dsh-multi-repo-git-graph` 主规格与三次变更的归档）已随插件迁到 `~/develop/person/dsh-plugins/openspec/`；本仓库 `openspec/` 保留空壳，供 dotfiles 自身的变更使用。
 > 仓库内不写项目本地 openspec skills 副本（`openspec init --tools none`）——dsh / opencode 的 `openspec-*` skills 已由 skctl 全局装好，见下节。
-
-### 插件开发文档（官方）
-
-- [第一个插件](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/index.zh.md)
-- [开发一个工具](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/tool.zh.md)
-- [打包与安装插件](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/publish.zh.md)
-
 ## skill 复用（与 opencode 同源，经 skctl 聚合）
 
 dsh 原生支持 Agent Skills 标准（`<dir>/<name>/SKILL.md` + `name`/`description` frontmatter）。

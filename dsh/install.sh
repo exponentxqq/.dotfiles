@@ -12,8 +12,8 @@ echo --------------------------------------------------------
 echo ---- install dsh config from "$BASEDIR" ----
 echo --------------------------------------------------------
 
-# 目录保障
-mkdir -p "$BASEDIR/profiles" "$BASEDIR/plugins"
+# 目录保障（自定义插件已独立成仓 ~/develop/person/dsh-plugins，本仓库不再有 plugins/）
+mkdir -p "$BASEDIR/profiles"
 
 # 纳管旧布局：profiles 曾直接放在 $DSH_DATA 下（未版本管理），
 # 把尚未纳入 dotfiles 的 profile 目录整体移入本仓库（含插件依赖产物）。

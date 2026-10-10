@@ -15,7 +15,7 @@ Personal dotfiles managed with GNU Stow.
 - `software/` — Additional software configs (amixer, kitty, ranger, wireplumber: force-analog ALC887 jack 误报 workaround)
 - `kitty/` — Kitty terminal emulator configuration
 - `opencode/` — opencode configuration
-- `dsh/` — DeepSeek Harness (dsh) 容器的 profile 配置与自定义插件（详见 `dsh/README.md`）
+- `dsh/` — DeepSeek Harness (dsh) 容器的 profile 配置（详见 `dsh/README.md`；自定义插件已独立成仓 `~/develop/person/dsh-plugins`，以 pnpm workspace 管理）
 - `software/` — Additional software configs (amixer, etc.)
 - `install.sh` — Main installation script
 
