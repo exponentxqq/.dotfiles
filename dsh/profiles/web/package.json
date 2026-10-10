@@ -13,13 +13,15 @@
         "@zzerx/dsh-plugin-notes",
         "@linxin666/dsh-client-ui-task-board",
         "dsh-plugin-git-graph-multi",
-        "dsh-better-input"
+        "dsh-better-input",
+        "dsh-plugin-multi-root-workspace"
       ]
     }
   },
   "dependencies": {
     "@deepseek-ai/dsh-browser-use": "0.2.0-rc.2",
     "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp": "0.2.0-rc.2",
+    "dsh-plugin-multi-root-workspace": "link:/home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace",
     "@linxin666/dsh-client-ui-task-board": "0.4.5",
     "@zzerx/dsh-plugin-notes": "0.4.3",
     "dsh-better-input": "0.2.5",

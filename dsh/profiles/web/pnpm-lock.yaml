@@ -19,6 +19,9 @@ importers:
       '@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/dsh-browser-use@0.2.0-rc.2)
+      dsh-plugin-multi-root-workspace:
+        specifier: link:/home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
+        version: link:../../../../xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
       '@linxin666/dsh-client-ui-task-board':
         specifier: 0.4.5
         version: 0.4.5

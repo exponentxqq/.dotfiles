@@ -108,6 +108,36 @@ docker exec dsh dsh --profile web --dump-config-schema                          
 
 回滚：`docker exec dsh dsh plugin --profile web remove dsh-plugin-git-graph-multi` 后重新 `add @linxin666/dsh-client-ui-git-graph@0.4.5`。
 
+### dsh-plugin-multi-root-workspace（多工作区附加根）
+
+`plugins/dsh-plugin-multi-root-workspace/` 是 **本地 fork**（包名 `dsh-plugin-multi-root-workspace`，已去掉上游的 `@dsh-electron` 作用域；MIT，上游 [`cherrchen/dsh-plugin-multi-root-workspace`](https://github.com/cherrchen/dsh-plugin-multi-root-workspace)，基线 `f149fa4`，在 v0.1.5 之后一个提交）：把 Workspace 的可写范围从「一个主根」扩展为「主根 + N 个附加根」，用于跨仓联动（opc + docker + dotfiles + apigen …）。
+
+上游式 CHANGELOG、`docs/plans/`、`docs/requirements/` 与 `.github/` CI/发版车道已随 fork 清理（ADR、架构、开发工作流、排查与上游调研保留）；本插件的变更记录以本节与 dotfiles 提交历史为准。
+
+它**不放宽沙箱档位**：以 bundle patch 禁用上游 `fs-sandbox` / `sandbox` 两行、插入多根子类；附加根与主根同权，仍走进程内 fs fence + 内核级 runner（Linux: bwrap → Landlock），不是 `danger-full-access`。版本闸是精确 allowlist，宿主版本不在清单内或核心包混装时相关行直接不启动（退化为「没装」），不会静默放宽。
+
+**本地扩展（上游没有）：附加根一次性播种。** registry 行新增 `seedRoots` / `seedPrimaryRoots`；某个主根在登记表中尚无记录时，按普通 `add` 路径逐条注册（照常走根规则校验）。只有**全部候选都成功**的那次播种才写入 store 级台账 `$DSH_HOME/storages/multi_root_workspace.seeded.json`，因此**删除已播种的根是永久的**；被跳过的播种保持未记录，下次启动重试。语义与配置见插件 [`docs/reference/additional-root-seeding.md`](plugins/dsh-plugin-multi-root-workspace/docs/reference/additional-root-seeding.md)，用例 `tests/registry-seed.spec.ts`。
+
+与 `git-graph-multi` 同为**双面插件 + 构建产物**：源码在 `src/`，`lib/` 与 `node_modules/` 均不入库。
+
+```bash
+# 1. 构建（link: 安装不会为被链接包装依赖，必须在本目录装）
+cd ~/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
+pnpm install && pnpm typecheck && pnpm test && pnpm build
+
+# 2. 装入 profile（容器内执行）
+cd ~/develop/docker
+docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace
+docker exec dsh dsh --profile web --dump-config-schema   # 校验组合可加载
+
+# 3. 运行期管理（会话内）：/workspace-folders list | add <path> | remove <ref>
+#    侧栏底部 Folders（🗂）面板是同一能力的图形入口
+```
+
+播种内容配置在 `dsh/profiles/web/cordis.patch.yml` 的 `multi-root-registry` 行（当前：docker / dotfiles / apigen / `~/.cache`，主根 `/home/xuqinqin/develop/company/opc`）。其中 `~/.cache` 是为了让 post-commit 的 codebase-memory 重建 hook（`cbm-hook-pending`、`cbm-hook.log` 与索引库）在会话沙箱内可写——不加入时该 hook 会因 EACCES 静默失败、索引停在旧版本。
+
+跨进程注意：同一 `$DSH_HOME` 同时只允许一个 DSH 进程持有根登记表，另一个进程显示 `registry-contended` 并 fail-closed（持锁者退出后刷新即接管）。
+
 ## OpenSpec 变更管理
 
 本仓库根有 OpenSpec 根目录 `openspec/`（`config.yaml` 声明 `schema: spec-driven`、语言简体中文；结构标题与 SHALL/MUST 关键字保持英文）。规划工件与主规格都在这里版本管理：

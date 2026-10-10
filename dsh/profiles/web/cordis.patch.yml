@@ -12,8 +12,8 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: opencode-go
-    model: deepseek-v4.1-flash
+    provider: zai
+    model: glm-5.3
     reasoningEffort: max
 # 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
 - id: llm-deepseek
@@ -80,13 +80,13 @@
     language: zh-CN
     maxRecordingSeconds: 120
     polishingEnabled: true
-    polishProvider: opencode-go
-    polishModel: deepseek-v4.1-flash
+    polishProvider: deepseek-official
+    polishModel: deepseek-flash
     polishReasoningEffort: ""
     polishPrompt: ""
     optimizeEnabled: true
-    optimizeProvider: opencode-go
-    optimizeModel: deepseek-v4.1-flash
+    optimizeProvider: deepseek-official
+    optimizeModel: deepseek-flash
     optimizeReasoningEffort: ""
     optimizePrompt: ""
     contextTurns: 3
@@ -112,3 +112,22 @@
           - "/home/xuqinqin/develop"
         env:
           FIGMA_API_KEY: !!js process.env.FIGMA_API_KEY
+
+# 多根工作区（本地 fork：dotfiles/dsh/plugins/dsh-plugin-multi-root-workspace）
+# 附加根与主根同权、仍走内核级方言，不降级 danger-full-access。
+# 首次使用某个主根时播种下列根；台账在 $DSH_HOME/storages/multi_root_workspace.seeded.json，
+# 删除已播种的根是永久的，想重新播种就删台账条目（见插件 docs/reference/additional-root-seeding.md）。
+- id: multi-root-registry
+  config:
+    leasePath: !!js dshHomePath('storages/multi_root_workspace.lock')
+    seedRoots:
+      # 仓库根用绝对路径：容器内 ~ 是 /home/docker、宿主是 /home/xuqinqin
+      - /home/xuqinqin/develop/docker
+      - /home/xuqinqin/develop/dotfiles
+      - /home/xuqinqin/develop/apigen
+      - /home/xuqinqin/develop/company/skills
+      # 家目录相对，两个环境各自解析（容器 /home/docker/.cache、宿主 /home/xuqinqin/.cache）
+      # 目的：让 post-commit hook（cbm-hook-pending / cbm-hook.log / codebase-memory-mcp）在会话内可写
+      - ~/.cache
+    seedPrimaryRoots:
+      - /home/xuqinqin/develop/company/opc
