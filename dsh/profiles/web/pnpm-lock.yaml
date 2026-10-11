@@ -37,6 +37,9 @@ importers:
       dsh-plugin-multi-root-workspace:
         specifier: github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/dsh-plugin-multi-root-workspace
         version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/dsh-plugin-multi-root-workspace
+      dsh-plugin-project-mcp:
+        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/project-mcp
+        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/project-mcp
       dsh-plugin-web-ux:
         specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/web-ux
         version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/web-ux
