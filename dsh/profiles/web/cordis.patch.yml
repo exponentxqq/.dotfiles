@@ -92,27 +92,11 @@
     contextTurns: 3
     ocrProvider: zai
     ocrModel: glm-5.3-flash
-# 接入 figma MCP（Framelink figma-developer-mcp）：design-to-code 读设计稿（布局/样式精简元数据 + 图片导出）
-# PAT 由图外 compose env_file 从宿主 ~/.secrets 注入容器（FIGMA_API_KEY），此处 !!js 显式传入子进程
-# （dsh-mcp-client 会清洗子进程环境中匹配 KEY|TOKEN|SECRET 的变量，必须显式注入）
-# --image-dir 是图片下载白名单根（项目无关）；调用工具时用 localPath 落到各项目，如 opc 传 company/opc/.figma-assets
-- insert:
-    - id: mcp-figma
-      name: "@deepseek-ai/dsh-mcp-client"
-      config:
-        serverName: figma
-        transport: stdio
-        # 预装于宿主 /data/dsh/figma-mcp（容器 /home/docker/.dsh/figma-mcp）：数据目录持久、非 git 仓
-        # 首次安装/升级：docker exec dsh npm install --prefix /home/docker/.dsh/figma-mcp figma-developer-mcp@0.13.2
-        command: /home/docker/.dsh/figma-mcp/node_modules/.bin/figma-developer-mcp
-        args:
-          - "--stdio"
-          - "--no-telemetry"
-          - "--image-dir"
-          - "/home/xuqinqin/develop"
-        env:
-          FIGMA_API_KEY: !!js process.env.FIGMA_API_KEY
-
+# figma MCP 已从「用户级」迁到 opc 的**项目级**配置：company/opc/.dsh/mcp/figma.yaml
+# 由 dsh-plugin-web-ux 扫描并按工作区隔离——只有 opc 工作区的会话看得到 mcp__figma__*，
+# 服务器命令/参数与原配置一致，仅 --image-dir 收窄到 opc 项目根。
+# 如确需全局 figma（所有工作区可见），把这段 insert 恢复即可（勿与项目级同名配置并存：
+# 同名先到先得，后来者会被记 error 跳过）。
 # 多根工作区（本地 fork：dsh-plugins 仓库 plugins/dsh-plugin-multi-root-workspace，见 ~/develop/person/dsh-plugins）
 # 附加根与主根同权、仍走内核级方言，不降级 danger-full-access。
 # seedRoots/seedPrimaryRoots：首次使用某个主根时播种下列根；台账在

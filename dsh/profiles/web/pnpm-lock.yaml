@@ -37,6 +37,9 @@ importers:
       dsh-plugin-multi-root-workspace:
         specifier: github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/dsh-plugin-multi-root-workspace
         version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/dsh-plugin-multi-root-workspace
+      dsh-plugin-web-ux:
+        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/web-ux
+        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/web-ux
       dsh-pocket:
         specifier: ^2.10.6
         version: 2.10.6(patch_hash=f06fe37b4a7ee48a28e15e8bebbc8cbf3aac52c42a784715dd00344d94eba9bf)
@@ -486,7 +489,7 @@ packages:
         optional: true
 
   dsh-plugin-git-graph-multi@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/git-graph-multi:
-    resolution: {gitHosted: true, integrity: sha512-QSlmxJsqCTjxn9Y/Znj+lZmey+fj39yMrqsIFHnaSDIYiOG3BbgBsdZEoq8G21S0vNprZaqfLeEEV/KISAgidw==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5}
+    resolution: {gitHosted: true, path: plugins/git-graph-multi, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5}
     version: 1.0.0
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
@@ -494,7 +497,7 @@ packages:
       react: ^18.2.0
 
   dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5#path:plugins/dsh-plugin-multi-root-workspace:
-    resolution: {gitHosted: true, integrity: sha512-QSlmxJsqCTjxn9Y/Znj+lZmey+fj39yMrqsIFHnaSDIYiOG3BbgBsdZEoq8G21S0vNprZaqfLeEEV/KISAgidw==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5}
+    resolution: {gitHosted: true, path: plugins/dsh-plugin-multi-root-workspace, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/71dc1cc7ca92093af00763d27af6b2bc2b1013c5}
     version: 1.0.0
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
