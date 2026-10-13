@@ -1,15 +1,17 @@
 ---
 name: nuxt-writer
-description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend code — pages, components, composables, Pinia stores, request/API layers, UnoCSS styles, mobile H5/webview compatibility, or frontend tests.
+description: Use when planning, writing, modifying, or reviewing any Vue/Nuxt frontend code — pages, components, composables, Pinia stores, request/API layers, UnoCSS styles, mobile H5/webview compatibility, or frontend tests.
 ---
 
 # Nuxt/Vue 前端开发规范
+
+本 skill 是 Vue/Nuxt 前端方向的唯一执行源：前端工作的**规划、编写、修改、审查**任一环节开始前都必须先加载；与项目 AGENTS.md 冲突时以本 skill 为准。
 
 ## 核心原则
 
 1. **写前先读** — 每写一个组件前，先读同模块 2-3 个已有组件，模仿其组件命名、样式写法、请求方式、测试写法
 2. **复用优先** — 已有 base 组件/composable 必须复用，不新建重复样式；重复 ≥2 处的 UI/逻辑抽公共组件或 composable；组件能力由组件自身 emit 声明，父层不集中维护清单；通用型 composable 先查 VueUse，确认没有才自写
-3. **页面只做编排** — 业务逻辑下沉 composables/stores（可单测）；通用型组合函数放 `hooks/`（先查 VueUse）；纯函数放 `app/utils/`
+3. **页面只做编排** — 业务逻辑下沉 composables/stores（可单测）；通用型组合函数放 `hooks/`（先查 VueUse）；`app/utils/` 只放基础通用工具（跨项目可复用、无领域名词），业务逻辑一律放 `app/composables/`
 4. **最优改动** — 任务实现选最优方案而非最小 diff；被本次改动波及的存量（调用方、受影响测试、规范收紧涉及的存量）一并改到位；无关文件的问题只报告不擅动；功能被移除时测试断言与死代码一并清理
 5. **验证交给用户** — 改完自查副作用；不主动起 dev server 验证；不主动提交
 6. **优先设计模式** — 写新功能前先考虑是否有成熟设计模式（策略/适配器/观察者/工厂等）可套用，避免堆叠 if-else 分支
@@ -19,6 +21,7 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 ## 组件规范
 
 - 组件使用 kebab-case（`<base-button>`），靠 Nuxt 路径自动导入；标签名与注册名完全对齐（`components/<域>/foo-bar.vue` → `<域-foo-bar>`）；不显式 import（仅 `import type`）；非组件文件名 camelCase（`useXxxApi.ts`、`request.ts`）
+- 组件逻辑内聚：UI 状态、交互、派生计算由组件自身持有，父层只做编排与数据传入；同一业务被 ≥2 处需要、或组件内出现重复编排逻辑时，按业务拆到 `app/composables/useXxx.ts`，不堆在组件里也不塞进 `utils/`
 - 含播放器/RTC/手势状态、需跨切换保留的组件隐藏用 `v-show` 不用 `v-if`（卸载销毁内部状态）
 - 弹窗：子组件对外支持 v-model 语义（props 收 `modelValue` + `emit('update:modelValue')`），但组件**内部**禁止把该 prop 再 `v-model` 绑给下层（prop 只读，关不掉）——内层要用 `:model-value` + emit 透传；全局 layout 已挂载的弹窗页面不再挂（双实例叠层）
 - base 表单组件用 `modelValue`/`update:modelValue` 做 v-model，props 全类型化
@@ -39,6 +42,8 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 
 - 通用型组合函数（防抖、localStorage、媒体查询等跨项目技术能力，无领域名词/业务规则）放 `hooks/`（与 `composables/` 同级）；业务型（含领域逻辑）放 `composables/`；跨组件共享业务状态进 Pinia store
 - `hooks/` 非默认扫描目录，必须配 `imports: { dirs: ['hooks/**'] }` 才自动导入（composables/、utils/ 默认也只扫顶层）
+- **`app/utils/` 边界**：只放基础通用类工具——跨项目可复用、无领域名词、无业务规则（日期、格式化、纯计算、类型守卫）；一旦出现业务名词（某需求/某订单/某状态流转）即越界，迁到 `app/composables/`。判断口诀：换个项目还能原样用 → `utils/`；必须懂本业务才读得懂 → `composables/`
+- **按业务拆分 composable**：同一业务的逻辑聚到一个 `useXxx.ts`（组件内部状态留在组件里），不同业务分文件；跨组件共享的按业务域命名，不建 `useCommon`/`useHelper` 这类杂货铺
 
 ## 状态与数据
 
@@ -137,6 +142,7 @@ description: Use when writing, modifying, or reviewing any Vue/Nuxt frontend cod
 - [ ] 移动端坑已过：手势播放 / dvh / contain / label 激活 / iOS repeat 背景
 - [ ] `??` 兜底、空数据隐藏、稳定 key、nextTick 后操作 ref
 - [ ] 测试 100% 覆盖且契约同步，用例名中文
-- [ ] 通用逻辑先查 VueUse；通用型在 hooks/、业务型在 composables/
+- [ ] 通用逻辑先查 VueUse；通用型在 hooks/、业务型在 composables/、基础通用工具在 utils/（utils 内无业务名词）
+- [ ] 组件逻辑内聚；重复或跨组件复用的业务编排已按业务拆到 composables/
 - [ ] 无无谓判空：类型/契约已保证的不重复 `?.`/`??` 兜底
 - [ ] 零注释；跑 format；双端同步；不主动提交
