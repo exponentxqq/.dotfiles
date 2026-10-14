@@ -2,8 +2,8 @@
 
 ## 1. 生成新 references 文件（纯剪切外移）
 
-- [ ] 1.1 新建 `agent/skills/spec-workflow/convergence.md`：把 SKILL.md §五第 4 步「按 `grill-me` 方法问决策项」的方法展开条目（当前 149–156 行，自 `- **映射为设计树**` 至 `- **不因此改变的部分**` 整块）**逐字剪切**搬入，文首加一行「本文件为 SKILL.md §五第 4 步的外移正文，回入口引用写『SKILL.md 第 X 节』」；本任务不改 SKILL.md；验证：`python3 -c "s=open('agent/skills/spec-workflow/convergence.md',encoding='utf-8').read(); assert s.strip() and len(s)<=8192; print(len(s))"` 退出码 0，且 `sed -n '149,156p' agent/skills/spec-workflow/SKILL.md | diff - <(tail -n +3 agent/skills/spec-workflow/convergence.md)` 无输出（逐字一致）
-- [ ] 1.2 新建 `agent/skills/spec-workflow/execution.md`：把 SKILL.md §八两个引擎小节（当前 210–227 行，自 `**subagent 引擎（默认）**：` 至 team 引擎最后一条 `- 该引擎**忽略 \`apply\` 路由键…`）**逐字剪切**搬入，文首加同样一行来源说明；本任务不改 SKILL.md；验证：`python3 -c "s=open('agent/skills/spec-workflow/execution.md',encoding='utf-8').read(); assert s.strip() and len(s)<=8192; print(len(s))"` 退出码 0，且 `sed -n '210,227p' agent/skills/spec-workflow/SKILL.md | diff - <(tail -n +3 agent/skills/spec-workflow/execution.md)` 无输出
+- [x] 1.1 新建 `agent/skills/spec-workflow/convergence.md`：把 SKILL.md §五第 4 步「按 `grill-me` 方法问决策项」的方法展开条目（当前 149–156 行，自 `- **映射为设计树**` 至 `- **不因此改变的部分**` 整块）**逐字剪切**搬入，文首加一行「本文件为 SKILL.md §五第 4 步的外移正文，回入口引用写『SKILL.md 第 X 节』」；本任务不改 SKILL.md；验证：`python3 -c "s=open('agent/skills/spec-workflow/convergence.md',encoding='utf-8').read(); assert s.strip() and len(s)<=8192; print(len(s))"` 退出码 0，且 `sed -n '149,156p' agent/skills/spec-workflow/SKILL.md | diff - <(tail -n +3 agent/skills/spec-workflow/convergence.md)` 无输出（逐字一致）
+- [x] 1.2 新建 `agent/skills/spec-workflow/execution.md`：把 SKILL.md §八两个引擎小节（当前 210–227 行，自 `**subagent 引擎（默认）**：` 至 team 引擎最后一条 `- 该引擎**忽略 \`apply\` 路由键…`）**逐字剪切**搬入，文首加同样一行来源说明；本任务不改 SKILL.md；验证：`python3 -c "s=open('agent/skills/spec-workflow/execution.md',encoding='utf-8').read(); assert s.strip() and len(s)<=8192; print(len(s))"` 退出码 0，且 `sed -n '210,227p' agent/skills/spec-workflow/SKILL.md | diff - <(tail -n +3 agent/skills/spec-workflow/execution.md)` 无输出
 
 ## 2. 入口骨架化与外部引用同步
 
