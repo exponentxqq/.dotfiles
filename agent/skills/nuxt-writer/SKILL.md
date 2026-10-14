@@ -18,9 +18,24 @@ description: Use when planning, writing, modifying, or reviewing any Vue/Nuxt fr
 7. **不做无谓判空** — 类型/契约已保证非空（必填 props、守卫已保证状态、后端非空字段）不再 `?.`/`if (!x)`/`??` 重复兜底；类型不匹配先修类型，不用 `!`/`as` 压制；只处理真实可达的空态（异步加载、可空字段），走隐藏区块/诚实文案
 8. **任务拆分粒度** — 拆分实施任务时，单任务非测试改动 ≤8 个文件（不含测试与 `composables/generated/` 重新生成文件）；超出说明切片过大，继续按页面/组件/composable 垂直拆——是拆任务不是砍改动范围
 
+## Import 规范（自动导入）
+
+- **裸用**（不写 import）的判据只有一个：目标仓 `.nuxt/imports.d.ts` 与 `.nuxt/types/imports.d.ts` 注册表里有这个名字
+  - Nuxt 默认目录 `components/`、`composables/`、`utils/`、`stores/`、`enums/`——含其中的函数与常量（`dateOf`、`AGENT_ROUTE_POOL`）
+  - `nuxt.config.ts` `imports.dirs` 配的全部目录（`composables/generated/*/{apis,models,enums}`、`hooks/`、`types/`、`types/apis`）
+  - Vue 自身导出（`ref`/`computed`/`watch`/`onMounted`/`nextTick`/`h`/`defineComponent`，类型 `Ref`/`PropType`/`InjectionKey` 等）
+  - Nuxt 模块注册的导入（@pinia/nuxt 的 `defineStore`/`storeToRefs`、@element-plus/nuxt 的 `ElMessage`/`ElMessageBox`、@vueuse/nuxt、模块注册的 `ApiError` 等）
+  - **类型同样自动导入**：注册表在 `declare global` 内以 `export type { … } from '<源>'` 声明过，注册表内类型直接裸用注解，不写 `import type`
+- **必须显式 import**：
+  - 被测试 `vi.mock('<模块ID>')` 拦截的模块，在被测代码与测试里都显式导入——自动导入注入的是注册表记录的路径（element-plus 深路径、framework 源码路径），与 mock 目标不是同一模块 ID，删掉会静默失效
+  - 测试基建：`vitest`、`@nuxt/test-utils`、`@vue/test-utils`、`createPinia`/`setActivePinia`/`createPersistedState`/`createApp`、`mountSuspended`/`mockNuxtImport`/`flushPromises`
+  - 不在注册表的来源：`#components` 与相对 `.vue`、组件目录相对模块（`./variants`）、`components/**/types.ts` 的值、assets、未注册包（`@fyzs/component/utils/validators`）
+  - 纯 node 环境测试（vitest `unit` project 命中的非 `*.nuxt.test.ts` 文件，如 `*.unit.test.ts`、`packages/*/src/**/__tests__/*.test.ts`）——这些文件本身及其直接消费模块的**值**导入保持显式；node 无 unimport，类型导入不受此限
+- 类型检查：项目应提供 `pnpm typecheck`（`nuxt typecheck`，需装 `vue-tsc`）；build/test/lint 都不查类型，误删 import 只能靠它发现，改动后必跑
+
 ## 组件规范
 
-- 组件使用 kebab-case（`<base-button>`），靠 Nuxt 路径自动导入；标签名与注册名完全对齐（`components/<域>/foo-bar.vue` → `<域-foo-bar>`）；不显式 import（仅 `import type`）；非组件文件名 camelCase（`useXxxApi.ts`、`request.ts`）
+- 组件使用 kebab-case（`<base-button>`），靠 Nuxt 路径自动导入；标签名与注册名完全对齐（`components/<域>/foo-bar.vue` → `<域-foo-bar>`）；不显式 import（含类型，见「Import 规范」）；非组件文件名 camelCase（`useXxxApi.ts`、`request.ts`）
 - 组件逻辑内聚：UI 状态、交互、派生计算由组件自身持有，父层只做编排与数据传入；同一业务被 ≥2 处需要、或组件内出现重复编排逻辑时，按业务拆到 `app/composables/useXxx.ts`，不堆在组件里也不塞进 `utils/`
 - 含播放器/RTC/手势状态、需跨切换保留的组件隐藏用 `v-show` 不用 `v-if`（卸载销毁内部状态）
 - 弹窗：子组件对外支持 v-model 语义（props 收 `modelValue` + `emit('update:modelValue')`），但组件**内部**禁止把该 prop 再 `v-model` 绑给下层（prop 只读，关不掉）——内层要用 `:model-value` + emit 透传；全局 layout 已挂载的弹窗页面不再挂（双实例叠层）
@@ -135,8 +150,8 @@ description: Use when planning, writing, modifying, or reviewing any Vue/Nuxt fr
 
 ## 写完自查
 
-- 跑项目自有验证命令（test / format，见各项目 CLAUDE.md/AGENTS.md）
-- [ ] 组件 kebab-case 自动导入，无显式 import（仅 type）
+- 跑项目自有验证命令（format / typecheck / test，见各项目 CLAUDE.md/AGENTS.md）
+- [ ] 无注册表内符号的显式 import（含 `import type`）；`vi.mock` 拦截的模块与被 node 单测消费的值导入除外
 - [ ] 日期操作全走 `app/utils/date.ts`（无显式 dayjs、无显式 utils import）
 - [ ] 样式 attributify + hex + rem；scoped 仅伪元素；同名属性已合并
 - [ ] 移动端坑已过：手势播放 / dvh / contain / label 激活 / iOS repeat 背景
