@@ -42,17 +42,20 @@
 - id: tool-skill
   name: "@deepseek-ai/dsh-tool-skill"
   disabled: false
-# 接入 dbx MCP：stdio 启动 @dbx-app/mcp-server（镜像预装），连接 dbx web（同 compose 网络）
-- insert:
-    - id: mcp-dbx
-      name: "@deepseek-ai/dsh-mcp-client"
-      config:
-        serverName: dbx
-        transport: stdio
-        command: npx
-        args: [ "-y", "@dbx-app/mcp-server" ]
-        env:
-          DBX_WEB_URL: http://dbx:4224
+# dbx MCP 已从「用户级」迁到 opc 的**项目级**配置：company/opc/.dsh/mcp/dbx.yaml
+# 由 dsh-plugin-project-mcp 扫描并按工作区隔离——只有 opc 工作区的会话看得到 mcp__dbx__*，
+# 服务器命令/参数与原配置一致。如确需全局 dbx（所有工作区可见），恢复下面注释的 insert 即可。
+# 注意勿与项目级同名配置并存：profile 行先占住 serverName，项目侧那台会被记 error 跳过。
+# - insert:
+#     - id: mcp-dbx
+#       name: "@deepseek-ai/dsh-mcp-client"
+#       config:
+#         serverName: dbx
+#         transport: stdio
+#         command: npx
+#         args: [ "-y", "@dbx-app/mcp-server" ]
+#         env:
+#           DBX_WEB_URL: http://dbx:4224
 # 接入 codebase-memory MCP：代码知识图谱检索（agent 指令要求优先使用；二进制由宿主机 npm 全局包目录挂载提供，见 compose tools.yml）
 - insert:
     - id: mcp-codebase-memory

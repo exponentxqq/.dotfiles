@@ -1,12 +1,15 @@
 {
   "name": "dsh-profile-headless",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/project-mcp"
+  },
   "dsh": {
     "profile": {
       "bundles": [
         "@deepseek-ai/dsh-base",
-        "@deepseek-ai/dsh-headless"
+        "@deepseek-ai/dsh-headless",
+        "dsh-plugin-project-mcp"
       ]
     }
   }

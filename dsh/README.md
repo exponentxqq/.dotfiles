@@ -130,7 +130,7 @@ dsh 原生支持 Agent Skills 标准（`<dir>/<name>/SKILL.md` + `name`/`descrip
   不跨容器挂载边界——宿主变更后 opencode 即时生效，**dsh 需 `docker compose restart dsh`**
 - **MCP 依赖型 skill**（`codebase-memory`、`analyzing-elastic-logs`、`context7-mcp`）：
   描述可见但对应 `mcp__*` 工具未接入，模型自行降级；后续按「MCP 接入」一节各加一条
-  insert patch 即可启用（dbx 已接，见下节）
+  insert patch 即可启用（dbx 已接，现为 opc 项目级，见下节）
 - skill 的 `name`/`description` 常驻 system prompt，正文由模型按需通过 skill 工具加载
 
 ### openspec skills
@@ -148,19 +148,28 @@ opencode 侧触发时 CLI 缺失会降级，需要时 `npm i -g @fission-ai/open
 > `docker exec dsh dsh <app>` 的默认工作目录是 `${HOST_PROJECT_PATH}`（无 `.env`），
 > 需要换目录时用 `docker exec -w <dir> dsh dsh <app>`。
 
-## MCP 接入（dbx）
+## MCP 接入（dbx：opc 项目级）
 
-三个 profile 的 `cordis.patch.yml` 各有一条 `- insert:` 条目，把内置的
-`@deepseek-ai/dsh-mcp-client` loader 插入树中，stdio 启动 `@dbx-app/mcp-server`
-连接 dbx web（dsh 与 dbx 同在 compose `backend` 网络，容器内以 `http://dbx:4224` 直连）。
-模型侧工具名为 `mcp__dbx__<tool>`。
+dbx MCP 已从**用户级**（三个 profile 的 `cordis.patch.yml` 各一条 `mcp-dbx` insert，对所有
+工作区可见）迁到 **opc 项目级**配置 `~/develop/company/opc/.dsh/mcp/dbx.yaml`（opc 仓
+`.gitignore` 忽略 `.dsh`，属机器本地配置、不入库）：由 `dsh-plugin-project-mcp` 扫描并按
+工作区隔离，**只有 opc 工作区**（主根，或以 opc 为附加根）的会话可见 `mcp__dbx__*`。
+三个 profile 均已安装该插件（web 原有；acp/headless 随本次迁移补装）。原 insert 已从三个
+profile 删除，并在原位以注释保留——确需恢复全局 dbx 时取消注释即可，但**勿与项目级同名
+配置并存**（profile 行先占住 serverName，项目侧那台会被记 error 跳过）。
 
+- **项目级 MCP 机制**：`dsh-plugin-project-mcp` 扫描每个工作区根（含附加根）的 `.dsh/mcp/`，
+  每文件一台服务器、`serverName` 默认取文件名，支持 `${VAR}` 环境展开、文件热重载与
+  `/mcp-reload` 兜底；隔离为 fail-closed（无归属会话看不到任何项目 MCP 工具）。该插件是
+  纯宿主面，web/acp/headless 均可安装。现成参考：`opc/.dsh/mcp/figma.yaml`
+- **给其他项目接 dbx**：在该项目根建 `.dsh/mcp/dbx.yaml`（结构同 opc），工具名同为
+  `mcp__dbx__<tool>`；同一 `serverName` 全局只有一处胜出，跨项目并存需改名
 - **patch 语法要点**：覆盖已有 loader（如翻转 `disabled`）直接写 `- id: ...` 条目；
   插入全新 loader 必须用 `- insert: [条目]` 包装，裸写新 id 会被静默忽略
 - MCP server 包已烘进镜像（`ARG DBX_MCP_VERSION`），`npx` 启动秒起、无网络下载；
   初始连接失败不阻断 dsh 启动（该 server 的工具不出现，日志有错误）
 - opencode 侧的同名 MCP 在 `~/.config/opencode/opencode.jsonc`（`DBX_WEB_URL` 为
-  `localhost:4224`，走宿主端口映射），两端各自独立配置
+  `localhost:4224`，走宿主端口映射），两端各自独立配置，不受本次迁移影响
 
 ## 升级注意
 

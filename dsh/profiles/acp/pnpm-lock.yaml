@@ -6,4 +6,30 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    dependencies:
+      dsh-plugin-project-mcp:
+        specifier: github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/project-mcp
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/6e0a80e795a24c55021506b5ac9a1bd5e1c2e7ef#path:plugins/project-mcp
+
+packages:
+
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/6e0a80e795a24c55021506b5ac9a1bd5e1c2e7ef#path:plugins/project-mcp:
+    resolution: {gitHosted: true, path: plugins/project-mcp, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/6e0a80e795a24c55021506b5ac9a1bd5e1c2e7ef}
+    version: 1.1.1
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/dsh': '>=0.2.0-rc.2'
+
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
+snapshots:
+
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/6e0a80e795a24c55021506b5ac9a1bd5e1c2e7ef#path:plugins/project-mcp:
+    dependencies:
+      yaml: 2.9.1
+
+  yaml@2.9.1: {}
