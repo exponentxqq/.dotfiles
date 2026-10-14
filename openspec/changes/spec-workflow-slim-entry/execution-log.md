@@ -60,7 +60,83 @@ $ git diff --stat          # tracked 文件零改动 → 组 1 未触碰 SKILL.m
 
 ## 三、阶段 3 批次 2（组 2：入口改写与外部引用同步）
 
-（待记录）
+**批次目标**：把入口从 15971 压入宿主 pruner 阈值之内（免裁），并同步外部引用；**本批次含 Lead 起草的确定性期望成品 + md5 门**。
+
+### 3.1 阈值与包裹开销的**精确标定**（取代先前 +360 估算）
+
+读 dsh 实现得到确定性包裹模板（`dsh-skill` `renderSkillContent`）：
+
+```
+<skill_content name="spec-workflow">\n<skill_resources>\nBase directory for this skill: <path>\nResolve relative paths mentioned by this skill against the base directory before using them. Load referenced resources only as needed.\n</skill_resources>\n\n<skill_instructions>\n{content}\n</skill_instructions>\n</skill_content>
+```
+
+据此计算（`path` 取 symlink 解析后的宿主路径 56 字符）：
+
+| 项 | 值 |
+| --- | --- |
+| 包裹码点（不含内容） | **343** |
+| pruner `thresholdChars` | 8192 |
+| **内容上限** | **7849**（= 8192 − 343；若 path 取容器短路径 42 字符则为 7863） |
+
+对照 `dsh-compaction-tool-result-pruner`：超限即裁为 head 4096 + marker 39 + tail 1024 = **5159**，**与超限多少无关**——故「中间态」机制收益为零（design D6 的定量确认）。
+
+### 3.2 Lead 起草：17 版迭代与实测（每版均 `python3 len()` 实测）
+
+| 版本 | 手段 | 码点 |
+| --- | --- | --- |
+| 现状 | — | 15971 |
+| v1 | 去重四项 + 骨架化 + 句式收紧 | 12538 |
+| v2 | + §二/§六 细节外移 + 行级短句 | 10790 |
+| v5 / v7 / v9 | 逐步链式化 + 续删非红线内容 | 9766 / 9042 / 8817 |
+| v11 / v13 / v15 | 结构性合并 + 定点删除 | 8323 / 8086 / 7921 |
+| **v17（定稿）** | 方向表改文字式 + 收口 | **7812** |
+
+**关键实测结论**：措辞级压缩在 v11 后完全饱和（每版仅省 100–200）；`[6800, 7830]` 区间**可达但需追加外移**（design D1 未声明的 §二/§五/§六/§八 判据外移），故经用户批准新增任务 2.3 承接。
+
+**定稿产物**：`/tmp/spec-flow/spec-workflow-slim-entry/expected-SKILL.md`，md5 **`613e3a9c27bfe54c20930930c559440a`**，7812 码点 → 渲染后 **8155 ≤ 8192（免裁）**；12 节标题与 frontmatter 逐字节一致；红线内联最小集 9/9 全在（恢复速查 / 绝不做 / §十二红线表 / §七六步恢复协议 / §四①–⑤ / 两条禁令 / 独立性铁律 / 参数面合并表 / 按需读取路由表）。
+
+### 3.3 执行编排与偏差
+
+**偏差 D-2（引擎降级，同 D-1 成因）**：团队席位仍为 8/8（第一步变更遗留 7 个 inactive 成员 + 批次 1 的 1 个），三个任务**全部降级 fresh subagent**（`apply` 路由 `opencode-go/deepseek-v4.1-flash`）并行执行：2.1 SKILL.md 替换（双 md5 门）、2.2 `dsh/README.md` 路径表 +2 条目、2.3 三个 references 追加承接段落（源取 `git show HEAD:` 改前基线，与 2.1 无依赖）。
+
+**Lead 独立核对**（实跑，不采信回执结论）：
+
+```
+$ md5sum agent/skills/spec-workflow/SKILL.md
+613e3a9c27bfe54c20930930c559440a  agent/skills/spec-workflow/SKILL.md     # = 期望成品 md5 ✓
+$ python3 -c "s=open('agent/skills/spec-workflow/SKILL.md',encoding='utf-8').read(); print(len(s), len(s)+343)"
+7812 8155                                                                # 码点门 [6800,7830] ✓；渲染 8155 ≤ 8192 免裁 ✓
+$ grep -c '^## ' agent/skills/spec-workflow/SKILL.md
+12                                                                       # 12 节 ✓
+$ git diff agent/skills/spec-workflow/SKILL.md | grep -E '^[+-](name|description):'
+（无输出）                                                                # frontmatter 逐字节未变 ✓
+红线内联最小集 9/9：恢复速查 / 绝不做段 / §十二红线表 / §七六步恢复协议 / §四①–⑤ / 两条禁令 / 独立性铁律 / 参数面表 / 按需读取路由表  —— 全部命中 ✓
+$ grep -c '^| `agent/skills/spec-workflow/\(routing\|failure-modes\|planning\|execution\|convergence\)\.md`' dsh/README.md
+5                                                                        # 路径表内 5 条 entries ✓
+$ git diff --stat dsh/README.md
+ dsh/README.md | 2 ++                                                    # 纯新增 2 行 ✓
+```
+
+**验证句假阳性 V-1（如实记录，卡片不改）**：tasks.md 任务 2.2 的验证句写 `grep -c 'spec-workflow/\(routing\|failure-modes\|planning\|execution\|convergence\)\.md' dsh/README.md` 期望 **5**，实测为 **6**——多出的 1 处是**表外第 198 行散文引用** `agent/skills/spec-workflow/routing.md`（HEAD 基线即存在，非本次引入）。改为限定表内行前缀（`^| \`agent/skills/...`）后精确命中 **5**，交付内容正确；属卡片验证句未限定匹配范围，非交付缺陷。
+
+### 3.4 任务 2.3 核对（承接外移、内容无损）
+
+```
+$ 5 个 references 码点（上限 8192）
+SKILL.md 7812 / convergence.md 2864 / execution.md 3058 / failure-modes.md 2169 / planning.md 4496 / routing.md 3738   —— 全部 ≤ 8192 ✓
+$ 逐字 diff 复核（6 个外移片段 vs 改前基线对应行区间，Lead 独立实跑）
+§二 前置检查展开 → planning.md   逐字一致 (1033 cp)
+§六 落档细节   → planning.md   逐字一致 (1375 cp)
+§十 接续细节   → planning.md   逐字一致  (401 cp)
+§五 六步判据   → convergence.md 逐字一致 (1948 cp)
+§八 三模式与硬停 → execution.md  逐字一致  (698 cp)
+§九 验证归档   → execution.md   逐字一致  (701 cp)
+$ 交叉验证：7 处源区间在改写后的入口中逐个检测 → 全部 False（已外移）
+```
+
+**结论**：外移内容唯一存在于三个 references，**无重复、无丢失**；2.1（删）与 2.3（承接）交接闭合。
+
+**格式观察（保留原样，不手改）**：追加块前为 3 个换行（空 2 行），共 3 处（planning.md ×2、execution.md ×1），系追加脚本固有产物；Markdown 折叠连续空行，不影响内容与读取。
 
 ## 四、阶段 3 批次 3（组 3：结构化验证与渲染后实测）
 

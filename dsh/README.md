@@ -128,6 +128,8 @@ openspec archive <change>           # 评审通过后归档
 | `agent/skills/spec-workflow/routing.md` | §十一 模型路由外移正文：路由键、图片能力、白名单、三档回退、路由自检脚本——**派发子代理前读取** |
 | `agent/skills/spec-workflow/failure-modes.md` | §十二 边界与失败处置表外移正文（红线级条目留在 SKILL.md 第十二节）——**异常时读取** |
 | `agent/skills/spec-workflow/planning.md` | §四 并行/串行派发模板与回执核对外移正文——**阶段 1 派发前读取** |
+| `agent/skills/spec-workflow/execution.md` | §八 执行引擎编排外移正文：提示模板、回执格式、team 任务板、三模式与提交纪律——**首次派发前读取** |
+| `agent/skills/spec-workflow/convergence.md` | §五 差异收敛外移正文：`grill-me` 设计树/前沿分轮方法与六步判据——**阶段 1.5 读取** |
 | `dsh/commands/spec-flow.md` | 命令薄壳，加载 skill 并把 `$ARGUMENTS` 代入正文 |
 | `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（见下） |
 
