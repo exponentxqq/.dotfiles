@@ -52,6 +52,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 | 派发任一子代理 / 团队成员前 | [routing.md](routing.md) —— 路由键、三档回退、白名单、图片能力、自检脚本 |
 | 遇异常、边界或失败处置 | [failure-modes.md](failure-modes.md) —— 处置表主体（红线条目另见第十二节） |
 
+**压缩后恢复速查**（红线级）：进度只认工件 + 勾选态 + 提交历史**三方对齐**（`openspec status --change <change> --json`、`tasks.md`、`git log`）；**绝不重跑已完成任务**，从最小编号未完成组继续（第七节）。
 
 ## 二、前置检查
 

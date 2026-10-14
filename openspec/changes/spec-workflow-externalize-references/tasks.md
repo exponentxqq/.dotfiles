@@ -13,8 +13,8 @@
 
 ## 3. 结构化验证
 
-- [ ] 3.1 引用闭合与内容无损核对：对 SKILL.md 与三个 references 文件中出现的每个 `xxx.md` 文件引用逐一 `test -f` 断言存在；断言外移内容唯一性（`grep -c 'child LLM route' agent/skills/spec-workflow/routing.md` ≥ 1 且同关键词在 SKILL.md 中仅剩摘要级 ≤ 1 次命中）；断言 12 节标题仍在（`grep -c '^## ' agent/skills/spec-workflow/SKILL.md` = 12）；验证：上述每条断言以退出码 0 通过并逐条记录输出
-- [ ] 3.2 加载冒烟与码点记录：在会话内按名加载 `spec-workflow` skill 成功、`read` 读取三个 references 文件任一成功；用 `python3 -c "print(len(open(p,encoding='utf-8').read()))"` 记录外移后 SKILL.md 与三个 references 的码点数字（写入变更执行记录，供第二步变更基线）；验证：加载与读取均成功，且四个码点数字已记录（SKILL.md 预期 ≈14000，routing.md 预期 ≈3600）
+- [x] 3.1 引用闭合与内容无损核对：对 SKILL.md 与三个 references 文件中出现的每个 `xxx.md` 文件引用逐一 `test -f` 断言存在；断言外移内容唯一性（`grep -c 'child LLM route' agent/skills/spec-workflow/routing.md` ≥ 1 且同关键词在 SKILL.md 中仅剩摘要级 ≤ 1 次命中）；断言 12 节标题仍在（`grep -c '^## ' agent/skills/spec-workflow/SKILL.md` = 12）；验证：上述每条断言以退出码 0 通过并逐条记录输出
+- [x] 3.2 加载冒烟与码点记录：在会话内按名加载 `spec-workflow` skill 成功、`read` 读取三个 references 文件任一成功；用 `python3 -c "print(len(open(p,encoding='utf-8').read()))"` 记录外移后 SKILL.md 与三个 references 的码点数字（写入变更执行记录，供第二步变更基线）；验证：加载与读取均成功，且四个码点数字已记录（SKILL.md 预期 ≈14000，routing.md 预期 ≈3600）
 
 ## Workflow follow-up
 
