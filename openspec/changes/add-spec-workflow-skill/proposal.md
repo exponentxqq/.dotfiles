@@ -28,6 +28,6 @@
 
 - **新增**：`agent/skills/spec-workflow/SKILL.md`、`dsh/commands/spec-flow.md`、`dsh/spec-workflow.yaml`
 - **修改**：`dsh/profiles/web/cordis.patch.yml`（模型选择开关与白名单）、`agent/skills/README.md`、`dsh/README.md`
-- **宿主环境**：skctl 聚合层登记（spec-workflow + 7 个 openspec skills）、`/data/dsh/commands/spec-flow.md` symlink、dsh 重启后生效
+- **宿主环境**：skctl 聚合层登记（spec-workflow + 7 个 openspec skills）、`/data/dsh/commands/spec-flow.md` symlink——两者**即时生效、无需重启**（实测；命令面板未出现时先 `/commands-reload` 手动重扫）；仅 `cordis.patch.yml` 的 profile 配置变更需重启 dsh
 - **依赖**：openspec CLI（容器已装 1.14.1）、user-commands 插件（web profile 已装）、Agent Teams（web profile 已装，仅供可选 team 引擎）、`subagent-model-selection`（本变更开启）
 - **风险**：team 引擎依赖实验性 Agent Teams（默认关闭，仅显式选用）；模型白名单与映射文件需保持一致

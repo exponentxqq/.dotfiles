@@ -16,6 +16,6 @@
 
 ## 3. 验证
 
-- [ ] 3.1 变更校验：`openspec validate add-spec-workflow-skill --strict` 输出通过；验证：退出码 0 且输出含 valid/passed 语义（无 error/warning）
-- [ ] 3.2 配置校验：经 docker python 容器解析 `dsh/spec-workflow.yaml` 与 `dsh/profiles/web/cordis.patch.yml` 成功（**dsh 会话容器**的 `python3` 无 PyYAML；docker python 容器自带 PyYAML 6.0.3；patch 文件含 `!!js` 标签，须先注册 `tag:yaml.org,2002:js` 多构造器再 `yaml.load`，裸 `safe_load` 必报 ConstructorError）；`dsh --profile web --dump-config` 中 `subagent-model-selection-settings` 行显示 `enabled: true` 与五条白名单；`dsh --profile web --dump-config-schema` 与开工前基线对比不新增 error/warning（基线本身 4 条既有 error、10 条 warning、退出码 1）；验证：YAML 解析脚本退出码 0，schema 输出与基线逐条一致
-- [ ] 3.3 交付核对：汇总验证证据——skill frontmatter 与目录一致、命令 symlink 指向源本、聚合层含 `spec-workflow` 与 7 个 `openspec-*`、README 两处更新、patch 白名单覆盖三家 provider、**生效机制已实测（命令面板出现 `/spec-flow`、skill 可加载，无需重启）**；验证：逐项列出命令与输出摘要，缺项如实标注（如「需宿主侧操作」）
+- [x] 3.1 变更校验：`openspec validate add-spec-workflow-skill --strict` 输出通过；验证：退出码 0 且输出含 valid/passed 语义（无 error/warning）
+- [x] 3.2 配置校验：经 docker python 容器解析 `dsh/spec-workflow.yaml` 与 `dsh/profiles/web/cordis.patch.yml` 成功（**dsh 会话容器**的 `python3` 无 PyYAML；docker python 容器自带 PyYAML 6.0.3；patch 文件含 `!!js` 标签，须先注册 `tag:yaml.org,2002:js` 多构造器再 `yaml.load`，裸 `safe_load` 必报 ConstructorError）；`dsh --profile web --dump-config` 中 `subagent-model-selection-settings` 行显示 `enabled: true` 与五条白名单；`dsh --profile web --dump-config-schema` 与开工前基线对比不新增 error/warning（基线本身 4 条既有 error、10 条 warning、退出码 1）；验证：YAML 解析脚本退出码 0，schema 输出与基线逐条一致
+- [x] 3.3 交付核对：汇总验证证据——skill frontmatter 与目录一致、命令 symlink 指向源本、聚合层含 `spec-workflow` 与 7 个 `openspec-*`、README 两处更新、patch 白名单覆盖三家 provider、**生效机制已实测（命令面板出现 `/spec-flow`、skill 可加载，无需重启）**；验证：逐项列出命令与输出摘要，缺项如实标注（如「需宿主侧操作」）
