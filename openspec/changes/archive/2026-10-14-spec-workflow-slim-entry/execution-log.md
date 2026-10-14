@@ -220,4 +220,29 @@ $ 交叉验证：7 处源区间在改写后的入口中逐个检测 → 全部 F
 
 ## 五、阶段 4（验证与归档）
 
-（待记录）
+**验证门**：本变更的验证 = 组 3 断言（3.1 引用闭合与内容无损 + 3.2 渲染后实测）——**已全部通过**（见第四节）；项目根无针对本变更的专门验证声明（`CLAUDE.md` 仅描述 dotfiles 结构与安装命令）。
+
+**归档执行（`openspec-archive-change` skill 规程，Lead 执行）**：
+
+| 步骤 | 命令 / 动作 | 结果 |
+| --- | --- | --- |
+| 1 选定变更 | 唯一活跃变更 `spec-workflow-slim-entry` | ✓ |
+| 1b advisory | `openspec instructions archive --change … --json` | exit 0，context 已读（简体中文 + 保留英文结构头） |
+| 2 工件完成度 | `openspec status --change … --json` | proposal / specs / design / tasks = **全部 `done`** |
+| 3 任务完成度 | `openspec list --json` | `totalTasks=7`、`completedTasks=7` ✓ |
+| 4a delta 评估 | delta `specs/spec-workflow/spec.md` = **ADDED ×1**（无 MODIFIED/REMOVED/RENAMED），主规格已存在 | 需 sync；用户确认 **Sync now** |
+| 4b 规则快照 | `openspec instructions specs --change … --json` | exit 0；**关键规则**：描述（`### Requirement:` 与首个 scenario 之间）≤500 字符，`--strict` 对超长失败 |
+| 4c inline sync | 追加 delta 的 ADDED Requirement 到主规格 | 7360 → **7914 cp**（200 → 216 行）；纯追加校验 `True` |
+| 4d sync 结构验证 | 标题保留 / `## Purpose` 未动 / 无 delta 风格头 / 15 Requirements / 37 Scenarios / 描述无超 500 | 全部 ✓；`openspec validate --specs --strict` **exit=0** |
+| 5 归档 | `mv openspec/changes/spec-workflow-slim-entry → openspec/changes/archive/2026-10-14-spec-workflow-slim-entry` | 已移动（含 `.openspec.yaml`） |
+| 5b 归档后校验 | `validate --changes --strict`（无活跃变更）/ `--specs --strict` | 均 **exit=0** |
+
+**自纠错 C-1（描述长度计数口径）**：起草期预演曾算出新增 Requirement「标题+描述 = 533 > 500」并一度判定"非硬性规则"；取到 specs 规则快照后确认口径为**仅描述段**（不含标题）→ 实测 **173 字符 ≤ 500** ✓。前次判断的结论（无问题）正确，但**推理依据有误**，据实记录。
+
+**归档提交**：主规格同步 + 变更目录移动合并为一次归档提交（`docs(openspec): 归档 spec-workflow-slim-entry`），不与任何批次改动混提。
+
+**未决 / 后续**：
+- 宿主操作（本流程不代劳）：用户自行 `git push`。
+- 无需 skctl 重登记：bundle 内文件经目录级 symlink 实时可见（新增 `convergence.md` / `execution.md` 已在 `dsh/README.md` 路径表登记）。
+- 观察项：`dsh/profiles/web/cordis.patch.yml` 在本流程期间被 dsh Web 插件反复改写（会话模型设置），**始终未纳入任何提交**。
+
