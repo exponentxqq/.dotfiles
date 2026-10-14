@@ -124,3 +124,4 @@
       # 目的：让 post-commit hook（cbm-hook-pending / cbm-hook.log / codebase-memory-mcp）
       # 在**任何项目**的会话内都可写——不再逐个主根播种。
       - ~/.cache
+      - /tmp
