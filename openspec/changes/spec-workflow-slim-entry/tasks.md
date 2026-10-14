@@ -13,8 +13,8 @@
 
 ## 3. 结构化验证与渲染后实测
 
-- [ ] 3.1 引用闭合与内容无损核对（只读）：断言 5 个 references 均存在且 ≤8192 码点；对 SKILL.md 与 5 个 references 中每个 `.md` 引用逐一 `test -f`；断言外移内容与**归档基线**（`git show 9048fcf^:agent/skills/spec-workflow/SKILL.md` 的对应区间）逐字 diff 无输出；断言关键词唯一命中所属文件（如 `child LLM route` 仅 routing.md、设计树方法仅 convergence.md、team 引擎细节仅 execution.md）；断言 `第十X节` 旧引用零残留、12 节标题与 frontmatter 与基线逐字节一致；验证：每条断言退出码 0 并逐条记录输出
-- [ ] 3.2 渲染后实测与码点记录（只读）：会话内按名加载 `spec-workflow` skill，实测 `skill` 工具完整返回的码点数并断言 ≤8192（同时标定包裹开销常量 = 返回码点 − 文件码点）；记录入口与 5 个 references 的码点数字（写入变更执行记录，供后续变更基线）；验证：实测返回 ≤8192 且 6 个码点数字已记录、包裹开销常量已写明
+- [x] 3.1 引用闭合与内容无损核对（只读）：断言 5 个 references 均存在且 ≤8192 码点；对 SKILL.md 与 5 个 references 中每个 `.md` 引用逐一 `test -f`；断言外移内容与**归档基线**（`git show 9048fcf^:agent/skills/spec-workflow/SKILL.md` 的对应区间）逐字 diff 无输出；断言关键词唯一命中所属文件（如 `child LLM route` 仅 routing.md、设计树方法仅 convergence.md、team 引擎细节仅 execution.md）；断言 `第十X节` 旧引用零残留、12 节标题与 frontmatter 与基线逐字节一致；验证：每条断言退出码 0 并逐条记录输出
+- [x] 3.2 渲染后实测与码点记录（只读）：会话内按名加载 `spec-workflow` skill，实测 `skill` 工具完整返回的码点数并断言 ≤8192（同时标定包裹开销常量 = 返回码点 − 文件码点）；记录入口与 5 个 references 的码点数字（写入变更执行记录，供后续变更基线）；验证：实测返回 ≤8192 且 6 个码点数字已记录、包裹开销常量已写明
 
 ## Workflow follow-up
 
