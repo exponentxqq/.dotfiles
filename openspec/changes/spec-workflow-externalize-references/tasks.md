@@ -8,8 +8,8 @@
 
 ## 2. 入口瘦身与外部引用同步
 
-- [ ] 2.1 改写 `agent/skills/spec-workflow/SKILL.md` 为入口骨架：保持 12 节结构与 frontmatter 逐字节不变；§四瘦身为骨架（独立性铁律 + 方向表 + 「派发前读 planning.md 取模板」）；§十一瘦身为摘要段（路由键表 + 三档回退顺序 + vision 规则要点 + 「自检脚本与展开见 routing.md」）；§十二瘦身为红线级条目表 + 「其余情形读 failure-modes.md」；总览附近新增 Read-next 路由表（派发规划线前读 planning.md / 派发任一子代理前读 routing.md 并跑自检 / 异常与边界情形读 failure-modes.md）；验证：`git diff agent/skills/spec-workflow/SKILL.md | grep -E '^[+-](name|description):'` 无输出、`grep -n '第十一节' agent/skills/spec-workflow/SKILL.md` 无命中、`python3 -c "print(len(open('agent/skills/spec-workflow/SKILL.md',encoding='utf-8').read()))"` 输出 ≤ 16000 且 ≥ 11000
-- [ ] 2.2 同步外部文档：`dsh/README.md` 127 行路径表补充 references 文件条目、193 行「SKILL.md 第十一节」提法改为 `routing.md`，并核对 `agent/skills/README.md` 中 spec-workflow 相关提法一并同步；验证：`grep -n '第十一节' dsh/README.md` 无命中、`grep -n 'routing.md' dsh/README.md` 命中 ≥ 1、`grep -n 'failure-modes.md\|planning.md' dsh/README.md` 合计命中 ≥ 1
+- [x] 2.1 改写 `agent/skills/spec-workflow/SKILL.md` 为入口骨架：保持 12 节结构与 frontmatter 逐字节不变；§四瘦身为骨架（独立性铁律 + 方向表 + 「派发前读 planning.md 取模板」）；§十一瘦身为摘要段（路由键表 + 三档回退顺序 + vision 规则要点 + 「自检脚本与展开见 routing.md」）；§十二瘦身为红线级条目表 + 「其余情形读 failure-modes.md」；总览附近新增 Read-next 路由表（派发规划线前读 planning.md / 派发任一子代理前读 routing.md 并跑自检 / 异常与边界情形读 failure-modes.md）；验证：`git diff agent/skills/spec-workflow/SKILL.md | grep -E '^[+-](name|description):'` 无输出、`grep -n '第十一节' agent/skills/spec-workflow/SKILL.md` 无命中、`python3 -c "print(len(open('agent/skills/spec-workflow/SKILL.md',encoding='utf-8').read()))"` 输出 ≤ 16000 且 ≥ 11000
+- [x] 2.2 同步外部文档：`dsh/README.md` 127 行路径表补充 references 文件条目、193 行「SKILL.md 第十一节」提法改为 `routing.md`，并核对 `agent/skills/README.md` 中 spec-workflow 相关提法一并同步；验证：`grep -n '第十一节' dsh/README.md` 无命中、`grep -n 'routing.md' dsh/README.md` 命中 ≥ 1、`grep -n 'failure-modes.md\|planning.md' dsh/README.md` 合计命中 ≥ 1
 
 ## 3. 结构化验证
 
