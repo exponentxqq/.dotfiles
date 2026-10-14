@@ -36,6 +36,7 @@
 4. **三档回退顺序固定且不反复重试**：① 有 `fallback` → 备用路由重派一次；② 无 `fallback` 或备用也失败 → 回退继承会话模型一次；③ 仍失败 → 报告路由与错误原文并暂停。触发条件写成实测错误码：`child LLM route "…" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用/限流。
 5. **规划三线不加备用**：用户只指定了执行侧备用；给规划线静默加备用等于偷偷改变规划质量口径。副作用如实写进 proposal 的「风险」。
 6. **不加 `reasoningEffort` 字段**：`llm-pi-ai` 已按 provider 设 `reasoningEffort: max`，`--model` 与映射只决定路由，避免多余配置面。
+7. **需求拆成两条（归档后按 strict 校验修正）**：初版把 `fallback` 与 `vision` 全部并进「阶段级模型路由」一条，`openspec archive` 同步后 `openspec validate --specs --strict` 报 `requirements[11]: Requirement text is very long (>500 characters)`（该 warning 在 strict 下即失败）。故拆为「阶段级模型路由」（映射读取、`fallback` 可选、空映射、命令覆盖、主会话模型）与「读图覆盖与路由回退」（`vision` 能力键、白名单子集、三档回退、会话创建期生效）两条，主规格与归档 delta 同步修正；修正后 `openspec validate --specs --strict` = 1 passed / 0 failed，delta 单体验证（临时移回 `openspec/changes/` 跑 `openspec validate <name> --strict`）亦通过。**教训**：`openspec validate <change> --strict` 只校验 **delta**，主规格的长度约束要到归档后的 `--specs` 校验才会暴露——落档时若新增长要求，应预先按 ≤500 字符拆分。
 
 ## 交付物与文件布局
 

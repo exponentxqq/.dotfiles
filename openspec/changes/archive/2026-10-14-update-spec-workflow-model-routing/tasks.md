@@ -14,4 +14,4 @@
 
 ## 3. 归档
 
-- [ ] 3.1 归档本变更并同步主规格（`openspec-archive-change`）：归档目录落在 `openspec/changes/archive/<日期>-update-spec-workflow-model-routing/`，主规格「阶段级模型路由」Requirement 更新为含 `fallback` 与 `vision` 的版本；验证：`openspec list --json` 活跃变更为 0，且 `grep -c 'fallback\|vision' openspec/specs/spec-workflow/spec.md` ≥ 4
+- [x] 3.1 归档本变更并同步主规格（`openspec-archive-change`）：归档目录落在 `openspec/changes/archive/2026-10-14-update-spec-workflow-model-routing/`（`archivedAs` 同名、`specsUpdated: true`、modified 1），主规格「阶段级模型路由」Requirement 更新为含 `fallback` 与 `vision` 的版本——**归档后 strict 校验暴露需求段 >500 字符 warning，已按 design 决策 7 拆为「阶段级模型路由」与「读图覆盖与路由回退」两条并同步修正归档 delta**；验证：`openspec list --json` 活跃变更为 0 ✓；`grep -c 'fallback\|vision' openspec/specs/spec-workflow/spec.md` = 6 ≥ 4 ✓；`openspec validate --specs --strict` = 1 passed / 0 failed ✓；归档 delta 临时移回后 `openspec validate <name> --strict` = valid ✓
