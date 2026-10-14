@@ -53,6 +53,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 2. **确认参数**：把调用参数解析为「需求原文 / continue 变更名 / 规划编排 / 执行模式 / 引擎 / 模型覆盖」，逐项记下；`continue <变更名>` 直接转第十节。
 3. **记录工作目录事实**：项目根绝对路径、git 根、当前分支、`git status --porcelain` 是否干净。已有与本流程无关的脏改动 → 报告并询问如何处理，**不擅自 stash / commit / revert**。
 4. **能力自检**：确认本 skill 所需的 `openspec-*` skill（`openspec-propose`、`openspec-archive-change` 等）与**阶段 1.5 问答环节所需的 `grill-me` skill** 可加载；不可加载按第十二节处置顺序处理（**先核对聚合层与 skctl 登记 → 会话内执行内置 `/commands-reload` 手动重扫 → 重启容器仅作兜底**）——其中 **`grill-me` 不可加载时降级为普通按轮提问并如实告知用户**（第十二节）。阶段 1 的两条规划线**不依赖任何外部调研 skill**：方法完全由第四节自包含定义（7 字段草案 + 独立性铁律）。
+5. **路由自检**（可选，派发子代理前）：按第十一节核对映射文件路由 ⊆ 白名单（含 `fallback`），并确认本轮若有读图任务则 `vision` 路由可用；自检不过或派发报路由错误时按第十一节**三档回退**处置，不猜、不反复重试。
 
 ## 三、模式收集
 
@@ -143,7 +144,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 
 阶段摘要**必须标注**：**「串行独立性弱于并行」**——同一会话先后完成两条线，先入为主的结论难以真正隔离；**仅建议需求较小时使用**。需求越复杂越应当用 `--parallel`：**独立性是双线的核心价值**。
 
-**回执核对（主会话必做）**：两份产物**都存在且非空** → 各读一遍，核对 7 字段是否齐备、能否明显看出两条线**方向上的差异**（两份草案结论雷同或字段残缺 → 独立性不成立，按失败处理）→ 输出 3–8 行阶段摘要（两线各自的关键判断、已可见的分歧点、单边项信号）作为阶段边界汇报；两线上浮的**待决问题按中转协议②并入阶段 1.5 的设计树/前沿统一提问**（不另开问答通道，不积压到阶段末）；某线**缺失 / 为空 / 答非所问** → 视为该线失败：**重派一次**，仍失败则**如实报告**，由**用户决定**是否降级为串行模式重做该线（不得静默降级）。派发时按第十一节给 A / B 线分别应用 `lineA` / `lineB` 路由。
+**回执核对（主会话必做）**：两份产物**都存在且非空** → 各读一遍，核对 7 字段是否齐备、能否明显看出两条线**方向上的差异**（两份草案结论雷同或字段残缺 → 独立性不成立，按失败处理）→ 输出 3–8 行阶段摘要（两线各自的关键判断、已可见的分歧点、单边项信号）作为阶段边界汇报；两线上浮的**待决问题按中转协议②并入阶段 1.5 的设计树/前沿统一提问**（不另开问答通道，不积压到阶段末）；某线**缺失 / 为空 / 答非所问** → 视为该线失败：**重派一次**，仍失败则**如实报告**，由**用户决定**是否降级为串行模式重做该线（不得静默降级）。派发时按第十一节给 A / B 线分别应用 `lineA` / `lineB` 路由（某线需要读图时改用 `vision` 路由）。
 
 ## 五、差异收敛与分歧复算（阶段 1.5）
 
@@ -225,7 +226,7 @@ while 存在未勾选任务:
 - 每个任务一个 **fresh** 子代理（不要用继承上下文的 fork；只有 fresh 支持模型选择）。
 - 提示自包含（缺一不可）：项目根绝对路径、**任务原文（含编号）**、相关 spec/design 摘录、验收标准=**验证句原文**、写范围（允许改的文件/目录）、禁止事项（不 `git add`/`git commit`、不改 `tasks.md` 勾选、不改写范围外文件、不跑破坏性或不可逆命令）。
 - 组内并发派发、**组间串行**；并行上限取映射文件 `parallelism`（默认 3）。
-- 回执格式要求：改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按第十一节给任务子代理应用 `apply` 路由。
+- 回执格式要求：改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按第十一节给任务子代理应用 `apply` 路由（任务需读图时改用 `vision` 路由）。
 - **待决问题中转**（第四节协议）：子代理遇需用户拍板的决策不得自行假设，在产物与回执中上浮 → 主会话**立即代问用户**（≤5 问/轮）→ 把**上一轮回执摘要 + 用户答复**并入新提示**接续重派**（上下文重建，非同一实例）。**这正是让 subagent 事实上能与用户交互的机制**：子代理自身不能提问（`DELEGATED_CALLER`），问题与答复经主会话中转。
 - 核对不通过：auto 模式 → 派发修复子代理（附失败输出）后重新核对；step 模式 → 向用户呈现问题与证据等裁决（见第十二节「审核被拒」）。
 
@@ -278,12 +279,18 @@ while 存在未勾选任务:
 映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`），schema：
 
 ```yaml
-models: {}          # 键：lineA | lineB | panel | apply | verify；值：{ provider, model }
+models:                       # 键：lineA | lineB | panel | apply | verify | vision
+  lineA: { provider: zai, model: glm-5.3 }        # 值：{ provider, model }
+  apply:                                          # 可选：fallback: { provider, model }
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  vision: { provider: zai, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
 engine: subagent    # subagent | team
 parallelism: 3      # 同组并行上限
 ```
 
-**优先级：命令行 `--model <阶段>=<provider>/<模型>` > 映射文件 `models` > 继承会话模型。**
+**优先级：命令行 `--model <阶段>=<provider>/<模型>` > 映射文件 `models` > 继承会话模型。** `--model` 只覆盖主路由，`fallback` 只能写在文件里。
 
 | 键 | 应用点 |
 | --- | --- |
@@ -292,16 +299,45 @@ parallelism: 3      # 同组并行上限
 | `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发） |
 | `apply` | 阶段 3 执行任务子代理（仅 subagent 引擎） |
 | `verify` | 阶段 4 归档前验证子代理 |
+| `vision` | **读图覆盖（能力键，不改变阶段划分）**：某阶段子代理需要图片输入（截图、设计稿、渲染结果、fixture 图片）而**该阶段路由不支持图片**时，忽略阶段路由、改用本键派发；阶段路由本身支持图片时保持阶段路由 |
+
+**图片输入能力**（出处：dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段；改白名单时同步核对）：
+
+| 路由 | 图片输入 | 说明 |
+| --- | --- | --- |
+| `zai/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线默认路由；**读图任务必须改走 `vision`** |
+| `zai/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
+| `opencode-go/deepseek-v4.1-flash` | 支持 | `apply` / `verify` 主路由 |
+| `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
+| `deepseek-official/deepseek-flash` | 支持 | `apply` / `verify` 备用路由 |
+
+不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
+
+**路由自检**（派发前可选；退出码非 0 = 有路由不在白名单）：
+
+```bash
+node -e '
+const fs=require("fs"),YAML=require("/home/xuqinqin/develop/dotfiles/opencode/node_modules/yaml");
+const d="/home/xuqinqin/develop/dotfiles/dsh/";
+const m=YAML.parse(fs.readFileSync(d+"spec-workflow.yaml","utf8"));
+const wl=[...fs.readFileSync(d+"profiles/web/cordis.patch.yml","utf8").matchAll(/-\s*\{\s*provider:\s*([\w.\-]+),\s*model:\s*([\w.\-]+)\s*\}/g)].map(x=>x[1]+"/"+x[2]);
+const rs=Object.entries(m.models||{}).flatMap(([k,v])=>[[k,v.provider+"/"+v.model],...(v.fallback?[[k+".fallback",v.fallback.provider+"/"+v.fallback.model]]:[])]);
+const bad=rs.filter(([,r])=>!wl.includes(r));
+console.log("白名单:",wl.join(" "));console.log("映射:",rs.map(([k,r])=>k+"="+r).join(" "));
+if(bad.length){console.error("不在白名单:",bad.map(([k,r])=>k+"="+r).join(" "));process.exit(1)}
+console.log("OK 全部路由 ⊆ 白名单");'
+```
 
 硬约束：
 
-- **白名单**：显式路由必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
-- 显式路由不在白名单 → 调用会报错：**报告该路由并回退继承会话模型**，不得反复重试；同时提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
+- **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
+- **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
 - **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 不支持模型选择（保持与父会话一致以复用 KV cache），需要阶段路由时**不要用 fork**。
+- **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是"该会话未生效"而非工具损坏，换新会话即可。
 - `team` 引擎**忽略 `apply` 键，阶段级模型路由整体不适用**（teammate 创建无模型参数）。
 - **主会话阶段（落档、归档）的模型由用户自行切换**，本 skill 只在衔接点提示（第七节）；本 skill 无法修改主会话模型。
 - 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），报告一次后继续。
-- 参数语法错误（阶段名非法、缺 `provider/model`）→ 报错并列出合法键，要求更正后重发，不猜。
+- 参数语法错误（阶段名非法、缺 `provider/model`）→ 报错并列出合法键（含 `vision`），要求更正后重发，不猜。
 
 ## 十二、边界与失败
 
@@ -316,7 +352,9 @@ parallelism: 3      # 同组并行上限
 | 审核被拒（step 模式或用户否决产出） | 按意见修正后**重审**：**不勾选 checkbox、不提交**；修正范围超出本变更 → 回到用户确认 scope |
 | 任务失败（重试一次仍失败） | 暂停本批次并报告（任务号、错误、进度、建议），不中断流程其余部分 |
 | 勾选态与证据矛盾 | 以证据为准，回退该勾选并报告 |
-| 显式模型路由不在**白名单** | 报告并回退继承会话模型（第十一节） |
+| 显式模型路由不在**白名单**（报 `is not allowed for this Session`） | 按第十一节**三档回退**：先 `fallback` 重派一次 → 再无则回退继承会话模型 → 仍失败报告并暂停（**不反复重试**） |
+| 子代理需读图而阶段路由不支持图片（报 `does not declare image input`） | 改用 `vision` 路由重新派发（第十一节）；该错误是能力事实，**不重试原路由** |
+| 旧会话报 `child model selection is disabled for this tool instance` | 该会话在**组合期**未读到开关与白名单（配置改动只对新会话生效）：**新建会话**重试，必要时重启 dsh 兜底；**不要判定工具损坏** |
 | 子代理需要用户决策 / 直接提问被拒（`DELEGATED_CALLER`） | 走第四节「待决问题的中转交互协议」：子代理写产物「待决问题」节并在回执上浮 → 主会话**立即代问用户** → team 用 `send_message` 回送**同一成员**、subagent 把上一轮回执摘要 + 答复并入新提示**接续重派**。**`DELEGATED_CALLER` 是平台设计**（被拥有的子代理不得直接提问），**不是故障**——不要判定工具损坏、不要重试直接提问 |
 | team 成员创建失败 / 长时间无进展 | `interrupt_agent` 中断或重建；无法恢复则降级 subagent 完成该任务 |
 | 计划彻底失效（工件与实现矛盾） | `auto` 硬停条件之一：停下让用户决定重做落档（改工件）或终止 |

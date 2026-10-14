@@ -1,16 +1,29 @@
 # spec-workflow 阶段级模型路由
 # 键：lineA（A 规划线：需求/价值/范围）| lineB（B 规划线：实现/约束/风险）
-#     panel（分歧复算线，仅分歧时派发）| apply（执行任务）| verify（归档前验证）
-# 值：{ provider, model }；留空或注释掉 = 继承会话模型
-# 显式路由必须已在 profile 的 subagent-model-selection 白名单内
-# 命令参数 --model <阶段>=<provider>/<模型> 可临时覆盖本文件
-models: {}
-# models:
-#   lineA:  { provider: zai, model: glm-5.3 }
-#   lineB:  { provider: zai, model: glm-5.3 }
-#   panel:  { provider: zai, model: glm-5.3-flash }
-#   apply:  { provider: opencode-go, model: deepseek-v4.1-flash }
-#   verify: { provider: zai, model: glm-5.3-flash }
+#     panel（分歧复算线，阶段 1.5 仅分歧时派发）| apply（执行任务）| verify（归档前验证）
+#     vision（读图覆盖路由：阶段路由不支持图片输入时改用它，见下）
+# 值：{ provider, model }；可选 fallback: { provider, model }（派发/运行失败时改用它重派一次）
+# 留空、注释掉或写 {} = 该阶段继承会话模型
+# 硬约束：所有路由（含 fallback）必须是 dsh/profiles/web/cordis.patch.yml 中
+#         subagent-model-selection-settings.allowedModels 的子集，否则派发报
+#         `child LLM route "<provider>/<model>" is not allowed for this Session`
+# 命令行 `--model <阶段>=<provider>/<模型>` 可临时覆盖本文件（fallback 只能写在文件里）
+models:
+  # 规划阶段：glm-5.3（图片输入能力 = 无，纯文本）；需读图时改用下面的 vision
+  lineA:  { provider: zai, model: glm-5.3 }
+  lineB:  { provider: zai, model: glm-5.3 }
+  panel:  { provider: zai, model: glm-5.3 }
+  # 执行阶段（含归档前验证）：deepseek-v4.1-flash 主用，deepseek-flash 备用；两者都支持图片输入
+  apply:
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  verify:
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  # 读图覆盖：glm-5.3-flash（支持 text+image）——规划线/复算线要看截图、设计稿时改用它
+  vision: { provider: zai, model: glm-5.3-flash }
 
 # 执行引擎偏好（可被 --engine 覆盖）：subagent | team
 engine: subagent

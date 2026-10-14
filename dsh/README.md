@@ -161,12 +161,20 @@ openspec archive <change>           # 评审通过后归档
 ### 阶段模型路由（`dsh/spec-workflow.yaml`）
 
 ```yaml
-models: {}          # 五键 lineA | lineB | panel | apply | verify；值 { provider, model }，留空=继承
+models:                       # 键：lineA | lineB | panel | apply | verify | vision
+  lineA: { provider: zai, model: glm-5.3 }         # 值 { provider, model }
+  apply:                                           # 可选 fallback: { provider, model }
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  vision: { provider: zai, model: glm-5.3-flash }  # 读图覆盖路由（能力键，非阶段键）
 engine: subagent    # subagent | team（--engine 覆盖）
 parallelism: 3      # 同组并行上限
 ```
 
-优先级 `--model` 参数 > 映射文件 > 继承会话模型；五键各自的应用点：
+仓库当前配置（规划用强模型、执行用快模型）：`lineA` / `lineB` / `panel` → `zai/glm-5.3`；`apply` / `verify` → `opencode-go/deepseek-v4.1-flash`，备用 `deepseek-official/deepseek-flash`；`vision` → `zai/glm-5.3-flash`。
+
+优先级 `--model` 参数 > 映射文件 > 继承会话模型（`--model` 只覆盖主路由，`fallback` 只写在文件里）；各键应用点：
 
 | 键 | 应用点 |
 | --- | --- |
@@ -174,10 +182,15 @@ parallelism: 3      # 同组并行上限
 | `panel` | 阶段 1.5 的**分歧复算线**：仅在出现无法查证且影响方案走向的分歧时，派第三条独立子代理 |
 | `apply` | 阶段 3 执行任务子代理（**team 引擎忽略 apply 键，该引擎下阶段级路由整体不适用**） |
 | `verify` | 阶段 4 归档前验证子代理 |
+| `vision` | **读图覆盖路由**（能力键，不改变阶段划分）：子代理需图片输入而该阶段路由不支持图片时忽略阶段路由、改用它 |
+
+图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。规划三线的 `glm-5.3` 读图会报 `model "glm-5.3" does not declare image input; switch to an image-capable model to read images`，故**读图任务必须改走 `vision`**。
 
 落档与归档在主会话进行，模型由用户自行切换。
 
-> **白名单一致性**：显式路由必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报错——工作流报告该路由并**回退继承**会话模型。注意：启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + 五条 `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
+> **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。工作流按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + 五条 `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
+>
+> **生效时机**：开关与白名单在**会话创建时**读取——改完配置**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**（旧会话里派发报 `child model selection is disabled for this tool instance`，换新会话即可）。映射路由 ⊆ 白名单的自检命令见 `agent/skills/spec-workflow/SKILL.md` 第十一节。
 
 ### 宿主操作（新增命令 / skill 后各一次）
 
