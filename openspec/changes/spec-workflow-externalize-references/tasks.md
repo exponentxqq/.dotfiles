@@ -2,9 +2,9 @@
 
 ## 1. 生成外移 references 文件
 
-- [ ] 1.1 新建 `agent/skills/spec-workflow/routing.md`：将 SKILL.md §十一（模型路由）整节内容剪切搬运（模型路由映射 schema、路由自检 node 脚本、白名单对照表、三档回退、vision 读图覆盖、平台图片能力表），文首加一行「本文件为 SKILL.md §十一的外移正文，回入口引用写『SKILL.md 第 X 节』」；验证：`test -s agent/skills/spec-workflow/routing.md` 通过且 `grep -c '三档回退\|fallback\|vision\|白名单' agent/skills/spec-workflow/routing.md` ≥ 4
-- [ ] 1.2 新建 `agent/skills/spec-workflow/failure-modes.md`：将 SKILL.md §十二处置表主体剪切搬运（红线级条目除外：绝不副作用创建 openspec/、不静默把待决项变假设、不提交未过审或未验证内容、DELEGATED_CALLER 是平台设计非故障、auto 硬停四条件——这些留入口），文首加同样一行来源说明；验证：`test -s agent/skills/spec-workflow/failure-modes.md` 通过且 `grep -c 'DELEGATED_CALLER\|重派一次\|降级\|interrupt_agent' agent/skills/spec-workflow/failure-modes.md` ≥ 3
-- [ ] 1.3 新建 `agent/skills/spec-workflow/planning.md`：将 SKILL.md §四的并行派发提示模板（两条线逐字等形模板全文）与串行模式细节、回执核对要求剪切搬运，文首加同样一行来源说明；验证：`test -s agent/skills/spec-workflow/planning.md` 通过且 `grep -c 'DELEGATED_CALLER\|7 个字段\|等形\|待决问题' agent/skills/spec-workflow/planning.md` ≥ 3
+- [x] 1.1 新建 `agent/skills/spec-workflow/routing.md`：将 SKILL.md §十一（模型路由）整节内容剪切搬运（模型路由映射 schema、路由自检 node 脚本、白名单对照表、三档回退、vision 读图覆盖、平台图片能力表），文首加一行「本文件为 SKILL.md §十一的外移正文，回入口引用写『SKILL.md 第 X 节』」；验证：`test -s agent/skills/spec-workflow/routing.md` 通过且 `grep -c '三档回退\|fallback\|vision\|白名单' agent/skills/spec-workflow/routing.md` ≥ 4
+- [x] 1.2 新建 `agent/skills/spec-workflow/failure-modes.md`：将 SKILL.md §十二处置表主体剪切搬运（红线级条目除外：绝不副作用创建 openspec/、不静默把待决项变假设、不提交未过审或未验证内容、DELEGATED_CALLER 是平台设计非故障、auto 硬停四条件——这些留入口），文首加同样一行来源说明；验证：`test -s agent/skills/spec-workflow/failure-modes.md` 通过且 `grep -c 'DELEGATED_CALLER\|重派一次\|降级\|interrupt_agent' agent/skills/spec-workflow/failure-modes.md` ≥ 3
+- [x] 1.3 新建 `agent/skills/spec-workflow/planning.md`：将 SKILL.md §四的并行派发提示模板（两条线逐字等形模板全文）与串行模式细节、回执核对要求剪切搬运，文首加同样一行来源说明；验证：`test -s agent/skills/spec-workflow/planning.md` 通过且 `grep -c 'DELEGATED_CALLER\|7 个字段\|等形\|待决问题' agent/skills/spec-workflow/planning.md` ≥ 3
 
 ## 2. 入口瘦身与外部引用同步
 
