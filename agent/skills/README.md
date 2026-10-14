@@ -26,12 +26,15 @@ node $SKCTL doctor                            # 修复 ~/.agents/skills 链接�
 
 ## 当前清单
 
-| skill | 来源 |
-| ----- | ---- |
-| `spring-writer` / `nuxt-writer` / `grill-me` / `reviewing-deliverables` | 自写（本目录 local symlink） |
-| `smoke-testing-local-env` | 自写（本目录 local symlink） |
-| `analyzing-elastic-logs` / `codebase-memory` / `context7-mcp` | 自写（依赖各自 MCP，dsh 侧工具未接时模型自行降级） |
-| `openspec-*` ×7（core 6 + verify） | [Fission-AI/OpenSpec] `skills/<name>`，git 源（commit `2500d6da`），`skctl update` 升级 |
+| skill                                                                                     | 来源                                                                                                     |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `spring-writer` / `nuxt-writer` / `grill-me` / `reviewing-deliverables` / `spec-workflow` | 自写（本目录 local symlink）                                                                             |
+| `smoke-testing-local-env`                                                                 | 自写（本目录 local symlink）                                                                             |
+| `analyzing-elastic-logs` / `codebase-memory` / `context7-mcp`                             | 自写（依赖各自 MCP，dsh 侧工具未接时模型自行降级）                                                       |
+| `openspec-*` ×7（core 6 + verify `openspec-verify-change`）                               | 经 skctl 从 [Fission-AI/OpenSpec] `skills/<name>` 安装，git 源（commit `9111a765`），`skctl update` 升级 |
+
+宿主侧增删/更新 skill 后 opencode 读同一聚合层即时生效，**dsh 需
+`docker compose restart dsh` 才对新会话可见**（inotify 事件不跨容器挂载边界）。
 
 openspec skill 驱动 `openspec` CLI：dsh 容器已随镜像预装（`containers/tools/dsh/Dockerfile`）；
 宿主机未装，opencode 侧触发时 CLI 缺失会降级，需要时 `npm i -g @fission-ai/openspec`。

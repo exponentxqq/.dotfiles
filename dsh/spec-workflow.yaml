@@ -1,0 +1,19 @@
+# spec-workflow 阶段级模型路由
+# 键：lineA（A 规划线：需求/价值/范围）| lineB（B 规划线：实现/约束/风险）
+#     panel（分歧复算线，仅分歧时派发）| apply（执行任务）| verify（归档前验证）
+# 值：{ provider, model }；留空或注释掉 = 继承会话模型
+# 显式路由必须已在 profile 的 subagent-model-selection 白名单内
+# 命令参数 --model <阶段>=<provider>/<模型> 可临时覆盖本文件
+models: {}
+# models:
+#   lineA:  { provider: zai, model: glm-5.3 }
+#   lineB:  { provider: zai, model: glm-5.3 }
+#   panel:  { provider: zai, model: glm-5.3-flash }
+#   apply:  { provider: opencode-go, model: deepseek-v4.1-flash }
+#   verify: { provider: zai, model: glm-5.3-flash }
+
+# 执行引擎偏好（可被 --engine 覆盖）：subagent | team
+engine: subagent
+
+# 同组并行上限
+parallelism: 3

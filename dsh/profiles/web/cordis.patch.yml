@@ -125,3 +125,16 @@
       # 在**任何项目**的会话内都可写——不再逐个主根播种。
       - ~/.cache
       - /tmp
+# 阶段级模型路由白名单：dsh/spec-workflow.yaml 的 models 路由必须是本列表子集，
+# 覆盖 zai / opencode-go / deepseek-official 三家常用路由。
+# 注：tool-subagent.modelSelectionSettings 已由 agent 预设层（cordis/standard/ptc）
+# 自带 true，profile 层再写同 id 只会落到被禁用的宿主行（无效果），故此处不再覆盖。
+- id: subagent-model-selection-settings
+  config:
+    enabled: true
+    allowedModels:
+      - { provider: zai, model: glm-5.3 }
+      - { provider: zai, model: glm-5.3-flash }
+      - { provider: opencode-go, model: deepseek-v4.1-flash }
+      - { provider: opencode-go, model: deepseek-v4-pro }
+      - { provider: deepseek-official, model: deepseek-flash }

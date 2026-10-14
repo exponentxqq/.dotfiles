@@ -117,6 +117,83 @@ openspec archive <change>           # 评审通过后归档
 
 > 与插件相关的规范工件（`dsh-multi-repo-git-graph` 主规格与三次变更的归档）已随插件迁到 `~/develop/person/dsh-plugins/openspec/`；本仓库 `openspec/` 保留空壳，供 dotfiles 自身的变更使用。
 > 仓库内不写项目本地 openspec skills 副本（`openspec init --tools none`）——dsh / opencode 的 `openspec-*` skills 已由 skctl 全局装好，见下节。
+
+## spec-workflow 固定工作流
+
+固定 spec 驱动流程：**独立双线规划 → 差异收敛与分歧复算 → 落档 → 子代理执行 → 验证归档提交**；进度载体只有工件（`openspec/changes/<change>/` 与 `tasks.md` 勾选态），压缩上下文或重启会话后可从工件无损恢复。实体文件：
+
+| 文件 | 作用 |
+| --- | --- |
+| `agent/skills/spec-workflow/SKILL.md` | 工作流本体（执行手册），skill 名 `spec-workflow` |
+| `dsh/commands/spec-flow.md` | 命令薄壳，加载 skill 并把 `$ARGUMENTS` 代入正文 |
+| `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（见下） |
+
+两个等价入口：skill `spec-workflow`（按描述触发）与用户级斜杠命令 `/spec-flow`——薄壳正文经 `dsh-plugin-user-commands` 从 `~/.dsh/commands/spec-flow.md` 现读，调用参数以 `$ARGUMENTS` 全文代入：
+
+| 参数 | 含义 |
+| --- | --- |
+| `<需求描述>` | 新建流程的需求原文；为空则先开放式询问 |
+| `continue <变更名>` | 接续未完成变更：跳过规划与落档，按任务完成度续跑（执行前重选一次模式与引擎） |
+| `--parallel` | 阶段 1 两条规划线以两个 fresh 子代理并行独立完成（缺省串行） |
+| `--auto` | 连续执行全部批次，不因进度打断（不可逆/安全敏感/工作区外副作用/计划失效仍硬停） |
+| `--step-task` | 每个任务核对后停留审核 |
+| `--step-group` | 每个批次（`tasks.md` 编号组）核对后停留审核 |
+| `--engine team` | Agent Teams 引擎；缺省读映射文件，再缺省 `subagent` |
+| `--model <阶段>=<provider>/<模型>` | 阶段级模型覆盖；缺省读映射文件，再缺省继承会话模型 |
+
+五阶段与阶段边界：1 独立双线规划（**两条方向不同、各自完整的独立规划线，不是分工**：A 线方向 = 需求与价值、范围与边界；B 线方向 = 实现与约束、反例与风险。两线各自产出**同一套 7 字段的完整轻量规划草案**——目标与非目标、范围与边界、方案与取舍、任务拆分草案、验证思路、风险与未知项、假设清单；**互不读取对方产物、不共享中间结论**，独立性用于互相暴露遗漏；**待决问题经「子代理 ↔ 用户交互（中转协议）」上浮**）→ 1.5 差异收敛与分歧复算（**共识 / 分歧 / 单边遗漏**三分类，单边项逐项核验、不因只有一条线提出而丢弃 → 可从代码、规范或只读命令查证的分歧由主会话自行查证裁定并记录依据、**不问用户** → 影响方案走向且无法查证的分歧派**第三条独立子代理复算**（映射键 `panel`，不以任何既有草案为输入）并三线对照形成结论 → 仅剩决策项按 **`grill-me` 的设计树 / 前沿法**提问（该方法只作用于本阶段提问，两条规划线不变）：把待决项映射为设计树，**只问前沿**——前置决策已定才进本轮、依赖未决答案的留到后续轮次，**≤5 问/轮、每题附推荐答案**（措辞使「是 / 同意」即等于接受推荐）；可从环境查证的事实自行查证、**不向你索取**，答完**重算前沿**再给下一轮，**前沿为空或你确认达成共识才算收敛**；三分类、第三线复算与裁定 / 未答项留痕机制不变）→ 2 落档（`openspec-propose` 产四件工件、`openspec validate --strict`；**落档即停**并展示摘要）→ 3 执行 → 4 验证与归档（`openspec-archive-change`）。每阶段结束简短汇报；规划外 scope 变化回到用户。
+
+执行双引擎：`subagent`（默认）每任务派 fresh 子代理（提示自包含：任务原文、工件摘录、验证句、写范围），组内并发（上限 `parallelism`）、组间串行，主会话按验证句 + diff 核对通过才勾选任务；`team`（需 `--engine team` 或映射文件显式启用，依赖实验性 Agent Teams）由 Lead 把批次发到共享任务板、spawn ≤ 任务数的 implementer 认领，审核反馈走消息保留上下文，成员不可用降级 subagent；两种引擎的子代理待决问题统一经「子代理 ↔ 用户交互（中转协议）」中转。
+
+三模式与提交节奏：`auto` 全部完成后提交一次；`step-task` 每任务、`step-group` 每批次停留审核，step 模式**每批次审核通过后提交一次**（提交信息含批次号）。另两次固定提交：落档工件在落档完成时单独提交、归档在验证通过后单独提交——三者互不混提。
+
+### 子代理 ↔ 用户交互（中转协议）
+
+平台约束：子代理与 Agent Teams 的 teammate **都不能直接向用户提问**——其调用提问工具会被 `assertLiveRoot` 以 `DELEGATED_CALLER` 拒绝（官方文档要求「在最终结果中包含尚未解决的决定」）。**中转**是让子代理**事实上能与用户交互**的官方可行路径：子代理把需用户拍板的决策（问题 + 选项 + 推荐 + 影响面）写入产物「待决问题」节并在回执中**上浮**，不自行假设 → 主会话收到后**立即代问用户**（≤5 问/轮，每题附推荐答案）→ 按引擎**两档回送**：
+
+| 引擎 | 回送路径 | 子代理上下文 |
+| --- | --- | --- |
+| `team` | 经 team 引擎用 `send_message` 把答复回送**同一成员**（仅 `spawn_teammate` 的具名队友可寻址；tool-subagent 的子代理报 `active teammate … not found`） | 保留，可多轮往返 |
+| `subagent` | 把上一轮回执摘要 + 用户答复并入新提示**接续重派** | 重建 |
+
+用户明确授权「按假设清单推进」时跳过代问，并在产物中标注已授权假设。
+
+### 阶段模型路由（`dsh/spec-workflow.yaml`）
+
+```yaml
+models: {}          # 五键 lineA | lineB | panel | apply | verify；值 { provider, model }，留空=继承
+engine: subagent    # subagent | team（--engine 覆盖）
+parallelism: 3      # 同组并行上限
+```
+
+优先级 `--model` 参数 > 映射文件 > 继承会话模型；五键各自的应用点：
+
+| 键 | 应用点 |
+| --- | --- |
+| `lineA` / `lineB` | 阶段 1 两条独立规划线的子代理（仅并行编排派子代理时适用，串行编排由主会话自身依次完成） |
+| `panel` | 阶段 1.5 的**分歧复算线**：仅在出现无法查证且影响方案走向的分歧时，派第三条独立子代理 |
+| `apply` | 阶段 3 执行任务子代理（**team 引擎忽略 apply 键，该引擎下阶段级路由整体不适用**） |
+| `verify` | 阶段 4 归档前验证子代理 |
+
+落档与归档在主会话进行，模型由用户自行切换。
+
+> **白名单一致性**：显式路由必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报错——工作流报告该路由并**回退继承**会话模型。注意：启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + 五条 `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
+
+### 宿主操作（新增命令 / skill 后各一次）
+
+```bash
+# 1. 命令薄壳：源本在仓库，容器 ~/.dsh/commands/ 放 symlink（落盘宿主 /data/dsh/commands/）
+mkdir -p ~/.dsh/commands && ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-flow.md ~/.dsh/commands/spec-flow.md
+
+# 2. skill 登记进 skctl 聚合层（机制见下节「skill 复用」）
+node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-workflow
+
+# 3. 重启后命令注册与 skill 才对新会话可见（inotify 不跨挂载边界）
+cd ~/develop/docker && docker compose restart dsh
+```
+
+重启后校验：命令菜单出现 `/spec-flow`、skill 列表出现 `spec-workflow`、subagent 工具出现模型字段。
+
 ## skill 复用（与 opencode 同源，经 skctl 聚合）
 
 dsh 原生支持 Agent Skills 标准（`<dir>/<name>/SKILL.md` + `name`/`description` frontmatter）。
