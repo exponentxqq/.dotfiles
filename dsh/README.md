@@ -188,11 +188,14 @@ mkdir -p ~/.dsh/commands && ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands
 # 2. skill 登记进 skctl 聚合层（机制见下节「skill 复用」）
 node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-workflow
 
-# 3. 重启后命令注册与 skill 才对新会话可见（inotify 不跨挂载边界）
+# 3. 无需重启：symlink 建好、skctl 登记后即时可用（已实测，通常无需重启 dsh）
+#    命令面板未出现时，先在当前会话执行内置 /commands-reload 手动重扫（插件热加载，见下节）
+#    仍不可见再兜底重启容器：
 cd ~/develop/docker && docker compose restart dsh
 ```
 
-重启后校验：命令菜单出现 `/spec-flow`、skill 列表出现 `spec-workflow`、subagent 工具出现模型字段。
+校验：命令面板出现 `/spec-flow`、skill 列表出现 `spec-workflow`（已实测，运行中的 dsh 即时可见）；
+`subagent` 工具的模型字段需新会话/重启后才出现。
 
 ## skill 复用（与 opencode 同源，经 skctl 聚合）
 
@@ -203,8 +206,11 @@ dsh 原生支持 Agent Skills 标准（`<dir>/<name>/SKILL.md` + `name`/`descrip
 - **单一聚合层**：`~/.local/share/agent-skills/skills`（skctl 维护）。自写 skill 实体在
   `dotfiles/agent/skills/`（symlink 登记），外部 skill 为 git 源拷贝（记录 commit，可 update）；
   opencode 经 `~/.agents/skills` 读同一层
-- **增删/更新 skill**：一律用 skctl（命令见 `agent/skills/README.md`）。注意 inotify 事件
-  不跨容器挂载边界——宿主变更后 opencode 即时生效，**dsh 需 `docker compose restart dsh`**
+- **增删/更新 skill**：一律用 skctl（命令见 `agent/skills/README.md`）。该挂载是宿主聚合层的
+  只读 bind mount **实时视图**（`findmnt` + md5 实测），宿主变更**即时可见**，运行中的 dsh
+  **即可加载新 skill，通常无需重启**；命令插件亦带热加载（`watchTargets()` 防抖重扫 + 重新 arm），
+  新命令同样即时注册——命令面板未出现时先执行内置 `/commands-reload` 手动重扫，
+  仍不可见再兜底 `docker compose restart dsh`
 - **MCP 依赖型 skill**（`codebase-memory`、`analyzing-elastic-logs`、`context7-mcp`）：
   描述可见但对应 `mcp__*` 工具未接入，模型自行降级；后续按「MCP 接入」一节各加一条
   insert patch 即可启用（dbx 已接，现为 opc 项目级，见下节）

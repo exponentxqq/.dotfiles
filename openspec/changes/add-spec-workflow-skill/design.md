@@ -4,19 +4,20 @@
 
 以下事实在规划阶段逐条核实，是实现的依据：
 
-1. **skill 承载机制**：dsh 只扫描容器内 `~/.agents/skills`（只读挂载宿主 skctl 聚合层 `/home/xuqinqin/.local/share/agent-skills/skills`）。自写 skill 实体放 `dotfiles/agent/skills/<name>/`，经 `skctl install`（local 源 = symlink 登记）进入聚合层；宿主变更后需重启 dsh 容器才能被会话发现（inotify 不跨挂载边界）。
-2. **命令承载机制**：`user-commands` 插件三层命令——内置、用户级 `$DSH_HOME/commands/`（容器 `~/.dsh/commands`，落盘宿主 `/data/dsh/commands`）、项目级 `<根>/.dsh/commands/`。命令文件为 `<name>.md`，仅取一层，`.md` 平铺；frontmatter 只认 `description` / `argument-hint`；正文 `$ARGUMENTS` 全部替换为调用参数；注册需重启，正文现读不缓存。
+1. **skill 承载机制**：dsh 只扫描容器内 `~/.agents/skills`（只读 bind mount 宿主 skctl 聚合层 `/home/xuqinqin/.local/share/agent-skills/skills`）。自写 skill 实体放 `dotfiles/agent/skills/<name>/`，经 `skctl install`（local 源 = symlink 登记）进入聚合层；**该挂载是实时视图**，宿主侧新增/更新后条目立即可见（md5 与源本一致），运行中的 dsh 亦可按名加载新 skill（实测，见事实 14）——**无需重启**。
+2. **命令承载机制**：`user-commands` 插件三层命令——内置、用户级 `$DSH_HOME/commands/`（容器 `~/.dsh/commands`，落盘宿主 `/data/dsh/commands`）、项目级 `<根>/.dsh/commands/`。命令文件为 `<name>.md`，仅取一层，`.md` 平铺；frontmatter 只认 `description` / `argument-hint`；正文 `$ARGUMENTS` 全部替换为调用参数、每次调用现读不缓存；插件**带热加载**（监听用户级命令目录，目录不存在时回退监听其父目录，事件经防抖后重扫并重新 arm），另有内置 `/commands-reload` 手动重扫——**新增命令无需重启**（实测，见事实 14）。
 3. **symlink 可用**：命令发现用 `readdir(withFileTypes)`，symlink 条目的 `isDirectory()` 为 false，不会被子目录过滤；`.md` 后缀与 `readFile` 跟随链接均通过，故命令源本可留在 git 仓库、`/data/dsh/commands/` 放 symlink。symlink 目标写成容器与宿主都有效的同一绝对路径（`/home/xuqinqin/develop/dotfiles/...`）。
 4. **tasks 分组惯例**：spec-driven 的 `tasks.md` 天然是 `## N. 组名` + `- [ ] N.M 描述 + 验证句` 结构；本仓库与 dsh-plugins 的历史变更均如此。执行批次契约直接沿用。
 5. **模型选择机制**：`tool-subagent` 的 `modelSelectionSettings`（默认 false）控制新会话的 subagent 工具是否暴露 provider/model/reasoning_effort 字段；`subagent-model-selection-settings`（服务 `subagentModelSelection`，由 dsh-web-app 的 patch 行挂载、默认 `enabled: false` 且 `allowedModels: []`）提供 enabled 与白名单；开启要求白名单非空；显式选择的路由必须在白名单内，未指定则继承。
 6. **fork 不参与模型选择**：`tool-subagent-fork` 明确省略模型选择以保持 provider/model 与父会话一致（KV cache 复用）。故阶段级模型路由只对 fresh 子代理生效。
 7. **Agent Teams 限制**：teammate 创建工具无模型参数（`freshProvider`/`forkProvider` 仅决定子代理提供方），fork teammate 锁定 Lead 模型。故 team 引擎下阶段级模型路由不适用。
-8. **openspec skills 状态**：仓库文档声称 7 个 `openspec-*` 已装入聚合层，核实为从未登记；本变更已用 skctl 从 `Fission-AI/OpenSpec` 的 `skills/<name>` 补装（apply-change / archive-change / explore / propose / sync-specs / update-change / verify-change），需重启 dsh 后对新会话可见。
+8. **openspec skills 状态**：仓库文档声称 7 个 `openspec-*` 已装入聚合层，核实为从未登记；本变更已用 skctl 从 `Fission-AI/OpenSpec` 的 `skills/<name>` 补装（apply-change / archive-change / explore / propose / sync-specs / update-change / verify-change），安装后即时可见（见事实 14），无需重启。
 9. **可用模型路由**：`zai`（glm-4.7 / glm-5.2 / glm-5.3 / glm-5.3-flash / glm-5.3-highspeed / glm-5-turbo）、`opencode-go`（deepseek-v4.1-flash / deepseek-v4-pro / glm-5.3 / kimi-k3 / grok-4.7 等）、`deepseek-official`（deepseek-flash / deepseek-v4-pro）。
 10. **阶段级模型路由的真实开关（落档后实测修正）**：`tool-subagent.config.modelSelectionSettings` 已由 agent 预设层自带 `true`（`dsh-web-app/presets/cordis.patch.yml`、`standard.patch.yml`、`ptc.patch.yml` 的 `config.plugins` 中 `- id: tool-subagent`），web-app 顶层 patch 把宿主行的 `tool-subagent` 置为 `disabled: true`；用 `dsh --profile web --patch <探针> --dump-config` 实测，profile 层写 `- id: tool-subagent / config.modelSelectionSettings: true` 只落到那条**被禁用的宿主行**（预设行配置原样不变），即无效。故 profile 补丁只需覆盖 `subagent-model-selection-settings`（`enabled: true` + 非空 `allowedModels`；两字段为 schemastery `.volatile()`——volatile 盒子由配置值播种，配置层可写）。当前会话的 `subagent` 工具确实没有模型字段，与 `enabled` 默认 `false` 一致。
 11. **`--dump-config-schema` 基线并非通过**：`dsh --profile web --dump-config-schema` 在本变更开工**之前**就以退出码 1 结束，stderr 含 4 条既有 `unrecognized Loader tree carrier`（`[/179]`–`[/182]`）与 10 条既有 warning。故验证门只能取「**不新增 error/warning**（与基线逐条对比）」，不能要求退出码 0。
 12. **`--patch` 探针通道**：`dsh --profile web --patch <file> --dump-config` 可在**不改动** `profiles/web/cordis.patch.yml` 的前提下验证补丁合并结果（叠加在 profile 层之后），用于避免运行中 HMR 重载带来的风险。
 13. **子代理与用户交互的边界与中转路径（本轮源码核实 + 实测）**：`dsh-user-questions` 的 `assertLiveRoot`（`lib/index.js:531-535`）对归属于其他存活 agent 的子级抛 `DELEGATED_CALLER`；`dsh-tool-ask-user/README.zh.md` 第 12/74/158 行同述「存活的子 agent 不能调用此工具，必须在最终结果中包含尚未解决的决定」。即 **subagent 与 teammate 都不能直接向用户提问**。回送路径实测：`send_message` **无法寻址 tool-subagent 的子代理**——对运行中的子代理与已结束的子代理两种目标均报 `active teammate "…" not found`，它只寻址 `spawn_teammate` 建立的具名队友（web profile 预设的 `tool-subagent` 为 `backgroundMode: continuable`，但其续跑通道不经 `send_message` 暴露）。故中转分两档：**team 引擎**用 `send_message` 回送同一成员（保留上下文、可多轮）；**subagent 引擎**把上一轮回执摘要 + 用户答复并入新提示**接续重派**（上下文重建）。
+14. **生效机制：无需重启（推翻此前假设）**：此前「宿主变更后需重启 dsh 才可见」是未经验证的假设，本变更执行期实测证伪，三条证据：①运行中的会话直接用 `skill` 工具**成功按名加载**新建的 `spec-workflow`（正文全文返回）；②用带 token 的地址打开 GUI 新会话，`/` 命令面板**立即出现** `spec-flow …（spec-workflow）`，skill 列表出现 `spec-workflow`；③机制层面：`findmnt` 显示容器内 `/home/docker/.agents/skills` 就是宿主聚合层 `skills/` 的只读 bind mount（同一 inode 视图，SKILL.md md5 与源本一致），`dsh-plugin-user-commands` 的 `watchTargets()` 在 `~/.dsh/commands` 不存在时回退监听其父目录、事件防抖后重扫并重新 arm，另有 `/commands-reload`。结论：**新增命令与 skill 即时可用**；`/commands-reload` 作手动重扫，重启仅作兜底。
 
 ## 交付物与文件布局
 
@@ -54,7 +55,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 9. **阶段 4 验证与归档**：跑目标项目声明的验证（读目标项目 AGENTS/CLAUDE；可派 subagent 执行并把输出摘要回传）；通过后加载 `openspec-archive-change` 执行归档；归档单独提交一次；最终汇报（变更、验证证据、归档位置、后续宿主操作）。
 10. **接续流程**：`continue <change>` 时跳过调研与落档（除非用户要求重跑），从任务完成度续跑，执行模式与引擎重选一次。
 11. **模型路由**：读取 `dsh/spec-workflow.yaml`（路径优先级：命令行参数 > 映射文件 > 继承）；映射键 lineA / lineB / panel / apply / verify（A 线、B 线、分歧复算线、执行任务、归档前验证）；team 引擎忽略 apply 键；白名单外路由报错时应报告并回退继承。
-12. **边界与失败**：无 openspec 根、命令未注册、skill 未生效（提示重启与 skctl）、用户中断、审核被拒（修正后重审，不勾选）。
+12. **边界与失败**：无 openspec 根、命令未注册（先 `/commands-reload` 再兜底重启）、skill 未生效（核对 symlink 与 skctl 登记）、用户中断、审核被拒（修正后重审，不勾选）。
 
 ## 命令文件设计
 
@@ -120,8 +121,8 @@ parallelism: 3
 1. 命令 symlink（容器内创建，落盘宿主 `/data/dsh/commands/`）：
    `mkdir -p ~/.dsh/commands && ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-flow.md ~/.dsh/commands/spec-flow.md`
 2. 登记新 skill（宿主/经 node 容器）：`node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-workflow`
-3. 重启使命令注册、skill 与新设置生效：`cd ~/develop/docker && docker compose restart dsh`
-4. 校验：`dsh --profile web --dump-config`（确认 `subagent-model-selection-settings` 已 `enabled: true` 且白名单五条齐备）与 `dsh --profile web --dump-config-schema`（对比基线，不新增 error）；重启后命令菜单出现 `/spec-flow`、skill 列表出现 `spec-workflow`、subagent 工具出现模型字段。
+3. **无需重启**：新增命令与 skill 即时可用（事实 14）。若命令未出现在面板，先在会话内执行内置 `/commands-reload` 手动重扫；仍不可见才兜底 `cd ~/develop/docker && docker compose restart dsh`（宿主操作，由用户执行）。
+4. 校验：`dsh --profile web --dump-config`（确认 `subagent-model-selection-settings` 已 `enabled: true` 且白名单五条齐备）与 `dsh --profile web --dump-config-schema`（对比基线，不新增 error）；命令面板应出现 `/spec-flow`、skill 列表应出现 `spec-workflow`（均已实测）；`subagent` 工具的模型字段在重启后的新会话中出现。
 
 ## 验证方式
 
@@ -137,4 +138,4 @@ parallelism: 3
 - team 引擎依赖实验性 Agent Teams：默认关闭，仅 `--engine team` 或映射文件显式启用；成员创建失败降级 subagent。
 - 模型白名单与映射文件漂移：两者在同一变更内提交，README 写明一致性要求。
 - symlink 命令万一未被识别：改为拷贝文件并在 README 记录同步命令（已知实现为 readdir+readFile，风险低）。
-- 重启前新 skill/命令对新会话不可见：README 与汇报中明确列出重启步骤。
+- 新增命令/skill 的可见性：**已实测即时可见、无需重启**（事实 14）；万一插件未感知，先 `/commands-reload`，重启仅作兜底——README 按此顺序写明。

@@ -52,7 +52,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
    - 若 `status` 报错以 `Declared in` / `Invalid store declaration in` 开头并指向本项目 `openspec/config.yaml`，说明项目通过 store 接入但该 store 本机无法解析——停下展示该错误的 `message` 与 `fix`，不要当作未初始化。
 2. **确认参数**：把调用参数解析为「需求原文 / continue 变更名 / 规划编排 / 执行模式 / 引擎 / 模型覆盖」，逐项记下；`continue <变更名>` 直接转第十节。
 3. **记录工作目录事实**：项目根绝对路径、git 根、当前分支、`git status --porcelain` 是否干净。已有与本流程无关的脏改动 → 报告并询问如何处理，**不擅自 stash / commit / revert**。
-4. **能力自检**：确认本 skill 所需的 `openspec-*` skill（`openspec-propose`、`openspec-archive-change` 等）与**阶段 1.5 问答环节所需的 `grill-me` skill** 可加载；不可加载见第十二节（重启后新会话才可见）——其中 **`grill-me` 不可加载时降级为普通按轮提问并如实告知用户**（第十二节）。阶段 1 的两条规划线**不依赖任何外部调研 skill**：方法完全由第四节自包含定义（7 字段草案 + 独立性铁律）。
+4. **能力自检**：确认本 skill 所需的 `openspec-*` skill（`openspec-propose`、`openspec-archive-change` 等）与**阶段 1.5 问答环节所需的 `grill-me` skill** 可加载；不可加载按第十二节处置顺序处理（**先核对聚合层与 skctl 登记 → 会话内执行内置 `/commands-reload` 手动重扫 → 重启容器仅作兜底**）——其中 **`grill-me` 不可加载时降级为普通按轮提问并如实告知用户**（第十二节）。阶段 1 的两条规划线**不依赖任何外部调研 skill**：方法完全由第四节自包含定义（7 字段草案 + 独立性铁律）。
 
 ## 三、模式收集
 
@@ -261,7 +261,7 @@ while 存在未勾选任务:
 3. **验证不通过 → 不归档**。报告失败证据（命令、输出、涉及任务），问用户：修复（回到阶段 3 派修复任务）或明确跳过（记录为已知缺口，需用户显式批准后才继续）。
 4. **通过后归档**：确认 `tasks.md` 全部勾选（有未勾选项不得归档），加载 `openspec-archive-change` skill 执行归档并同步主规格。
 5. **归档单独提交一次**（`docs(openspec): 归档 <change>`），不与批次改动混提。归档报错 → 贴错误原文并停，不手工搬移目录。
-6. **最终汇报四要素**：①变更名与工件路径；②验证证据（命令 + 结果摘要）；③归档位置（`openspec/changes/archive/...` 与同步后的主规格）；④后续宿主操作清单（需要用户在容器外做的事，如 skctl 登记、`docker compose restart dsh`、推送 `git push`——本流程不代劳）。
+6. **最终汇报四要素**：①变更名与工件路径；②验证证据（命令 + 结果摘要）；③归档位置（`openspec/changes/archive/...` 与同步后的主规格）；④后续宿主操作清单（需要用户在容器外做的事，如 skctl 登记、推送 `git push`、以及命令仍不可见时的 `docker compose restart dsh` 兜底——本流程不代劳）。
 
 ## 十、接续流程
 
@@ -308,9 +308,9 @@ parallelism: 3      # 同组并行上限
 | 情形 | 处置 |
 | --- | --- |
 | 无 openspec 根（`root: null`） | 问 init / store / 放弃，**绝不副作用创建** `openspec/`（第二节） |
-| `/spec-flow` 命令或 `spec-workflow` skill 不可见 | 新增物**重启后新会话才可见**：提示用户在宿主执行 `cd ~/develop/docker && docker compose restart dsh`；并确认 skctl 已登记——**skctl 聚合层（宿主 `/home/xuqinqin/.local/share/agent-skills`）在 dsh 容器内不可见**，该命令须在宿主或经 node 容器执行：`node /home/xuqinqin/develop/dotfiles/tools/skctl/src/cli.ts install /home/xuqinqin/develop/dotfiles/agent/skills/spec-workflow`；命令 symlink 为 `~/.dsh/commands/spec-flow.md`（宿主 `/data/dsh/commands/spec-flow.md`）；登记与重启由用户执行 |
-| 所需 `openspec-*` skill 加载失败 | 同上重启并核对聚合层；本 skill 不代替 `openspec-propose` / `openspec-archive-change` 的行为 |
-| `grill-me` skill 不可加载（阶段 1.5 问答环节） | 报告并**降级为普通按轮提问**（仍守「只问前置已定项、每轮 ≤5 问、每题附推荐答案、事实自行查证」），同时**如实告知用户已降级**；随后按上一行重启并核对聚合层 |
+| `/spec-flow` 命令或 `spec-workflow` skill 不可见 | **通常无需重启**——聚合层（宿主 `/home/xuqinqin/.local/share/agent-skills/skills`）是容器内 `/home/docker/.agents/skills` 的**只读 bind mount 实时视图**，宿主侧新增/更新条目立即可见，运行中的会话即可按名加载 skill；命令侧由插件热加载（监听用户级命令目录 + 事件防抖重扫）。处置顺序：①**核对登记**：命令 symlink 应为 `~/.dsh/commands/spec-flow.md`（宿主 `/data/dsh/commands/spec-flow.md`）指向 `dsh/commands/spec-flow.md`，缺失则容器内 `mkdir -p ~/.dsh/commands && ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-flow.md ~/.dsh/commands/spec-flow.md`；skctl 登记则须确认聚合层含该条目——**skctl 聚合层在 dsh 容器内不可见**，`node /home/xuqinqin/develop/dotfiles/tools/skctl/src/cli.ts install /home/xuqinqin/develop/dotfiles/agent/skills/spec-workflow` 须在宿主或经 node 容器执行（宿主操作，由用户执行）；②在会话内执行内置 **`/commands-reload`** 手动重扫；③仍不可见才兜底 `cd ~/develop/docker && docker compose restart dsh`（宿主操作，由用户执行） |
+| 所需 `openspec-*` skill 加载失败 | 同上核对聚合层；先 `/commands-reload`，重启兜底；本 skill 不代替 `openspec-propose` / `openspec-archive-change` 的行为 |
+| `grill-me` skill 不可加载（阶段 1.5 问答环节） | 报告并**降级为普通按轮提问**（仍守「只问前置已定项、每轮 ≤5 问、每题附推荐答案、事实自行查证」），同时**如实告知用户已降级**；随后按上一行**先核对聚合层与 `/commands-reload`，重启兜底** |
 | 某条规划线失败（产物缺失 / 为空 / 答非所问 / 与另一线雷同） | **重派一次**；仍失败**如实报告**，由**用户决定**是否降级为串行重做该线（第四节），**不得静默降级** |
 | 用户中断（说停、切换话题、新指令） | 立即停在安全检查点；未提交改动保持原状并汇报位置（改了哪些文件、勾选到哪），不擅自 stash / revert / 补提交 |
 | 审核被拒（step 模式或用户否决产出） | 按意见修正后**重审**：**不勾选 checkbox、不提交**；修正范围超出本变更 → 回到用户确认 scope |
@@ -320,6 +320,6 @@ parallelism: 3      # 同组并行上限
 | 子代理需要用户决策 / 直接提问被拒（`DELEGATED_CALLER`） | 走第四节「待决问题的中转交互协议」：子代理写产物「待决问题」节并在回执上浮 → 主会话**立即代问用户** → team 用 `send_message` 回送**同一成员**、subagent 把上一轮回执摘要 + 答复并入新提示**接续重派**。**`DELEGATED_CALLER` 是平台设计**（被拥有的子代理不得直接提问），**不是故障**——不要判定工具损坏、不要重试直接提问 |
 | team 成员创建失败 / 长时间无进展 | `interrupt_agent` 中断或重建；无法恢复则降级 subagent 完成该任务 |
 | 计划彻底失效（工件与实现矛盾） | `auto` 硬停条件之一：停下让用户决定重做落档（改工件）或终止 |
-| 需要宿主操作（重启容器、skctl、推送、装依赖） | 给出确切命令交给用户执行，**本 skill 不代劳** |
+| 需要宿主操作（重启容器兜底、skctl、推送、装依赖） | 给出确切命令交给用户执行，**本 skill 不代劳** |
 
 **绝不做**：不自行 `openspec init`；不提交未过审或未验证的内容；不动目标项目的 CI、密钥、生产配置；不替用户切换主会话模型；不在 `auto` 之外的模式下跳过审核点；不把子代理上浮的待决项**静默变成假设**；不把 `/tmp/spec-flow/` 的临时材料当成进度依据（权威进度永远是工件 + 勾选态 + 提交历史）。

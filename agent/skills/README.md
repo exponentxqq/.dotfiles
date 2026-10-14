@@ -33,8 +33,13 @@ node $SKCTL doctor                            # 修复 ~/.agents/skills 链接�
 | `analyzing-elastic-logs` / `codebase-memory` / `context7-mcp`                             | 自写（依赖各自 MCP，dsh 侧工具未接时模型自行降级）                                                       |
 | `openspec-*` ×7（core 6 + verify `openspec-verify-change`）                               | 经 skctl 从 [Fission-AI/OpenSpec] `skills/<name>` 安装，git 源（commit `9111a765`），`skctl update` 升级 |
 
-宿主侧增删/更新 skill 后 opencode 读同一聚合层即时生效，**dsh 需
-`docker compose restart dsh` 才对新会话可见**（inotify 事件不跨容器挂载边界）。
+宿主侧增删/更新 skill 后 opencode 与 dsh 均即时生效：容器内
+`/home/docker/.agents/skills` 是宿主聚合层的只读 bind mount **实时视图**
+（`findmnt` 佐证），新增/更新后条目立即可见，运行中的 dsh 无需重启即可按名
+加载（实测，skill 工具直接返回正文）。命令侧（`~/.dsh/commands` 与各工作区
+`.dsh/commands`）由 user-commands 插件热加载，必要时用内置 `/commands-reload`
+手动重扫（带 token 新开 GUI 会话，`/` 面板即时出现新命令）——**通常无需重启
+容器**，`docker compose restart dsh` 仅作兜底。
 
 openspec skill 驱动 `openspec` CLI：dsh 容器已随镜像预装（`containers/tools/dsh/Dockerfile`）；
 宿主机未装，opencode 侧触发时 CLI 缺失会降级，需要时 `npm i -g @fission-ai/openspec`。
