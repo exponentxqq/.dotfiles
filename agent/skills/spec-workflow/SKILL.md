@@ -18,7 +18,7 @@ line-a + line-b  diff-matrix + 第三线复算  code-design.md  openspec-propose
 
 阶段 1.5 的三分类与复算逻辑固定；问答方法见第五节。
 
-**状态载体 = 工件**：权威进度 = 工件（唯一源）+ `tasks.md` 勾选态 + `git log`（**三方对齐**）；`/tmp/spec-flow/<change>/` 材料易失、不入库、不进提交。
+**状态载体 = 工件**：权威进度 = 工件 + `tasks.md` 勾选态 + `git log`（**三方对齐**）；`/tmp/spec-flow/<change>/` 材料易失、不入库、不进提交。
 
 承诺：**阶段边界必汇报**、**规划外 scope 变化回到用户**、**不假设未给出的选项**。
 
@@ -81,8 +81,6 @@ line-a + line-b  diff-matrix + 第三线复算  code-design.md  openspec-propose
 
 **两条禁令**：**不得把待决项静默变成假设**；**不得让子代理为等答复而阻塞或轮询**。
 
-**派发前先读 [planning.md](refs/planning.md)**；两线除「方向」外**逐字等形**。
-
 ## 五、差异收敛与分歧复算（阶段 1.5）
 
 两线都回执后做差异收敛——**六步，一步不省**；**第 4 步遵循 `grill-me` 的设计树/前沿分轮方法**（**问答由主会话执行**；判据与留痕见 [convergence.md](refs/convergence.md)）：
@@ -105,9 +103,9 @@ line-a + line-b  diff-matrix + 第三线复算  code-design.md  openspec-propose
 
 **恢复协议（任何时刻生效：新轮次、`/compact` 之后、会话重启之后、用户说「继续」）**：
 
-1. 先重建进度：`openspec status --change <change> --json`（**该版本 `status` 不接受位置参数**；裸 `--json` 无效，用 `openspec status --all --json` 兜底）。
+1. 先重建进度：`openspec status --change <change> --json`（该版本 `status` 不接受位置参数；裸 `--json` 无效，用 `--all --json` 兜底）。
 2. 读 `tasks.md` 勾选态（`- [x]` = 完成）与 `git log --oneline` 的批次提交。
-3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据或提交对不上 → 回退为未完成并报告。
+3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。
 4. **绝不重跑已完成任务**；从「最小编号的未完成组」继续。
 5. 恢复后先输出一行进度摘要（`change / 已完成 N/M / 当前组 / 引擎 / 模式 / 下一步`）。
 6. 上下文一律从工件现读（specs、design、tasks），**不依赖对话记忆**。

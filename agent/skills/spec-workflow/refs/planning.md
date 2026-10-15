@@ -1,4 +1,6 @@
-> 本文件为 SKILL.md §四的外移正文，回入口引用写『SKILL.md 第 X 节』
+> 本文件为 SKILL.md §二（前置检查展开）、§四（阶段 1 双线派发）、§六（落档细节）、§十（接续细节）与『附：代码设计环节（阶段 1.7）』的外移正文，回入口引用写『SKILL.md 第 X 节』
+
+## 附：阶段 1 双线派发细节（自 SKILL.md §四 外移）
 
 ### 并行模式（`--parallel`）
 
@@ -29,19 +31,19 @@
 
 **回执核对（主会话必做）**：两份产物**都存在且非空** → 各读一遍，核对 7 字段是否齐备、能否明显看出两条线**方向上的差异**（两份草案结论雷同或字段残缺 → 独立性不成立，按失败处理）→ 输出 3–8 行阶段摘要（两线各自的关键判断、已可见的分歧点、单边项信号）作为阶段边界汇报；两线上浮的**待决问题按中转协议②并入阶段 1.5 的设计树/前沿统一提问**（不另开问答通道，不积压到阶段末）；某线**缺失 / 为空 / 答非所问** → 视为该线失败：**重派一次**，仍失败则**如实报告**，由**用户决定**是否降级为串行模式重做该线（不得静默降级）。派发时按第十一节给 A / B 线分别应用 `lineA` / `lineB` 路由（某线需要读图时改用 `vision` 路由）。
 
-**入口指引**（自 SKILL.md §四 剪切）：派发前先读本文件——模板全文、串行顺序、**回执核对**清单。
-
 > 注：§四 其余部分（异构方向表、7 字段草案清单、独立性铁律、待决问题中转协议）留在 SKILL.md 第四节。
 
-## 附：前置检查展开（自 SKILL.md §二 外移）
+## 附：前置检查展开（自 SKILL.md §二 外移；仅展开 ①④⑤，编号与入口 §二 一一对应）
 
-1. **确认 OpenSpec 根**：在项目根执行 `openspec list --json`，读返回的 `root` 字段。
+**②参数** 与 **③工作目录事实** 的正文留在入口 §二，此处不重复（防双源漂移）。
+
+**①OpenSpec 根**：在项目根执行 `openspec list --json`，读返回的 `root` 字段。
    - `root` 为对象 → 项目已接入，继续。
    - `"root": null` → **未接入**。此时命令退出码非 0 是「未初始化」的答案，不是 CLI 坏了，不要重试。**绝不副作用创建** `openspec/`；向用户给三选一并等待答复：①`openspec init` 初始化本项目；②指定已注册 store（`openspec store list --json` 取 id，后续命令带 `--store <id>`）；③放弃本流程，按普通对话处理。
    - 若 `status` 报错以 `Declared in` / `Invalid store declaration in` 开头并指向本项目 `openspec/config.yaml`，说明项目通过 store 接入但该 store 本机无法解析——停下展示该错误的 `message` 与 `fix`，不要当作未初始化。
 
-4. **能力自检**：确认本 skill 所需的 `openspec-*` skill（`openspec-propose`、`openspec-archive-change` 等）与**阶段 1.5 问答环节所需的 `grill-me` skill** 可加载；不可加载按 [failure-modes.md](failure-modes.md) 处置顺序处理（**先核对聚合层与 skctl 登记 → 会话内执行内置 `/commands-reload` 手动重扫 → 重启容器仅作兜底**）——其中 **`grill-me` 不可加载时降级为普通按轮提问并如实告知用户**（[failure-modes.md](failure-modes.md)）。阶段 1 的两条规划线**不依赖任何外部调研 skill**：方法完全由第四节自包含定义（7 字段草案 + 独立性铁律）。
-5. **路由自检**（可选，派发子代理前）：按 [routing.md](routing.md) 核对映射文件路由 ⊆ 白名单（含 `fallback`），并确认本轮若有读图任务则 `vision` 路由可用；自检不过或派发报路由错误时按 [routing.md](routing.md)**三档回退**处置，不猜、不反复重试。
+**④能力自检**：确认本 skill 所需的 `openspec-*` skill（`openspec-propose`、`openspec-archive-change` 等）与**阶段 1.5 问答环节所需的 `grill-me` skill** 可加载；不可加载按 [failure-modes.md](failure-modes.md) 处置顺序处理（**先核对聚合层与 skctl 登记 → 会话内执行内置 `/commands-reload` 手动重扫 → 重启容器仅作兜底**）——其中 **`grill-me` 不可加载时降级为普通按轮提问并如实告知用户**（[failure-modes.md](failure-modes.md)）。阶段 1 的两条规划线**不依赖任何外部调研 skill**：方法完全由第四节自包含定义（7 字段草案 + 独立性铁律）。
+**⑤路由自检**（可选，派发子代理前）：按 [routing.md](routing.md) 核对映射文件路由 ⊆ 白名单（含 `fallback`），并确认本轮若有读图任务则 `vision` 路由可用；自检不过或派发报路由错误时按 [routing.md](routing.md)**三档回退**处置，不猜、不反复重试。
 
 
 ## 附：代码设计环节（阶段 1.7）

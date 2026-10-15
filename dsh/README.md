@@ -127,8 +127,8 @@ openspec archive <change>           # 评审通过后归档
 | `agent/skills/spec-workflow/SKILL.md` | 工作流本体（执行手册），skill 名 `spec-workflow` |
 | `agent/skills/spec-workflow/refs/routing.md` | §十一 模型路由外移正文：路由键、图片能力、白名单、三档回退、路由自检脚本——**派发子代理前读取** |
 | `agent/skills/spec-workflow/refs/failure-modes.md` | §十二 边界与失败处置表外移正文（红线级条目留在 SKILL.md 第十二节）——**异常时读取** |
-| `agent/skills/spec-workflow/refs/planning.md` | §四 并行/串行派发模板与回执核对外移正文，及「附：代码设计环节（阶段 1.7）」的设计线派发模板、深度契约（六字段 + 二行为约束）、回执核对与三档分降——**阶段 1 与阶段 1.7 派发前读取** |
-| `agent/skills/spec-workflow/refs/execution.md` | §八 执行引擎编排外移正文：提示模板、回执格式、team 任务板、三模式与提交纪律——**首次派发前读取** |
+| `agent/skills/spec-workflow/refs/planning.md` | §二 前置检查展开、§四 并行/串行派发模板与回执核对、§六 落档细节、§十 接续细节的外移正文，及「附：代码设计环节（阶段 1.7）」的设计线派发模板、深度契约（六字段 + 二行为约束）、回执核对与三档分降——**阶段 1 与阶段 1.7 派发前读取** |
+| `agent/skills/spec-workflow/refs/execution.md` | §八 执行引擎编排与三模式、提交纪律（含中途恢复口径）外移正文，及 §九 验证与归档派发要点：提示模板、回执格式、team 任务板——**首次派发前读取** |
 | `agent/skills/spec-workflow/refs/convergence.md` | §五 差异收敛外移正文：`grill-me` 设计树/前沿分轮方法与六步判据——**阶段 1.5 读取** |
 | `dsh/commands/spec-flow.md` | 命令薄壳，加载 skill 并把 `$ARGUMENTS` 代入正文 |
 | `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（见下） |
@@ -152,7 +152,7 @@ openspec archive <change>           # 评审通过后归档
 
 执行双引擎：`subagent`（默认）每任务派 fresh 子代理（提示自包含：任务原文、工件摘录、验证句、写范围），组内并发（上限 `parallelism`）、组间串行，主会话按验证句 + diff 核对通过才勾选任务；`team`（需 `--engine team` 或映射文件显式启用，依赖实验性 Agent Teams）由 Lead 把批次发到共享任务板、spawn ≤ 任务数的 implementer 认领，审核反馈走消息保留上下文，成员不可用降级 subagent；两种引擎的子代理待决问题统一经「子代理 ↔ 用户交互（中转协议）」中转。
 
-三模式与提交节奏：`auto` 全部完成后提交一次；`step-task` 每任务、`step-group` 每批次停留审核，step 模式**每批次审核通过后提交一次**（提交信息含批次号）。另两次固定提交：落档工件在落档完成时单独提交、归档在验证通过后单独提交——三者互不混提。
+三模式与提交节奏：`auto` 全部完成后提交一次；`step-task` 每任务、`step-group` 每批次停留审核，step 模式**每批次审核通过后提交一次**（提交信息含批次号）。另两次固定提交：落档工件在落档完成时单独提交、归档在验证通过后单独提交——三者互不混提。**中途恢复（`auto` 尤甚）**：勾选任务的改动尚未提交**属预期**（auto 收尾才提交）——先对现存 diff 跑该任务验证句，通过即保持勾选、不重派子代理，不通过才回退该勾选并报告。
 
 ### 子代理 ↔ 用户交互（中转协议）
 

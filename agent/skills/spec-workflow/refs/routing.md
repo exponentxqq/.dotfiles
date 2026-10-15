@@ -41,12 +41,15 @@ parallelism: 3      # 同组并行上限
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 
-**路由自检**（派发前可选；退出码非 0 = 有路由不在白名单）：
+**路由自检**（派发前可选；退出码非 0 = 有路由不在白名单；打印「跳过」= 依赖缺失未校验，**不等于通过**）：
 
 ```bash
 node -e '
-const fs=require("fs"),YAML=require("/home/xuqinqin/develop/dotfiles/opencode/node_modules/yaml");
+const fs=require("fs");
 const d="/home/xuqinqin/develop/dotfiles/dsh/";
+const cands=["yaml","/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/yaml",d+"../opencode/node_modules/yaml"];
+let YAML=null;for(const c of cands){try{YAML=require(c);break}catch{}}
+if(!YAML){console.log("缺 yaml 依赖：路由自检跳过（未校验，不等于通过）");process.exit(0)}
 const m=YAML.parse(fs.readFileSync(d+"spec-workflow.yaml","utf8"));
 const wl=[...fs.readFileSync(d+"profiles/web/cordis.patch.yml","utf8").matchAll(/-\s*\{\s*provider:\s*([\w.\-]+),\s*model:\s*([\w.\-]+)\s*\}/g)].map(x=>x[1]+"/"+x[2]);
 const rs=Object.entries(m.models||{}).flatMap(([k,v])=>[[k,v.provider+"/"+v.model],...(v.fallback?[[k+".fallback",v.fallback.provider+"/"+v.fallback.model]]:[])]);
