@@ -81,6 +81,12 @@
 
 ## 六、阶段 4（验证与归档）
 
-- 项目声明的验证（`CLAUDE.md` L35-40，仅 `tools/skctl` 组件）：`node --test` **47/47 pass，exit 0**；本变更未触及其任何文件，作为回归证据。
-- 变更侧验证：批次 3/4 全部断言通过（第二、三节）。
-- 归档：`openspec-archive-change` 流程（delta 同步主规格 + 净增 ≤0 门 + `validate --specs --strict`）→ 归档单独提交 → 四要素汇报。**本节结果以提交历史与归档目录为准。**
+- 项目声明的验证（`CLAUDE.md` L35-40，仅 `tools/skctl` 组件）：`/home/xuqinqin/develop/docker/run.sh node "cd tools/skctl && pnpm install && node --test"` → **47/47 pass，exit 0**；本变更未触及其任何文件，作为回归证据。
+- 变更侧验证：批次 3/4 全部断言通过（第二、三节）；`openspec validate spec-workflow-add-design-phase --strict` exit 0。
+- **delta 同步（agent 驱动智能合并，用户确认「Sync now + 收紧至净增 ≤0」）**：
+  - 机械合并：4 条 MODIFIED Requirement 整块替换 + ADDED「阶段 1.7 代码设计线」插入 1.5 之后；未改块逐字节保持 → 合并后 **9308** 码点（+1394）。
+  - T9 收紧（D6 门）：分轮压缩 11 条未改 Requirement 的正文与场景措辞 + 新增/修改块的表述，最终 **7901** 码点（**净 −13 ≤ 0**）。
+  - 保真断言：Requirement 16 条与 Scenario 45 条**标题逐条不变**；`## Purpose` 未动；无 delta 风格分节头；描述 max 288 ≤ 500（strict 门）。
+  - SHALL 审计（对比确定性重放的合并态）：总 91 → 81，差异全部来自**同一义务的子句合并**；其中「第三线复算不以既有草案为输入」与「『是 / 同意』即接受推荐」两处语义细节经审计后**已回补**；「会话创建时读取允许列表 / 不判定工具损坏」改由 Scenario「配置改动对既有会话未生效」承载。
+- 归档：`openspec/changes/archive/2026-10-15-spec-workflow-add-design-phase/`（含四件套 + 本日志）；归档后 `openspec validate --specs --strict` exit 0。
+- 提交纪律：实现批次 `0d9967b`、归档单独提交 `docs(openspec): 归档 spec-workflow-add-design-phase`；两者均**未包含**宿主侧 `dsh/profiles/web/cordis.patch.yml`（会话模型切换写入的活 profile，非本变更写范围）。
