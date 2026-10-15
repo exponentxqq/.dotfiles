@@ -15,5 +15,5 @@
 - bare `node` 版本各环境不同（宿主系统、volta 默认、dsh 容器自带），正式构建与依赖安装一律经 `pnpm`/`npm` 包装脚本（走 volta 容器）。
 - Java：`mvn` 走 `bin/mvn` 包装（java 容器：ubuntu + JDK 11/17/21，默认 17，时区随宿主 GMT+8）；宿主裸 `java` 是宿主 JDK（nvim jdtls/conform 依赖，不可卸）；dsh 会话内 `java` 为镜像内置包装（转发 java 容器）；Gradle 用项目自带 `./gradlew` wrapper（无全局 gradle 包装脚本），版本自适应由 gradle toolchains（自动探测 `/usr/lib/jvm`）与 `./mvnw`/`./gradlew` 完成。
 - 容器身份由 `.env` 的 `HOST_UID`/`HOST_GID`/`HOST_USER` 与宿主机对齐，容器内创建的文件宿主机可直接读写。
-- 可用服务：mysql、postgres、redis、mongo、rabbitmq、rocketmq（namesrv+broker）、nginx、dbx（web 端口 4224）；hermes 为 manual profile 需显式启动；数据目录统一在宿主 `/data`。
+- 可用服务：mysql、postgres、redis、mongo、elasticsearch（7.17.3 + IK，同公司版本，http + `elastic`/`123456`，端口 9200）、rabbitmq、rocketmq（namesrv+broker）、nginx、dbx（web 端口 4224）；hermes 为 manual profile 需显式启动；数据目录统一在宿主 `/data`。
 - compose 拆分为 `compose/services.yml`（中间件）、`compose/languages.yml`（语言容器）、`compose/tools.yml`（工具），由根 `docker-compose.yml` include，配置由 `.env` 驱动。
