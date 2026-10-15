@@ -22,7 +22,7 @@
 
 - [x] 3.2 运行时冒烟（G4）：会话内按名加载 `spec-workflow` 返回改后版本（§五 新标记、planning 新小节可见）、`refs/` 五文件可见；聚合层 `~/.agents/skills/spring-writer/SKILL.md`、`~/.agents/skills/nuxt-writer/SKILL.md` 存在（`test -f`）；验证：实测结果记入执行日志
 
-- [x] 3.3 规格与回归（G5/G6）：`openspec validate spec-workflow-writer-skill-integration --strict` 退出码 0；`tools/skctl` 下经 pnpm 包装跑 `node --test 'test/*.test.ts'` 47/47 通过退出码 0
+- [x] 3.3 规格与回归（G5/G6）：`openspec validate spec-workflow-writer-skill-integration --strict` 退出码 0 **且无告警**（首版需求正文 649 字符触发 >500 告警，已按偏差 D-6 拆为 ADDED 横切 Requirement + MODIFIED 三条）；归档后 `openspec validate --all` / `--archived` 退出码 0 且主规格无告警；`tools/skctl` 下经 pnpm 包装跑 `node --test 'test/*.test.ts'` 47/47 通过退出码 0
 
 ## Workflow follow-up
 

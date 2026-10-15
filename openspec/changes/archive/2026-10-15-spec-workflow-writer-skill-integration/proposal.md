@@ -15,7 +15,7 @@
 - **`SKILL.md`**：§五 阶段 1.7 指针句加「（恒先加载栈对应 writer skill）」并扩指针为「模板、writer skill 接线、深度契约与三档分降」；§八 共同纪律加最短标记；两处合计 ≤53 码点、file+343 ≤8192，frontmatter 与 12 节标题不动。
 - **`refs/failure-modes.md`**：处置表加两行——「栈识别未命中」问用户三选一；「writer skill 加载失败」按既有处置顺序修复后仍失败则报告问用户（不允许静默降级）。
 - **`dsh/README.md`**：文件表 planning/execution 行、阶段 1.7 段、design 路由表行、阶段 3 引擎段各补一句 writer 接线。
-- **主规格**（经 delta 同步，不手改）：MODIFIED「阶段 1.7 代码设计线」（栈识别与加载 SHALL + 5 个新 Scenario）、「落档工件与执行批次契约」（粒度 SHALL + 1 Scenario）、「subagent 执行引擎」（提示含加载指令 SHALL + 1 Scenario）、「team 执行引擎」（任务卡含加载指令 SHALL + 1 Scenario）。
+- **主规格**（经 delta 同步，不手改）：**ADDED**「栈识别与 writer skill 加载（阶段 1.7 与阶段 3）」——横切契约（栈识别判据、双侧加载、未命中三选一、加载失败处置、trivial 标注、落档粒度）+ 6 个 Scenario；**MODIFIED**「阶段 1.7 代码设计线」（补栈识别与加载要求）、「subagent 执行引擎」（提示含加载指令 + 1 Scenario）、「team 执行引擎」（任务卡含同款指令 + 1 Scenario）。横切契约独立成 Requirement 而非并入 1.7 需求——后者并入后文本达 649 字符，会触发 `openspec validate` 的 >500 字符告警。
 - 不做：不改 `dsh/spec-workflow.yaml`（路由键不变）、不改 `/spec-flow` 薄壳、不动 profile 白名单、不动 writer skill 本体、不自动安装缺失 skill、不做栈识别的通用插件机制（判据表按当前两类写死，新增 writer skill 时人工同步，作为已知维护点记入 design.md）。
 
 ## Capabilities
@@ -26,7 +26,7 @@
 
 ### Modified Capabilities
 
-- `spec-workflow`：阶段 1.7 增补「派发前栈识别 + 设计子代理先加载栈对应 writer skill + 未命中问用户三选一 + trivial 豁免标注」的 SHALL；落档批次契约增补「任务粒度满足所加载 writer skill 拆分规定」；两执行引擎增补「派发提示/任务卡含 writer skill 加载指令」。其余 Requirement 行为语义不变。
+- `spec-workflow`：**新增**横切 Requirement「栈识别与 writer skill 加载（阶段 1.7 与阶段 3）」——栈识别 + 双侧加载 + 未命中问用户三选一 + 加载失败处置 + trivial 标注 + 落档粒度；阶段 1.7 需求补栈识别与加载要求；两执行引擎需求增补「派发提示/任务卡含 writer skill 加载指令」。其余 Requirement 行为语义不变。
 
 ## Impact
 

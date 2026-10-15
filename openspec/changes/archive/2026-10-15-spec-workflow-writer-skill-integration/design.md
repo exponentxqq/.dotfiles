@@ -9,7 +9,7 @@
 | T3 | `agent/skills/spec-workflow/SKILL.md` | 入口最短标记 | §五 1.7 指针句加「（恒先加载栈对应 writer skill）」并扩「writer skill 接线」；§八 共同纪律加最短标记；合计 ≤53 码点、file ≤7849 |
 | T4 | `agent/skills/spec-workflow/refs/failure-modes.md` | 失败处置两行 | 「栈识别未命中」→ 问用户三选一；「writer skill 加载失败」→ 处置顺序后仍失败报告问用户 |
 | T5 | `dsh/README.md` | 文档同步 | 文件表 planning/execution 行、阶段 1.7 段、design 路由表行、阶段 3 引擎段补 writer 接线一句 |
-| T6 | `openspec/specs/spec-workflow/spec.md` | 经 delta 同步（不手改） | MODIFIED 四个 Requirement（1.7 设计线／落档批次契约／subagent 引擎／team 引擎）+ 8 个新 Scenario |
+| T6 | `openspec/specs/spec-workflow/spec.md` | 经 delta 同步（不手改） | ADDED 一个横切 Requirement（栈识别与 writer skill 加载，6 Scenario）+ MODIFIED 三个 Requirement（1.7 设计线／subagent 引擎／team 引擎）+ 2 个引擎级新 Scenario |
 
 ## 决策记录
 
@@ -25,7 +25,9 @@
 
 **D6：入口标记以 53 码点为硬预算。** file+343 ≤8192 → file ≤7849，现 7796。首选两处最短标记（§五 指针句扩写 + §八 一句）；若超支，§八 完全外移（execution.md 已有「提示模板见 refs/execution.md」指针承载），只保 §五 标记——§五 是阶段 1.7 的入口权威句，标记不可全缺。frontmatter、12 节标题、红线表、恢复协议、中转协议、「绝不做」段不动。
 
-**D7：主规格只在归档时由 delta 同步。** 与历次变更一致；归档后逐字复核主规格 diff，确认四个 MODIFIED Requirement 外未被规整误改。
+**D7：横切契约独立成 ADDED Requirement，不并入 1.7 设计线需求。** 首版把栈识别/加载/未命中/trivial/粒度全部并入「阶段 1.7 代码设计线」，需求正文由 271 涨到 649 字符，触发 `openspec validate` 的 >500 字符告警（`--strict` 下即失败）。拆法：①新增「栈识别与 writer skill 加载（阶段 1.7 与阶段 3）」承载全部横切 SHALL 与其 6 个 Scenario；②1.7 需求只留一句指认（361/374 字符，均 <500）；③两执行引擎需求各加一句落点说明 + 1 Scenario；④「落档工件与执行批次契约」不再重复粒度句（单一来源在新需求）。被否方案：把判据与 trivial 细节塞进正文——告警根源，且场景本就是边缘情况的正确归属。
+
+**D8：主规格只在归档时由 delta 同步。** 与历次变更一致；归档后逐字复核主规格 diff，确认 ADDED 1 + MODIFIED 3 之外的 Requirement 未被规整误改。
 
 ## 门禁
 
@@ -35,7 +37,7 @@
 | G2 码点 | 六文件 ≤8192；`SKILL.md` ≤7849（本变更换新门限：file+343 ≤8192），渲染上界 ≤8192 |
 | G3 接线 | planning.md 含「栈识别与 writer skill 接线」小节与模板加载行；execution.md 两引擎各含加载指令；failure-modes.md 两行新处置；回执核对第 ⑥ 条存在 |
 | G4 运行时 | 会话内按名加载 `spec-workflow` 返回改后版本；`refs/` 五文件可见；聚合层 `~/.agents/skills/spring-writer`、`nuxt-writer` 存在 |
-| G5 规格 | `openspec validate spec-workflow-writer-skill-integration --strict` 退出码 0；归档后 `--all`/`--archived` 退出码 0 |
+| G5 规格 | `openspec validate spec-workflow-writer-skill-integration --strict` 退出码 0 **且无告警**；归档后 `--all`/`--archived` 退出码 0 且主规格无 >500 字符告警 |
 | G6 回归 | `tools/skctl`：`node --test 'test/*.test.ts'` 47/47 通过 |
 | G7 提交 | 三次提交（落档/实现/归档）显式 `git add`，`dsh/profiles/web/cordis.patch.yml` 不混入 |
 
