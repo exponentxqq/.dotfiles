@@ -89,7 +89,7 @@ line-a + line-b  diff-matrix + 第三线复算  code-design.md  openspec-propose
 
 **只问决策，不问事实**。
 
-**阶段 1.7 代码设计**（1.5 收敛后、落档前）：**恒派 fresh 子代理**（`design` 路由）产出 `code-design.md`；模板、深度契约与三档分降见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
+**阶段 1.7 代码设计**（1.5 收敛后、落档前）：**恒派 fresh 子代理**（`design` 路由）产出 `code-design.md`，**须先加载栈对应 writer skill**；模板、深度契约与三档分降见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
 
 ## 六、落档（阶段 2）
 
@@ -125,7 +125,7 @@ while 存在未勾选任务:
 
 **共同纪律**：主会话必须自己按**验证句 + diff** 核对（跑验证句命令、读回改动文件、`git diff --stat`），**核对通过才把 `- [ ]` 改成 `- [x]`**；不得仅凭口头汇报勾选。
 
-**引擎与模式**：`subagent`（默认）每任务一个 **fresh** 子代理、组内并发**组间串行**；`team`（`--engine team`）走任务板卡片 + 具名 implementer、反馈回**同一成员**；**成员创建失败或不可用时降级 subagent**。三模式：`auto`/`step-task`（每任务停留）/`step-group`（每批次停留）。**停留点与提交时机、提示模板、回执格式、硬停四条件、逐条纪律见 [execution.md](refs/execution.md)**（**首次派发前读**）；`auto` **硬停**：不可逆 / 安全敏感 / 工作区外副作用 / 计划彻底失效；任务失败**重试一次**，仍失败**暂停本批次并报告**。
+**引擎与模式**：`subagent`（默认）每任务一个 **fresh** 子代理、组内并发**组间串行**；`team`（`--engine team`）走任务板卡片 + 具名 implementer、反馈回**同一成员**；**成员创建失败或不可用时降级 subagent**。三模式：`auto`/`step-task`（每任务停留）/`step-group`（每批次停留）。**停留点与提交时机、提示模板（含 writer skill 加载指令）、回执格式、硬停四条件、逐条纪律见 [execution.md](refs/execution.md)**（**首次派发前读**）；`auto` **硬停**：不可逆 / 安全敏感 / 工作区外副作用 / 计划彻底失效；任务失败**重试一次**，仍失败**暂停本批次并报告**。
 
 ## 九、验证与归档（阶段 4）
 
