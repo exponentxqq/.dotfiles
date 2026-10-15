@@ -1,7 +1,7 @@
 # spec-workflow 阶段级模型路由
 # 键：lineA（A 规划线：需求/价值/范围）| lineB（B 规划线：实现/约束/风险）
-#     panel（分歧复算线，阶段 1.5 仅分歧时派发）| apply（执行任务）| verify（归档前验证）
-#     vision（读图覆盖路由：阶段路由不支持图片输入时改用它，见下）
+#     panel（分歧复算线，阶段 1.5 仅分歧时派发）| design（设计线阶段路由，阶段 1.7 代码设计子代理）
+#     apply（执行任务）| verify（归档前验证）| vision（读图覆盖路由：阶段路由不支持图片输入时改用它，见下）
 # 值：{ provider, model }；可选 fallback: { provider, model }（派发/运行失败时改用它重派一次）
 # 留空、注释掉或写 {} = 该阶段继承会话模型
 # 硬约束：所有路由（含 fallback）必须是 dsh/profiles/web/cordis.patch.yml 中
@@ -13,6 +13,8 @@ models:
   lineA:  { provider: zai, model: glm-5.3 }
   lineB:  { provider: zai, model: glm-5.3 }
   panel:  { provider: zai, model: glm-5.3 }
+  # 设计线阶段路由：阶段 1.7 代码设计子代理（恒派 fresh；与规划三线同级强模型）
+  design: { provider: zai, model: glm-5.3 }
   # 执行阶段（含归档前验证）：deepseek-v4.1-flash 主用，deepseek-flash 备用；两者都支持图片输入
   apply:
     provider: opencode-go

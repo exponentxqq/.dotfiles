@@ -5,8 +5,9 @@
 映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`），schema：
 
 ```yaml
-models:                       # 键：lineA | lineB | panel | apply | verify | vision
+models:                       # 键：lineA | lineB | panel | design | apply | verify | vision
   lineA: { provider: zai, model: glm-5.3 }        # 值：{ provider, model }
+  design: { provider: zai, model: glm-5.3 }       # 设计线（阶段 1.7 代码设计子代理）
   apply:                                          # 可选：fallback: { provider, model }
     provider: opencode-go
     model: deepseek-v4.1-flash
@@ -23,6 +24,7 @@ parallelism: 3      # 同组并行上限
 | `lineA` | 阶段 1 A 线规划子代理（需求与价值、范围与边界） |
 | `lineB` | 阶段 1 B 线规划子代理（实现与约束、反例与风险） |
 | `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发） |
+| `design` | 阶段 1.7 代码设计子代理（恒派 fresh 子代理，深度契约见 [planning.md](planning.md)） |
 | `apply` | 阶段 3 执行任务子代理（仅 subagent 引擎） |
 | `verify` | 阶段 4 归档前验证子代理 |
 | `vision` | **读图覆盖（能力键，不改变阶段划分）**：某阶段子代理需要图片输入（截图、设计稿、渲染结果、fixture 图片）而**该阶段路由不支持图片**时，忽略阶段路由、改用本键派发；阶段路由本身支持图片时保持阶段路由 |
@@ -31,7 +33,7 @@ parallelism: 3      # 同组并行上限
 
 | 路由 | 图片输入 | 说明 |
 | --- | --- | --- |
-| `zai/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线默认路由；**读图任务必须改走 `vision`** |
+| `zai/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线与设计线默认路由；**读图任务必须改走 `vision`** |
 | `zai/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
 | `opencode-go/deepseek-v4.1-flash` | 支持 | `apply` / `verify` 主路由 |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
