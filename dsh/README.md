@@ -120,16 +120,16 @@ openspec archive <change>           # 评审通过后归档
 
 ## spec-workflow 固定工作流
 
-固定 spec 驱动流程：**独立双线规划 → 差异收敛与分歧复算 → 代码设计 → 落档 → 子代理执行 → 验证归档提交**；进度载体只有工件（`openspec/changes/<change>/` 与 `tasks.md` 勾选态），压缩上下文或重启会话后可从工件无损恢复。实体文件：
+固定 spec 驱动流程：**独立双线规划 → 差异收敛与分歧复算 → 代码设计 → 落档 → 子代理执行 → 验证归档提交**；进度载体只有工件（`openspec/changes/<change>/` 与 `tasks.md` 勾选态），压缩上下文或重启会话后可从工件无损恢复。实体文件（references 集中于 `refs/` 子目录）：
 
 | 文件 | 作用 |
 | --- | --- |
 | `agent/skills/spec-workflow/SKILL.md` | 工作流本体（执行手册），skill 名 `spec-workflow` |
-| `agent/skills/spec-workflow/routing.md` | §十一 模型路由外移正文：路由键、图片能力、白名单、三档回退、路由自检脚本——**派发子代理前读取** |
-| `agent/skills/spec-workflow/failure-modes.md` | §十二 边界与失败处置表外移正文（红线级条目留在 SKILL.md 第十二节）——**异常时读取** |
-| `agent/skills/spec-workflow/planning.md` | §四 并行/串行派发模板与回执核对外移正文，及「附：代码设计环节（阶段 1.7）」的设计线派发模板、深度契约（六字段 + 二行为约束）、回执核对与三档分降——**阶段 1 与阶段 1.7 派发前读取** |
-| `agent/skills/spec-workflow/execution.md` | §八 执行引擎编排外移正文：提示模板、回执格式、team 任务板、三模式与提交纪律——**首次派发前读取** |
-| `agent/skills/spec-workflow/convergence.md` | §五 差异收敛外移正文：`grill-me` 设计树/前沿分轮方法与六步判据——**阶段 1.5 读取** |
+| `agent/skills/spec-workflow/refs/routing.md` | §十一 模型路由外移正文：路由键、图片能力、白名单、三档回退、路由自检脚本——**派发子代理前读取** |
+| `agent/skills/spec-workflow/refs/failure-modes.md` | §十二 边界与失败处置表外移正文（红线级条目留在 SKILL.md 第十二节）——**异常时读取** |
+| `agent/skills/spec-workflow/refs/planning.md` | §四 并行/串行派发模板与回执核对外移正文，及「附：代码设计环节（阶段 1.7）」的设计线派发模板、深度契约（六字段 + 二行为约束）、回执核对与三档分降——**阶段 1 与阶段 1.7 派发前读取** |
+| `agent/skills/spec-workflow/refs/execution.md` | §八 执行引擎编排外移正文：提示模板、回执格式、team 任务板、三模式与提交纪律——**首次派发前读取** |
+| `agent/skills/spec-workflow/refs/convergence.md` | §五 差异收敛外移正文：`grill-me` 设计树/前沿分轮方法与六步判据——**阶段 1.5 读取** |
 | `dsh/commands/spec-flow.md` | 命令薄壳，加载 skill 并把 `$ARGUMENTS` 代入正文 |
 | `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（见下） |
 
@@ -188,7 +188,7 @@ parallelism: 3      # 同组并行上限
 | --- | --- |
 | `lineA` / `lineB` | 阶段 1 两条独立规划线的子代理（仅并行编排派子代理时适用，串行编排由主会话自身依次完成） |
 | `panel` | 阶段 1.5 的**分歧复算线**：仅在出现无法查证且影响方案走向的分歧时，派第三条独立子代理 |
-| `design` | 阶段 1.7 **代码设计子代理**：恒派 fresh（`zai/glm-5.3`），深度契约与三档分降见 `agent/skills/spec-workflow/planning.md` |
+| `design` | 阶段 1.7 **代码设计子代理**：恒派 fresh（`zai/glm-5.3`），深度契约与三档分降见 `agent/skills/spec-workflow/refs/planning.md` |
 | `apply` | 阶段 3 执行任务子代理（**team 引擎忽略 apply 键，该引擎下阶段级路由整体不适用**） |
 | `verify` | 阶段 4 归档前验证子代理 |
 | `vision` | **读图覆盖路由**（能力键，不改变阶段划分）：子代理需图片输入而该阶段路由不支持图片时忽略阶段路由、改用它 |
@@ -199,7 +199,7 @@ parallelism: 3      # 同组并行上限
 
 > **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。工作流按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + 五条 `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
 >
-> **生效时机**：开关与白名单在**会话创建时**读取——改完配置**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**（旧会话里派发报 `child model selection is disabled for this tool instance`，换新会话即可）。映射路由 ⊆ 白名单的自检命令见 `agent/skills/spec-workflow/routing.md`。
+> **生效时机**：开关与白名单在**会话创建时**读取——改完配置**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**（旧会话里派发报 `child model selection is disabled for this tool instance`，换新会话即可）。映射路由 ⊆ 白名单的自检命令见 `agent/skills/spec-workflow/refs/routing.md`。
 
 ### 宿主操作（新增命令 / skill 后各一次）
 

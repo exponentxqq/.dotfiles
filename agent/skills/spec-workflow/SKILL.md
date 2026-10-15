@@ -9,11 +9,11 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 
 ## 一、总览
 
-六阶段流水线，入口为用户级斜杠命令 `/spec-flow`（命令薄壳加载本 skill）：
+六阶段流水线，入口为用户级命令 `/spec-flow`（命令薄壳加载本 skill）：
 
 ```
 阶段1 独立双线规划 → 阶段1.5 差异收敛与分歧复算 → 阶段1.7 代码设计 → 阶段2 落档 → 阶段3 执行 → 阶段4 验证与归档
-line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-propose    subagent | team    openspec-archive-change
+line-a + line-b  diff-matrix + 第三线复算  code-design.md  openspec-propose  subagent | team  openspec-archive-change
 ```
 
 阶段 1.5 的三分类与复算逻辑固定；问答方法见第五节。
@@ -22,7 +22,7 @@ line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-p
 
 承诺：**阶段边界必汇报**、**规划外 scope 变化回到用户**、**不假设未给出的选项**。
 
-参数与模式（**一次只问该阶段需要的，已预置的不再问**；决策转达方式＝直接答复（默认）/ 授权按假设清单推进，与模式同问）：
+参数与模式（**一次只问该阶段需要的，已预置的不再问**；决策转达＝直接答复（默认）/ 授权按假设清单推进，与模式同问）：
 
 | 参数 / 选项 | 取值与缺省（含询问时机） |
 | --- | --- |
@@ -33,21 +33,21 @@ line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-p
 | `--engine team` | 执行引擎；映射 `engine` → `subagent`；与模式同问 |
 | `--model <阶段>=<provider>/<模型>` | 阶段级模型覆盖；映射 `models` → 继承会话 |
 
-展开内容按**消费时机**外移到**同目录** references——入口只留骨架、红线与指针（按下表**按需读取**，读到的与正文同等权威）：
+展开内容按**消费时机**外移到 **`refs/`** 子目录——入口只留骨架、红线与指针（按下表**按需读取**，读到的与正文同等权威）：
 
 | 消费时机 | 读什么 |
 | --- | --- |
-| 阶段 1 派发规划线前 | [planning.md](planning.md) —— 派发模板、回执核对、前置检查、落档细节 |
-| 阶段 1.5 | [convergence.md](convergence.md) —— 设计树/前沿分轮与六步判据 |
-| **仅 `subagent` 引擎**派发前 | [routing.md](routing.md) —— 路由键、三档回退、白名单、图片能力、自检 |
-| 执行派发前（两引擎） | [execution.md](execution.md) —— 编排、模式与提交、提示模板、回执格式 |
-| 异常、边界、失败 | [failure-modes.md](failure-modes.md) —— 处置表主体（红线见第十二节） |
+| 阶段 1 派发规划线前 | [planning.md](refs/planning.md) —— 派发模板、回执核对、前置检查、落档细节 |
+| 阶段 1.5 | [convergence.md](refs/convergence.md) —— 设计树/前沿分轮与六步判据 |
+| **仅 `subagent` 引擎**派发前 | [routing.md](refs/routing.md) —— 路由键、三档回退、白名单、图片能力、自检 |
+| 执行派发前（两引擎） | [execution.md](refs/execution.md) —— 编排、模式与提交、提示模板、回执格式 |
+| 异常、边界、失败 | [failure-modes.md](refs/failure-modes.md) —— 处置表主体（红线见第十二节） |
 
-**压缩后恢复速查**（红线级）：进度只认**三方对齐**（工件 + 勾选态 + 提交历史）；**绝不重跑已完成任务**，从最小编号未完成组继续（第七节）。
+**压缩后恢复速查**（红线级）：进度只认**三方对齐**（工件+勾选态+提交历史）；**绝不重跑已完成任务**，从最小编号未完成组继续（第七节）。
 
 ## 二、前置检查
 
-开工前五项（展开见 [planning.md](planning.md) / [failure-modes.md](failure-modes.md)）：**①OpenSpec 根**（`openspec list --json` 读 `root`；`null` → **未接入**：**绝不副作用创建** `openspec/`，问 init / store / 放弃）｜**②参数**（需求原文 / continue 名 / 编排 / 模式 / 引擎 / 模型覆盖）｜**③工作目录事实**（含 `git status --porcelain`；无关脏改动**不擅自 stash / commit / revert**）｜**④能力自检**（`openspec-*` 与 `grill-me`；**`grill-me` 缺失时降级为普通按轮提问并如实告知**）｜**⑤路由自检**（**仅 `subagent` 引擎**；不过按 [routing.md](routing.md) **三档回退**）。
+开工前五项（展开见 [planning.md](refs/planning.md) / [failure-modes.md](refs/failure-modes.md)）：**①OpenSpec 根**（`openspec list --json` 读 `root`；`null` → **未接入**：**绝不副作用创建** `openspec/`，问 init / store / 放弃）｜**②参数**（需求原文 / continue 名 / 编排 / 模式 / 引擎 / 模型覆盖）｜**③工作目录事实**（含 `git status --porcelain`；无关脏改动**不擅自 stash / commit / revert**）｜**④能力自检**（`openspec-*` 与 `grill-me`；**`grill-me` 缺失时降级为普通按轮提问并如实告知**）｜**⑤路由自检**（**仅 `subagent` 引擎**；不过按 [routing.md](refs/routing.md) **三档回退**）。
 
 ## 三、模式收集
 
@@ -57,7 +57,7 @@ line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-p
 
 两条**方向不同、各自完整**的规划线，**不是分工**：两种视角各自把需求**完整**规划一遍，让盲区在阶段 1.5 交叉比对中互相暴露。
 
-**A 线**（需求与价值、范围与边界——要解决什么、为谁解决、边界在哪）与 **B 线**（实现与约束、反例与风险——怎么做、会怎么错、代价是什么）；两者产物分别落 `/tmp/spec-flow/<change>/line-a.md`、`line-b.md`。
+**A 线**（需求与价值、范围与边界——要解决什么、为谁解决、边界在哪）与 **B 线**（实现与约束、反例与风险——怎么做、会怎么错、代价是什么）；产物分别落 `/tmp/spec-flow/<change>/line-a.md`、`line-b.md`。
 
 **每条线都产出同一套字段的完整轻量规划草案**——7 项**不得缺项、不得合并、不得只写本方向内的那几项**（目标与非目标 / 范围与边界 / 方案与取舍 / 任务拆分 / 验证思路 / 风险与未知 / 假设清单）；两线**结构与完备度完全一致**。
 
@@ -71,7 +71,7 @@ line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-p
 
 ### 待决问题的中转交互协议（子代理 ↔ 用户）
 
-**平台事实**：被父代理拥有的子代理**不能直接向用户提问**——调用提问工具被以错误码 `DELEGATED_CALLER` 拒绝（team 的 teammate 同受此限）。**这是平台设计，不是故障**。协议适用于规划线、执行任务、复算线：
+**平台事实**：被父代理拥有的子代理**不能直接向用户提问**——调用提问工具被 `DELEGATED_CALLER` 拒绝（team 的 teammate 同受此限）。**这是平台设计，不是故障**。协议适用于规划线、执行任务、复算线：
 
 1. **① 上浮**：决策**不得自行假设**；写进产物「待决问题」节（**问题、选项、推荐、影响面**）并列回执 TOP 项后结束回合；**不得为等答复阻塞、空转、轮询**。
 2. **② 代问**：主会话**立即**代问，**不积压、不另开通道**（规划期并入阶段 1.5 统一提问）；执行期当批次即时代问。
@@ -81,31 +81,31 @@ line-a + line-b    diff-matrix + 第三线复算    code-design.md    openspec-p
 
 **两条禁令**：**不得把待决项静默变成假设**；**不得让子代理为等答复而阻塞或轮询**。
 
-**派发前先读 [planning.md](planning.md)**；两线除「方向」外**逐字等形**。
+**派发前先读 [planning.md](refs/planning.md)**；两线除「方向」外**逐字等形**。
 
 ## 五、差异收敛与分歧复算（阶段 1.5）
 
-两线都回执后做差异收敛——**六步，一步不省**；**第 4 步遵循 `grill-me` 的设计树/前沿分轮方法**（**问答由主会话执行**；判据与留痕见 [convergence.md](convergence.md)）：
+两线都回执后做差异收敛——**六步，一步不省**；**第 4 步遵循 `grill-me` 的设计树/前沿分轮方法**（**问答由主会话执行**；判据与留痕见 [convergence.md](refs/convergence.md)）：
 
 **①交叉比对**（**共识** / **分歧** / **单边遗漏**；单边项 SHALL **逐项核验**，**绝不因"只有一条线提出"而丢弃**）→ **②自行裁定**（能查证的自己查证，**不得转为提问**）→ **③分歧复算**（无法查证的派第三条 **fresh** 子代理；三条互异 → **用户决策项**；**最多 3 个**）→ **④问决策项**（设计树**只问前沿**、每轮 **≤5 问**、附**推荐与来源**）→ **⑤记录**（`/tmp/spec-flow/<change>/diff-matrix.md`）→ **⑥收敛结束**（**前沿为空**或用户**确认「已达成共识 / 可以落档」**；未答项**不得静默假设**）。
 
 **只问决策，不问事实**。
 
-**阶段 1.7 代码设计**（1.5 收敛后、落档前）：**恒派 fresh 子代理**（`design` 路由）产出 `code-design.md`；模板、深度契约与三档分降见 [planning.md](planning.md)『附：代码设计环节（阶段 1.7）』。
+**阶段 1.7 代码设计**（1.5 收敛后、落档前）：**恒派 fresh 子代理**（`design` 路由）产出 `code-design.md`；模板、深度契约与三档分降见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
 
 ## 六、落档（阶段 2）
 
-加载 `openspec-propose` skill 生成工件；输入 = 需求原文 + `line-a.md` + `line-b.md` + `diff-matrix.md` + `code-design.md`（缺后两者分别说明阶段 1.5 / 1.7 未做完）。**细节见 [planning.md](planning.md)**：
+加载 `openspec-propose` skill 生成工件；输入 = 需求原文 + `line-a.md` + `line-b.md` + `diff-matrix.md` + `code-design.md`（缺后两者分别说明阶段 1.5 / 1.7 未做完）。**细节见 [planning.md](refs/planning.md)**：
 
 **①四件套** → **②`tasks.md` 执行批次契约（硬约束）**：`## N. 组名` = 批次、**组间串行**、**组内可并行**、**验证句必须第三方可核对**、单组 ≤ `parallelism` → **③分歧点提问** → **④`openspec validate <change> --strict` 退出码 0**（**不得带病进入执行**）→ **⑤落档即停** → **⑥展示摘要** → **⑦问执行模式与引擎** → **⑧工件单独提交一次** → **⑨「暂不执行」**告知 `/spec-flow continue <change>`。
 
 ## 七、衔接与恢复协议
 
-**衔接（落档提交后、执行前）**：①确认执行模式与引擎（第六节第 7 步；接续场景见第十节需重选）；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文，然后说继续。」** 被打断的会话按恢复协议重建进度即可。
+**衔接（落档提交后、执行前）**：①确认执行模式与引擎（第六节第 7 步；接续场景见第十节需重选）；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文，然后说继续。」** 被打断的会话按恢复协议重建进度。
 
 **恢复协议（任何时刻生效：新轮次、`/compact` 之后、会话重启之后、用户说「继续」）**：
 
-1. 先重建进度：`openspec status --change <change> --json`（**该 CLI 版本的 `status` 不接受位置参数**；裸 `--json` 报缺 `--change`，用 `openspec status --all --json` 兜底）。
+1. 先重建进度：`openspec status --change <change> --json`（**该版本 `status` 不接受位置参数**；裸 `--json` 无效，用 `openspec status --all --json` 兜底）。
 2. 读 `tasks.md` 勾选态（`- [x]` = 完成）与 `git log --oneline` 的批次提交。
 3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据或提交对不上 → 回退为未完成并报告。
 4. **绝不重跑已完成任务**；从「最小编号的未完成组」继续。
@@ -127,11 +127,11 @@ while 存在未勾选任务:
 
 **共同纪律**：主会话必须自己按**验证句 + diff** 核对（跑验证句命令、读回改动文件、`git diff --stat`），**核对通过才把 `- [ ]` 改成 `- [x]`**；不得仅凭口头汇报勾选。
 
-**引擎与模式**：`subagent`（默认）每任务一个 **fresh** 子代理、组内并发**组间串行**；`team`（`--engine team`）走任务板卡片 + 具名 implementer、反馈回**同一成员**；**成员创建失败或不可用时降级 subagent**。三模式：`auto`/`step-task`（每任务停留）/`step-group`（每批次停留）。**停留点与提交时机、提示模板、回执格式、硬停四条件、逐条纪律见 [execution.md](execution.md)**（**首次派发前读**）；`auto` **硬停**：不可逆 / 安全敏感 / 工作区外副作用 / 计划彻底失效；任务失败**重试一次**，仍失败**暂停本批次并报告**。
+**引擎与模式**：`subagent`（默认）每任务一个 **fresh** 子代理、组内并发**组间串行**；`team`（`--engine team`）走任务板卡片 + 具名 implementer、反馈回**同一成员**；**成员创建失败或不可用时降级 subagent**。三模式：`auto`/`step-task`（每任务停留）/`step-group`（每批次停留）。**停留点与提交时机、提示模板、回执格式、硬停四条件、逐条纪律见 [execution.md](refs/execution.md)**（**首次派发前读**）；`auto` **硬停**：不可逆 / 安全敏感 / 工作区外副作用 / 计划彻底失效；任务失败**重试一次**，仍失败**暂停本批次并报告**。
 
 ## 九、验证与归档（阶段 4）
 
-**①先读项目声明的验证方式**（`AGENTS.md`/`CLAUDE.md` → README、package scripts、CI）→ **②执行验证**（可派 **fresh** 子代理按 [routing.md](routing.md) 应用 `verify` 路由；回传命令与**退出码**）→ **③不通过 → 不归档**（报告证据；问用户修复或**显式批准**跳过并记已知缺口）→ **④通过后归档**（`tasks.md` 全部勾选 → `openspec-archive-change` 归档并同步主规格）→ **⑤归档单独提交一次**（报错贴原文并停，**不手工搬移目录**）→ **⑥汇报四要素**（工件路径 / 验证证据 / 归档位置与主规格 / 宿主操作清单）。
+**①先读项目声明的验证方式**（`AGENTS.md`/`CLAUDE.md` → README、package scripts、CI）→ **②执行验证**（可派 **fresh** 子代理按 [routing.md](refs/routing.md) 应用 `verify` 路由；回传命令与**退出码**）→ **③不通过 → 不归档**（报告证据；问用户修复或**显式批准**跳过并记已知缺口）→ **④通过后归档**（`tasks.md` 全部勾选 → `openspec-archive-change` 归档并同步主规格）→ **⑤归档单独提交一次**（报错贴原文并停，**不手工搬移目录**）→ **⑥汇报四要素**（工件路径 / 验证证据 / 归档位置与主规格 / 宿主操作清单）。
 
 ## 十、接续流程
 
@@ -139,13 +139,13 @@ while 存在未勾选任务:
 
 ## 十一、模型路由
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径；容器内 `~` = `/home/docker`）：键 `lineA`/`lineB`/`panel`/`design`/`apply`/`verify`/`vision` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线、阶段 3 执行（**仅 `subagent` 引擎**）、阶段 4 验证、**读图覆盖（能力键）**；值 `{ provider, model }`，可选 `fallback`。**优先级：`--model` > 映射文件 > 继承会话模型。**
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径；容器 `~` = `/home/docker`）：键 `lineA`/`lineB`/`panel`/`design`/`apply`/`verify`/`vision` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线、阶段 3 执行（**仅 `subagent` 引擎**）、阶段 4 验证、**读图覆盖（能力键）**；值 `{ provider, model }`，可选 `fallback`。**优先级：`--model` > 映射文件 > 继承会话模型。**
 
-红线要点（**展开唯一权威源 = [routing.md](routing.md)——仅 `subagent` 引擎派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——`zai/glm-5.3` **不支持图片**，`does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
+红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——仅 `subagent` 引擎派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——`zai/glm-5.3` **不支持图片**，`does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
 
 ## 十二、边界与失败
 
-**红线级条目**（违反即致不可逆、失控或静默假设）；其余异常与失败处置见 [failure-modes.md](failure-modes.md)，**遇异常先读它**：
+**红线级条目**（违反即致不可逆、失控或静默假设）；其余异常与失败处置见 [failure-modes.md](refs/failure-modes.md)，**遇异常先读它**：
 
 | 情形 | 处置 |
 | --- | --- |
