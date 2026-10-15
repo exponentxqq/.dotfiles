@@ -16,7 +16,7 @@
 
 - [x] 2.2 项目声明验证回归（G5）：`node --test 'test/*.test.ts'`（工作目录 `tools/skctl`）；验证：退出码 0、用例 47 通过
 
-- [ ] 2.3 运行时冒烟（G4）：会话内按名加载 `spec-workflow` skill，确认加载成功且渲染码点 ≤8192（余量 ≥15）；`ls ~/.agents/skills/spec-workflow/refs/` 5 文件可见（改源即生效，无需重登记）；验证：实测数字与加载结果记录入执行日志
+- [x] 2.3 运行时冒烟（G4）：会话内按名加载 `spec-workflow` skill，确认加载成功且渲染码点 ≤8192（余量 ≥15）；`ls ~/.agents/skills/spec-workflow/refs/` 5 文件可见（改源即生效，无需重登记）；验证：实测数字与加载结果记录入执行日志
 
 ## Workflow follow-up
 
