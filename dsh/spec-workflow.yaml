@@ -12,11 +12,11 @@
 # 命令行 `--model <阶段>=<provider>/<模型>` 可临时覆盖本文件（fallback 只能写在文件里）
 models:
   # 规划阶段：glm-5.3（图片输入能力 = 无，纯文本）；需读图时改用下面的 vision
-  lineA:  { provider: zai, model: glm-5.3 }
-  lineB:  { provider: zai, model: glm-5.3 }
-  panel:  { provider: zai, model: glm-5.3 }
+  lineA: { provider: zai-coding-cn, model: glm-5.3 }
+  lineB: { provider: zai-coding-cn, model: glm-5.3 }
+  panel: { provider: zai-coding-cn, model: glm-5.3 }
   # 设计线阶段路由：阶段 1.7 代码设计子代理（恒派 fresh；与规划三线同级强模型）
-  design: { provider: zai, model: glm-5.3 }
+  design: { provider: zai-coding-cn, model: glm-5.3 }
   # 执行阶段（含归档前验证）：deepseek-v4.1-flash 主用，deepseek-flash 备用；两者都支持图片输入
   apply:
     provider: opencode-go
@@ -27,7 +27,7 @@ models:
     model: deepseek-v4.1-flash
     fallback: { provider: deepseek-official, model: deepseek-flash }
   # 读图覆盖：glm-5.3-flash（支持 text+image）——规划线/复算线要看截图、设计稿时改用它
-  vision: { provider: zai, model: glm-5.3-flash }
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash }
 
 # 执行引擎偏好（可被 --engine 覆盖）：subagent | team
 engine: subagent

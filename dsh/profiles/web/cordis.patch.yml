@@ -12,7 +12,7 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: zai
+    provider: zai-coding-cn
     model: glm-5.3
     reasoningEffort: max
 # 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
@@ -31,6 +31,8 @@
       opencode-go:
         apiKeyEnv: OPENCODE_GO_API_KEY
         reasoningEffort: max
+      zai-coding-cn:
+        apiKeyEnv: ZAI_CODING_CN_API_KEY
 # 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
 - id: skill-filesystem
   name: "@deepseek-ai/dsh-skill-filesystem"
@@ -135,6 +137,8 @@
     allowedModels:
       - { provider: zai, model: glm-5.3 }
       - { provider: zai, model: glm-5.3-flash }
+      - { provider: zai-coding-cn, model: glm-5.3 }
+      - { provider: zai-coding-cn, model: glm-5.3-flash }
       - { provider: opencode-go, model: deepseek-v4.1-flash }
       - { provider: opencode-go, model: deepseek-v4-pro }
       - { provider: deepseek-official, model: deepseek-flash }
