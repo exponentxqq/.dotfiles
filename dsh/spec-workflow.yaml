@@ -33,4 +33,4 @@ models:
 engine: subagent
 
 # 同组并行上限
-parallelism: 3
+parallelism: 8

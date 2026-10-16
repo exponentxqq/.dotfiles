@@ -73,6 +73,7 @@ boot → controllers(协议层) → 应用层 → 领域层(xxx-api) → 基础�
 ## Repository 通用约定
 
 - Repository 命名：`getByXxx` 抛异常，`findByXxx` 返回 Optional；查不到抛「资源不存在」错误码（选码按项目惯例，见附录）；业务错误码可在 repository 层承载「存储约束/缺失」语义（唯一键冲突、资源不存在等），不限于应用层
+- **repository 不感知业务场景**：方法名只表达持久化/查询语义（约定前缀 + 查询条件 + `search` 类动态分页），不携带业务场景词（如 market/mine/橱窗）——场景语义命名归应用层方法，内部转调业务中立的 repository 方法（先例：`SkillService.listMarket` → `SkillRepository.search`）
 - **聚合仓储以聚合为单位**：写入统一 `save(聚合)`（新建/更新同一入口，子表随聚合根写入）、删除 `delete(id)`；部分列更新方法（`resetPassword` 等）是过渡形态，随域富化收敛进 `save`
 - repository 写方法参数直接传 domain 对象，不拆扁平参数列表（部分列更新须 javadoc 明示）
 - 数值型统计字段不允许 null，统一 `BigDecimal.ZERO` 兜底
@@ -206,6 +207,7 @@ boot → controllers(协议层) → 应用层 → 领域层(xxx-api) → 基础�
 - 成员变量 → 构造函数注入（`@RequiredArgsConstructor`）；静态常量放在成员变量之前；日志 `@Slf4j`
 - 时间一律用 `Instant`（domain/entity/DTO/参数统一）；如非必要禁用非 Instant 时间类（`LocalDateTime`/`LocalDate`/`ZonedDateTime`/`Date`）。审计列走 `AuditBaseEntity` 的 Instant 体系，ORM 列转换器见对应 ORM 文件
 - 表名前缀与类名对齐（`statistic_*` 表 ↔ `Statistic*` 类）
+- 方法名尽量精简：参数本身的类型与语义已具备足够区分度时，不在方法名中冗长复述参数（避免 `xxxByAAndBAndC` 式条件链条堆叠）；方法名只保留参数表达不了的语义（`getBy` 抛错 / `findBy` 可空等约定前缀、业务意图、副作用）
 - Javadoc 只写 `@param` / `@return` 有非显而易见语义时才加描述
 
 ## 写完自查
