@@ -17,11 +17,13 @@ parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 | 键 | 应用点 |
 | --- | --- |
-| `lineA` | 阶段 1 A 线规划子代理（需求与价值、范围与边界） |
-| `lineB` | 阶段 1 B 线规划子代理（实现与约束、反例与风险） |
-| `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发） |
-| `design` | 阶段 1.7 代码设计子代理（恒派 fresh 子代理，深度契约见 [planning.md](planning.md)） |
+| `lineA` | 阶段 1 A 线规划派发——**仅 subagent 派发时应用**（team 编排下不应用；串行单线不消费） |
+| `lineB` | 阶段 1 B 线规划派发——适用范围同 `lineA` |
+| `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发；恒为 subagent，不受编排影响） |
+| `design` | 阶段 1.7 代码设计子代理（恒派 fresh 子代理，深度契约见 [planning.md](planning.md)；恒为 subagent，不受编排影响） |
 | `vision` | **读图覆盖（能力键，不改变阶段划分）**：某阶段子代理需要图片输入（截图、设计稿、渲染结果、fixture 图片）而**该阶段路由不支持图片**时，忽略阶段路由、改用本键派发；阶段路由本身支持图片时保持阶段路由 |
+
+**编排适用性速查**：路由**仅适用于 subagent 派发**——并行 team 成员无模型参数（`lineA`/`lineB` 不应用，映射值忽略并留痕告知）；串行单线无派发（规划键不消费）；`panel`/`design` 恒为 subagent 派发，不受编排影响；显式 `--model lineA|lineB` 覆盖 → 该线以 subagent 派发兑现路由（不静默丢弃显式覆盖）。
 
 > 执行键 `apply` / `verify` 与 `engine` 由 **spec-workflow** 消费（执行与验证派发、引擎偏好）；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。两半共用同一映射文件与白名单。
 
@@ -29,8 +31,8 @@ parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 | 路由 | 图片输入 | 说明 |
 | --- | --- | --- |
-| `zai/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线与设计线默认路由；**读图任务必须改走 `vision`** |
-| `zai/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
+| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线与设计线默认路由；**读图任务必须改走 `vision`** |
+| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
 | `opencode-go/deepseek-v4.1-flash` | 支持 | 执行侧主路由（spec-workflow 消费） |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
 | `deepseek-official/deepseek-flash` | 支持 | 执行侧备用路由（spec-workflow 消费） |
@@ -59,7 +61,7 @@ console.log("OK 全部路由 ⊆ 白名单");'
 
 - **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
 - **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
-- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 不支持模型选择（保持与父会话一致以复用 KV cache），需要阶段路由时**不要用 fork**。
+- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 与 `spawn_teammate` 均不支持模型选择（fork 保持与父会话一致以复用 KV cache；team 成员锁定 Lead 模型）——需要阶段路由时**不要用 fork**；team 编排下 `lineA`/`lineB` 不应用（同 spec-workflow team 引擎忽略 `apply` 键先例），显式 `--model lineA|lineB` 覆盖的线改以 subagent 派发兑现路由。
 - **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是「该会话未生效」而非工具损坏，换新会话即可。
 - **主会话阶段（落档）的模型由用户自行切换**，本 skill 只提示；本 skill 无法修改主会话模型。
 - 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），报告一次后继续。

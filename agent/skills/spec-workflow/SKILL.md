@@ -16,7 +16,7 @@ description: 固定 spec 驱动开发工作流——两条方向不同的独立�
 → 阶段3 执行 → 阶段4 验证与归档（本 skill 承载）
 ```
 
-**状态载体 = 工件**：权威进度 = 工件 + `tasks.md` 勾选态 + `git log`（**三方对齐**）；`/tmp/spec-flow/<change>/` 材料易失、不入库、不进提交。工件跨界所有权：`code-design.md`/`diff-matrix.md` 由 spec-plan 产出，执行期由本 skill 维护（组段终形态化，见第六节）。
+**状态载体 = 工件**：权威进度 = 工件 + `tasks.md` 勾选态 + `git log`（**三方对齐**）；`/tmp/spec-flow/<change>/` 材料易失、不入库、不进提交。工件跨界所有权：`code-design.md`/`diff-matrix.md`（串行 `decisions.md`）由 spec-plan 产出并**随落档提交至变更目录**，执行期由本 skill 维护**落档副本**（组段终形态化，见第六节；`/tmp` 侧原件落档后不再维护）。
 
 承诺：**阶段边界必汇报**、**规划外 scope 变化回到用户**、**不假设未给出的选项**。
 
