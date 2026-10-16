@@ -1,4 +1,6 @@
 # spec-workflow 阶段级模型路由
+# 键归属（split-spec-plan-skill 拆分）：lineA/lineB/panel/design 与 vision·规划侧由 spec-plan 消费；
+#         apply/verify、vision·执行侧、engine、parallelism 由 spec-workflow 消费（两半共用本文件与白名单）
 # 键：lineA（A 规划线：需求/价值/范围）| lineB（B 规划线：实现/约束/风险）
 #     panel（分歧复算线，阶段 1.5 仅分歧时派发）| design（设计线阶段路由，阶段 1.7 代码设计子代理）
 #     apply（执行任务）| verify（归档前验证）| vision（读图覆盖路由：阶段路由不支持图片输入时改用它，见下）

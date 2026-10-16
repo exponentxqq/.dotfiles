@@ -28,7 +28,7 @@ node $SKCTL doctor                            # 修复 ~/.agents/skills 链接�
 
 | skill                                                                                     | 来源                                                                                                     |
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `spring-writer` / `nuxt-writer` / `grill-me` / `reviewing-deliverables` / `spec-workflow` | 自写（本目录 local symlink）                                                                             |
+| `spring-writer` / `nuxt-writer` / `grill-me` / `reviewing-deliverables` / `spec-workflow` / `spec-plan` | 自写（本目录 local symlink）                                                                             |
 | `smoke-testing-local-env`                                                                 | 自写（本目录 local symlink）                                                                             |
 | `analyzing-elastic-logs` / `codebase-memory` / `context7-mcp`                             | 自写（依赖各自 MCP，dsh 侧工具未接时模型自行降级）                                                       |
 | `openspec-*` ×7（core 6 + verify `openspec-verify-change`）                               | 经 skctl 从 [Fission-AI/OpenSpec] `skills/<name>` 安装，git 源（commit `9111a765`），`skctl update` 升级 |
