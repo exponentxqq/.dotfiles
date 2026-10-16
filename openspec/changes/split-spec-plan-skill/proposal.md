@@ -16,7 +16,7 @@
 - **新建 skill `spec-plan`**（`agent/skills/spec-plan/`：SKILL.md + refs planning/convergence/routing/failure-modes）：承接阶段 1 独立双线规划 → 1.5 差异收敛 → 1.7 代码设计 → 2 落档，**到落档提交为止**；收尾固定告知 `/spec-flow continue <变更名>` 接续执行。落档契约两处增强：①`tasks.md` 分组语义明确「组 = 执行审核批次，组内单任务是合法常态，分组兼顾用户审核节奏」；②栈识别结论（writer skill 名与证据）写入落档 `design.md` 决策记录，供执行侧与接续恢复读取。
 - **新增用户命令 `/spec-plan`** 薄壳（`dsh/commands/spec-plan.md` + 容器 symlink）。
 - **`spec-workflow` 改写为全流程编排者**：三个规划节合并为「加载 `spec-plan` skill 委托执行（转发 `--parallel` 与规划键 `--model`，已预置不重问）」一节；衔接节吸收原落档第 7 步（落档完成后确认执行模式与引擎）；frontmatter 逐字节不变；refs 删 `planning.md`/`convergence.md`，`routing.md`/`failure-modes.md` 裁至执行键，`execution.md` 吸收纪律级实证。
-- **spec-workflow 执行侧吸收 component:ai 实证纪律**（不改执行节律的文本纪律）：审核-提交分离（step 模式停留 = 呈现证据等用户确认，确认后才提交）、引擎批次间可切换（team↔subagent，切换留痕）、干净窗口验收两步法（无并发构建进程 + 无 SKIPPED 且任务真实 executed）、嵌套子仓分仓提交、真实凭据只经参数、执行期留痕与工件维护（组段终形态化、R<n> 编号、证据目录易失）。
+- **spec-workflow 执行侧吸收 component:ai 实证纪律**（不改执行节律的文本纪律）：审核-提交分离（**任何模式**完成后不自动提交——呈现证据等用户审核确认后才提交，用户明确豁免审核时除外；auto 在全部批次完成后停留呈证）、引擎批次间可切换（team↔subagent，切换留痕）、干净窗口验收两步法（无并发构建进程 + 无 SKIPPED 且任务真实 executed）、嵌套子仓分仓提交、真实凭据只经参数、执行期留痕与工件维护（组段终形态化、R<n> 编号、证据目录易失）。
 - **共用 `dsh/spec-workflow.yaml` 键值零改动**（注释补键归属分工）；`/spec-flow` 薄壳正文不动。
 - **不做（本期）**：独立对抗性复核分档（L0 Lead 自核 / L1 独立只读复核 / L2 复核+假绿检验）、Lead 裁定协议（子代理报告须独立复核确认）、delta 复核——component:ai 流程级实证显著改变每组执行节律与成本，立为紧后独立变更（蓝图记本变更 design.md D7），需单独设计分档判据。
 
