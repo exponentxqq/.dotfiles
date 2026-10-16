@@ -218,6 +218,12 @@ return {
         config.init_options = vim.tbl_deep_extend("force", config.init_options or {}, {
           settings = config.settings,
         })
+        -- 独立 GRADLE_USER_HOME：jdtls 的 Gradle Tooling 导入与容器内 ./gradlew
+        -- （java 容器把宿主 ~/.gradle 挂成 /home/docker/.gradle）彻底分家，
+        -- 避免跨容器/宿主共用同一把 journal-1 锁导致的 LockTimeoutException。
+        config.cmd_env = vim.tbl_extend("force", config.cmd_env or {}, {
+          GRADLE_USER_HOME = vim.fn.expand("~/.gradle-jdtls"),
+        })
         return config
       end
 
