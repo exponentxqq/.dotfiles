@@ -9,7 +9,11 @@ models:                       # 执行键：apply；verify 由 spec-done 复用�
   apply:                                          # 值：{ provider, model }
     provider: opencode-go
     model: deepseek-v4.1-flash
-    fallback: { provider: deepseek-official, model: deepseek-flash }
+    fallback: { provider: deepseek-official, model: deepseek-flash }  # 官方 deepseek-flash = 最新 V4.1 Flash（1017）
+  verify:                                         # 阶段 4 归档前验证与收尾复验（spec-done 消费）
+    provider: zai-coding-cn
+    model: glm-5.3-flash
+    fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
   vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
 engine: subagent    # subagent | team（--engine 覆盖）
 parallelism: 8      # 同组并行上限
@@ -29,11 +33,13 @@ parallelism: 8      # 同组并行上限
 
 | 路由 | 图片输入 | 说明 |
 | --- | --- | --- |
-| `opencode-go/deepseek-v4.1-flash` | 支持 | `apply` / `verify` 主路由 |
+| `opencode-go/deepseek-v4.1-flash` | 支持 | `apply` 主路由 / `verify` 备用（转售通道，版本是否同步 1017 以渠道为准） |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
-| `deepseek-official/deepseek-flash` | 支持 | `apply` / `verify` 备用路由 |
-| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
-| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划侧默认路由（spec-plan 消费） |
+| `deepseek-official/deepseek-flash` | 支持 | 官方最新 V4.1 Flash（2026-10-17 起为 1017 版）；`apply` 备用 / 规划三线默认路由（spec-plan 消费） |
+| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `verify` 主路由 + `vision` 键 |
+| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划线异家兜底（spec-plan 消费）；落到它且需读图时改走 `vision` |
+
+> **版本口径**：2026-10-17 起 DeepSeek 官方 `deepseek-flash` 即 `DeepSeek-V4.1-Flash-1017` 最新版（API model 名不变，路由无需改动）。新版建议配合 DeepSeek Harness ≥ `0.2.1-rc.1`。
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 

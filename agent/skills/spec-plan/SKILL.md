@@ -103,7 +103,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由仅适用于 subagent 派发**：**team 成员无模型参数**——team 编排下 `lineA`/`lineB` **不应用**（留痕告知）；**串行单线无派发，规划键不消费**；`panel`/`design` 恒为 subagent 派发，不受编排影响；**显式 `--model lineA|lineB` → 该线以 subagent 派发兑现路由**（不静默丢弃显式覆盖）。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
 
-红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——`zai-coding-cn/glm-5.3` **不支持图片**，`does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
+红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——规划主路由 `deepseek-official/deepseek-flash`（V4.1 Flash，最新 1017）**支持图片**，正常直读；仅显式覆盖或 `fallback` 落到 `zai-coding-cn/glm-5.3` 等**不支持图片**的路由时，`does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
 
 ## 九、边界与失败
 

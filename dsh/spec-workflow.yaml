@@ -2,23 +2,34 @@
 #   规划键 lineA/lineB/panel/design → spec-plan 消费
 #   apply、engine、parallelism → spec-apply 消费；verify → spec-done 复用（归档前验证与收尾复验）
 #   vision 为能力键（读图覆盖），spec-plan（规划线读图）与 spec-apply 共用；四段共用本文件与白名单
+# 路由现状说明（2026-10-17 DeepSeek-V4.1-Flash-1017 发布后重排）：
+#   规划/设计用 DeepSeek V4.1 Flash（官方 deepseek-flash 即最新版：综合 agentic 能力最强、成本最低、原生支持读图）
+#   执行用 opencode-go 通道的 V4.1 Flash（更便宜）；验证用最便宜的视觉可用模型（glm-5.3-flash）
+#   GLM-5.3（异家）只作规划线兜底：DeepSeek 官方不可用/限流时规划线不停摆
 models:
-  # 规划阶段：glm-5.3（图片输入能力 = 无，纯文本）；需读图时改用下面的 vision
-  lineA: { provider: zai-coding-cn, model: glm-5.3 }
-  lineB: { provider: zai-coding-cn, model: glm-5.3 }
-  panel: { provider: zai-coding-cn, model: glm-5.3 }
-  # 设计线阶段路由：阶段 1.7 代码设计子代理（恒派 fresh；与规划三线同级强模型）
-  design: { provider: zai-coding-cn, model: glm-5.3 }
-  # 执行阶段（含归档前验证）：deepseek-v4.1-flash 主用，deepseek-flash 备用；两者都支持图片输入
+  # 规划阶段：DeepSeek V4.1 Flash（1017，支持 text+image）——规划线读图无需再改道 vision
+  lineA:
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  lineB:
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  panel: { provider: deepseek-official, model: deepseek-flash }
+  # 设计线阶段路由：阶段 1.7 代码设计子代理（恒派 fresh；与规划三线同路由）
+  design: { provider: deepseek-official, model: deepseek-flash }
+  # 执行阶段：opencode-go 通道的 V4.1 Flash 更便宜，主用；备用 DeepSeek 官方 flash（最新 1017）
   apply:
-    provider: opencode-go
-    model: deepseek-v4.1-flash
+    provider: zai-coding-cn
+    model: glm-5.3
     fallback: { provider: deepseek-official, model: deepseek-flash }
+  # 归档前验证与收尾复验：机械跑命令 + 汇证据，用最便宜的视觉可用模型
   verify:
-    provider: opencode-go
-    model: deepseek-v4.1-flash
-    fallback: { provider: deepseek-official, model: deepseek-flash }
-  # 读图覆盖：glm-5.3-flash（支持 text+image）——规划线/复算线要看截图、设计稿时改用它
+    provider: zai-coding-cn
+    model: glm-5.3-flash
+    fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
+  # 读图覆盖：主路由已支持图片，vision 仅作低成本读图 / 落到不支持图片的路由时兜底
   vision: { provider: zai-coding-cn, model: glm-5.3-flash }
 
 # 执行引擎偏好（可被 --engine 覆盖）：subagent | team

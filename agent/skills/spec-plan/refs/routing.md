@@ -6,9 +6,12 @@
 
 ```yaml
 models:                       # 规划键：lineA | lineB | panel | design；能力键：vision
-  lineA: { provider: zai-coding-cn, model: glm-5.3 }        # 值：{ provider, model }
-  design: { provider: zai-coding-cn, model: glm-5.3 }       # 设计线（阶段 1.7 代码设计子代理）
-  vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
+  lineA:                                            # 值：{ provider, model }，可选 fallback
+    provider: deepseek-official
+    model: deepseek-flash                           # 官方 deepseek-flash = 最新 V4.1 Flash（1017，支持读图）
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }  # 异家兜底（DeepSeek 不可用/限流时）
+  design: { provider: deepseek-official, model: deepseek-flash }  # 设计线（阶段 1.7 代码设计子代理）
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash }       # 读图覆盖路由（能力键；主路由支持图片时不需要）
 engine: subagent    # 由 spec-apply 消费，本 skill 不读
 parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 ```
@@ -31,11 +34,13 @@ parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 | 路由 | 图片输入 | 说明 |
 | --- | --- | --- |
-| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线与设计线默认路由；**读图任务必须改走 `vision`** |
-| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
+| `deepseek-official/deepseek-flash` | 支持（`["text","image"]`） | 规划三线与设计线默认路由（官方 `deepseek-flash` 即最新 V4.1 Flash，2026-10-17 起为 1017 版）；**读图无需改道** |
+| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | `lineA` / `lineB` 的异家兜底；**落到它且任务需读图时改走 `vision`** |
+| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键（低成本读图 / 降级通道） |
 | `opencode-go/deepseek-v4.1-flash` | 支持 | 执行侧主路由（spec-apply 消费） |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
-| `deepseek-official/deepseek-flash` | 支持 | 执行侧备用路由（spec-apply 消费） |
+
+> **版本口径**：2026-10-17 起 DeepSeek 官方 `deepseek-flash` 即 `DeepSeek-V4.1-Flash-1017` 最新版（API model 名不变，路由无需改动）；`opencode-go/deepseek-v4.1-flash` 为转售通道，版本是否同步以渠道为准。新版建议配合 DeepSeek Harness ≥ `0.2.1-rc.1`。
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 
