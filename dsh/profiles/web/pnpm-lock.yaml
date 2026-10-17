@@ -27,17 +27,17 @@ importers:
         specifier: ^0.73.0
         version: 0.73.0(@deepseek-ai/schemastery@3.18.5)
       dsh-plugin-multi-root-workspace:
-        specifier: github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/dsh-plugin-multi-root-workspace
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/dsh-plugin-multi-root-workspace
+        specifier: github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/dsh-plugin-multi-root-workspace
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/dsh-plugin-multi-root-workspace
       dsh-plugin-project-mcp:
-        specifier: github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/project-mcp
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/project-mcp
+        specifier: github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/project-mcp
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/project-mcp
       dsh-plugin-user-commands:
-        specifier: github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/user-commands
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/user-commands
+        specifier: github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/user-commands
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/user-commands
       dsh-plugin-web-ux:
-        specifier: github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/web-ux
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/web-ux
+        specifier: github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/web-ux
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/web-ux
       dsh-pocket:
         specifier: ^2.12.0
         version: 2.12.0
@@ -489,9 +489,9 @@ packages:
       react-dom:
         optional: true
 
-  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/dsh-plugin-multi-root-workspace:
-    resolution: {gitHosted: true, path: plugins/dsh-plugin-multi-root-workspace, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485}
-    version: 1.2.0
+  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/dsh-plugin-multi-root-workspace:
+    resolution: {gitHosted: true, integrity: sha512-7Q9h4lVMNpiamLK1tHLkEpWedw3ReUBuIHTkF0p4OT05H77D2/Q3UQ1mAb8KRAsBaK8hXhjrjVtq7RzEV2SE0Q==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0}
+    version: 1.2.1
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/cordis': '>=4.0.1 <5.0.0'
@@ -542,23 +542,23 @@ packages:
       '@deepseek-ai/dsh-typert-protocol':
         optional: true
 
-  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/project-mcp:
-    resolution: {gitHosted: true, path: plugins/project-mcp, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485}
-    version: 1.2.0
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/project-mcp:
+    resolution: {gitHosted: true, integrity: sha512-7Q9h4lVMNpiamLK1tHLkEpWedw3ReUBuIHTkF0p4OT05H77D2/Q3UQ1mAb8KRAsBaK8hXhjrjVtq7RzEV2SE0Q==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0}
+    version: 1.2.1
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.1-rc.2 <0.3.0'
 
-  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/user-commands:
-    resolution: {gitHosted: true, path: plugins/user-commands, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485}
-    version: 1.2.0
+  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/user-commands:
+    resolution: {gitHosted: true, integrity: sha512-7Q9h4lVMNpiamLK1tHLkEpWedw3ReUBuIHTkF0p4OT05H77D2/Q3UQ1mAb8KRAsBaK8hXhjrjVtq7RzEV2SE0Q==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0}
+    version: 1.2.1
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.1-rc.2 <0.3.0'
 
-  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/web-ux:
-    resolution: {gitHosted: true, path: plugins/web-ux, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485}
-    version: 1.2.0
+  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/web-ux:
+    resolution: {gitHosted: true, integrity: sha512-7Q9h4lVMNpiamLK1tHLkEpWedw3ReUBuIHTkF0p4OT05H77D2/Q3UQ1mAb8KRAsBaK8hXhjrjVtq7RzEV2SE0Q==, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0}
+    version: 1.2.1
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.1-rc.2 <0.3.0'
@@ -1270,21 +1270,21 @@ snapshots:
       '@deepseek-ai/schemastery': 3.18.5
       zod: 4.6.5
 
-  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/dsh-plugin-multi-root-workspace:
+  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/dsh-plugin-multi-root-workspace:
     dependencies:
       '@deepseek-ai/node-addon-system': 0.1.2
       koffi: 3.3.3
       zod: 4.4.3
 
-  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/project-mcp:
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/project-mcp:
     dependencies:
       yaml: 2.9.1
 
-  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/user-commands:
+  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/user-commands:
     dependencies:
       yaml: 2.9.1
 
-  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/89c1b96aa345338946d796b9f866760840919485#path:plugins/web-ux: {}
+  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/1b56db6cb7a1618a35181f38eefe4f49bd70dfd0#path:plugins/web-ux: {}
 
   dsh-pocket@2.12.0:
     dependencies:
