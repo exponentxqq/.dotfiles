@@ -3,8 +3,6 @@ packages:
 autoInstallPeers: false
 
 nodeLinker: hoisted
-patchedDependencies:
-  dsh-pocket@2.10.6: patches/dsh-pocket@2.10.6.patch
 
 # pnpm ≥10 默认不执行依赖的构建脚本。本仓插件自 v1.1.1 起产物 lib/ 随 tag 提交、包内
 # 没有 `prepare`，git 来源安装不触发构建授权（pnpm 10 与 ≥11 行为一致），因此这里只剩

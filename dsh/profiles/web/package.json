@@ -12,7 +12,6 @@
         "dshmarket",
         "@zzerx/dsh-plugin-notes",
         "@linxin666/dsh-client-ui-task-board",
-        "dsh-plugin-git-graph-multi",
         "dsh-better-input",
         "dsh-plugin-multi-root-workspace",
         "dsh-plugin-project-mcp",
@@ -24,16 +23,15 @@
   "dependencies": {
     "@deepseek-ai/dsh-browser-use": "0.2.0-rc.2",
     "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp": "0.2.0-rc.2",
-    "@linxin666/dsh-client-ui-task-board": "0.4.5",
+    "@linxin666/dsh-client-ui-task-board": "0.4.7",
     "@zzerx/dsh-plugin-notes": "0.4.3",
-    "dsh-better-input": "0.2.5",
-    "dsh-context": "^0.66.0",
-    "dsh-plugin-git-graph-multi": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/git-graph-multi",
-    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/dsh-plugin-multi-root-workspace",
-    "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/project-mcp",
-    "dsh-plugin-user-commands": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/user-commands",
-    "dsh-plugin-web-ux": "github:exponentxqq/dsh-plugins#v1.1.1&path:plugins/web-ux",
-    "dsh-pocket": "^2.10.6",
-    "dshmarket": "^1.66.14"
+    "dsh-better-input": "0.2.6",
+    "dsh-context": "^0.73.0",
+    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/dsh-plugin-multi-root-workspace",
+    "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/project-mcp",
+    "dsh-plugin-user-commands": "github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/user-commands",
+    "dsh-plugin-web-ux": "github:exponentxqq/dsh-plugins#v1.2.0&path:plugins/web-ux",
+    "dsh-pocket": "^2.12.0",
+    "dshmarket": "^1.66.35"
   }
 }
