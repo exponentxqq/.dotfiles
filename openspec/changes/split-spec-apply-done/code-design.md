@@ -228,6 +228,18 @@ description 替换为:`固定工作流:双线规划→落档→衔接→执行�
 
 ## 验证口径备忘
 
+**评审修复留痕(终形态)**:变更评审后主会话直修 9 项——①yaml:3 头注释 vision 归属改「spec-plan(规划线读图)与 spec-apply 共用」并统一「四段共用」措辞,spec-workflow SKILL.md §九同步;②spec-apply §六沉淀回流清单改「最后批次组收尾工件化(tasks.md 附录、随最后批次提交)」、spec-done §二'.5⑤ 补重建来源(工件优先、git status 辅证),消跨会话信息断裂;③spec-apply/refs/execution.md:24 附节头「自 SKILL.md §六 外移」改「对应第二节③与第三节」、:1 头部说明同步;④spec-workflow/refs/failure-modes.md:6 被委托方列举与 symlink 清单补 spec-apply/spec-done;⑤README yaml 示例 provider zai→zai-coding-cn(示例块 3 处+叙述行 2 处)、parallelism 3→8,spec-apply routing.md:15 与 spec-plan routing.md:13 示例同步 8(zai-coding-cn 双模型在白名单 cordis.patch.yml:140-141 证实);⑥spec-done §二① 补「先完成②读执行环境块再进二节'」、§二'.1 补执行目录判据(隔离=worktree/非隔离=主工作区);⑦spec-workflow §八② 补已归档分支(转 spec-done 收尾,不进③④);⑧半角标点归一全角(spec-apply SKILL.md 与 failure-modes.md 全量、spec-workflow SKILL.md 新段、routing.md 头注、命令壳、yaml 头注释),§四尾句补 spec-apply 反引号(修后「委托 skill `spec-apply`」grep=2 达标,修前=1);⑨spec-apply.md argument-hint 补 --engine/--model。附带补明 --model verify 覆盖经编排层随终末委托交接 spec-done(拆分后原为盲区)。tasks 验证锚点经 grep 复核全部保持。
+
+**主会话复核留痕(评审修复后独立复跑)**:9 项逐条对照实际文件确认落地;事实核对补证——parallelism 示例 3→8 系对齐实际值(HEAD 基线 yaml:28 即 `parallelism: 8`,键值零动、16 行变更全为注释);yaml 头注释/spec-plan routing 注记行/spec-workflow §九 vision 归属三处口径一致;spec-apply §六「工件化+从工件读出」与 spec-done §二'.5⑤「优先读附录+git status 辅证」双侧闭环。一处裁定:planning.md:72 对齐四段新口径后含「被 spec-workflow 委托时」命中 4.1 验证句模式,属编排委托类合法叙述(5.1 豁免四类之一),按 3.2 先例在 tasks 4.1 行内补豁免注记,不改文本。码点断言 16 文件(spec-plan 7+spec-workflow 4+spec-apply 4+spec-done 1)全 ≤7849、validate --strict valid、命令壳 symlink 指向源本。
+
+**组4 实测留痕(终形态)**:spec-plan 四文件 13 处替换(表内 11+表外同口径 2:SKILL.md:104 消费分工、planning.md:72 衔接指路),旧执行语义残留 0、spec-apply 引用 10、四文件码点全过;README 34+行变更;spec-flow description 更新。主会话补修四处(子代理回执照指令正确,均系蓝图笔误/遗留):①「五个等价入口」→「八个等价入口(四对)」(4 对=8 个入口点,蓝图计数错);②安装段补 spec-apply/spec-done 两行 symlink;③补 spec-done install 行(上次 worktree-lifecycle 变更遗留缺口顺带补齐);④校验句补 /spec-done 与 spec-done。子代理报备修正采纳:yaml 示例块 apply 行内注释消费者同步改 spec-apply。
+
+组3 实测留痕(终形态):spec-workflow/SKILL.md 116→99 行、7710→**6143 码点**(解压 1567,余量 1706);failure-modes.md 22→14 行、1653 码点;yaml 头注释 12→4 行纯注释替换(键值零 diff)。主会话补修一处蓝图漏项:§十「计划彻底失效」行「四条件见第六节」改指「细则归 spec-apply 的 execution.md」(§六已指针化,交叉引用落点失真——子代理上浮发现)。裁决记录:failure-modes 指路行分类列举含「审核被拒」grep=1 属合法(验证意图=旧行删净,已达成);T3.1 蓝图替换文本半角标点按逐字照抄接受(spec-workflow 入口本为混用风格)。用户审核发现 design「整体迁移」在任务拆解中缺删除动作:spec-workflow/refs/{execution.md,routing.md} 引用已清零但文件实体残留成孤儿(聚合层整目录 symlink 仍向运行时暴露旧口径),补任务 3.4 删除;refs/ 终态仅 failure-modes.md(1653)+worktree.md(2297),与 §一消费时机表保留行一致,全仓活跃路径引用与 bundle 内相对链接均 0。
+
+组2 实测留痕(终形态):spec-done/SKILL.md 53→65 行、4452 码点(预算 ~4400 吻合);六项变换全落位,验证六条全过。主会话核对期精修两处:H1「收尾半程」→「终末半程」(定位升级对齐)、§一 verify 回退权威源改指 spec-apply 的 refs/routing.md;子代理自行把蓝图半角标点归一为全角(内容零偏差,采纳)。
+
+组1 实测留痕(终形态):SKILL.md 3184 码点、execution.md 4494(标点统一全角后)、routing.md ~4000(修正后)、failure-modes.md 1330、命令壳 485 字节——全 ≤7849。主会话核对期修正四处(子代理回执照蓝图逐字正确,修正系蓝图自身措辞缺陷):①routing.md 节标题「九」→「五」(对齐新入口节号);②:26 规划键转发主体「本 skill」→「编排层 spec-workflow」(迁移后失真);③:65 主会话模型提示句改指编排层/spec-done 分载;④execution.md 替换文本标点统一全角。failure-modes.md 权限 600→644 统一。被否方案:保留「九」编号(观感不一致弃)。
+
 - 码点断言:全部新建/修改 skill 文件 ≤7849(python3 len 断言)。
 - 旧指残留清零:`grep -rn "spec-workflow" agent/skills/spec-plan/ dsh/README.md dsh/commands/spec-flow.md` 中「消费/承载执行/执行侧」语义的行逐一核对指向 spec-apply(worktree.md 权威源、yaml 文件名、编排委托三类表述除外)。
 - 链接断言:spec-apply/refs 内 markdown 相对链接仅指向本 bundle(failure-modes.md/execution.md 内);worktree 引用一律文字表述。
