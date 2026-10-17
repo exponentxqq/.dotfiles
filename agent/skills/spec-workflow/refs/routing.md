@@ -10,7 +10,7 @@ models:                       # 执行键：apply | verify；能力键：vision�
     provider: opencode-go
     model: deepseek-v4.1-flash
     fallback: { provider: deepseek-official, model: deepseek-flash }
-  vision: { provider: zai, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
 engine: subagent    # subagent | team（--engine 覆盖）
 parallelism: 3      # 同组并行上限
 ```
@@ -32,8 +32,8 @@ parallelism: 3      # 同组并行上限
 | `opencode-go/deepseek-v4.1-flash` | 支持 | `apply` / `verify` 主路由 |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
 | `deepseek-official/deepseek-flash` | 支持 | `apply` / `verify` 备用路由 |
-| `zai/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
-| `zai/glm-5.3` | **不支持**（`input: ["text"]`） | 规划侧默认路由（spec-plan 消费） |
+| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
+| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划侧默认路由（spec-plan 消费） |
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 

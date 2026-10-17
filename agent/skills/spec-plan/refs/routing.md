@@ -6,9 +6,9 @@
 
 ```yaml
 models:                       # 规划键：lineA | lineB | panel | design；能力键：vision
-  lineA: { provider: zai, model: glm-5.3 }        # 值：{ provider, model }
-  design: { provider: zai, model: glm-5.3 }       # 设计线（阶段 1.7 代码设计子代理）
-  vision: { provider: zai, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
+  lineA: { provider: zai-coding-cn, model: glm-5.3 }        # 值：{ provider, model }
+  design: { provider: zai-coding-cn, model: glm-5.3 }       # 设计线（阶段 1.7 代码设计子代理）
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
 engine: subagent    # 由 spec-workflow 消费，本 skill 不读
 parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
 ```

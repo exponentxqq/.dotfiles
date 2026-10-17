@@ -87,7 +87,7 @@
 3. （L44 条末追加）「**前提——落档副本在变更目录**：缺失按 SKILL.md 第五节恢复协议补复制或问用户，**不得以 /tmp 原件替代维护**。」
 4. （L45 扩义）「条目须自包含（规则 + 依据 + 适用范围 + **连锁面**——该规则联动需同步的工件 / spec Scenario / 代码 / 测试清单）；推翻前裁定时前条标注「被 R<n'> 推翻」并对其连锁面重跑同步。」
 5. （L62 拆两步）「4. **归档前校验**：加载 `openspec-verify-change` skill 校验（任务全勾、spec 覆盖映射、design 一致性），发现缺漏（如勾选遗漏、delta 缺 Scenario）先修复重校——通过才归档。\n5. **归档**：确认 `tasks.md` 全部勾选（有未勾选项不得归档），加载 `openspec-archive-change` skill 执行归档并同步主规格。」
-6. （L64 五要素）「6. **最终汇报五要素**：①变更名与工件路径；②验证证据（命令 + 结果摘要）；③归档位置（`openspec/changes/archive/...` 与同步后的主规格）；④后续宿主操作清单（需要用户在容器外做的事，如 skctl 登记、推送 `git push`、以及命令仍不可见时的 `docker compose restart dsh` 兜底——本流程不代劳）；⑤**沉淀回流清单**——执行期改动的工作流仓文件（skill 文本、工作流配置，含未提交项）逐条列明，交用户决定提交与方式，本流程不代提交。」
+6. （L64 五要素）【执行期更正 R2：本块首编号原写「6.」，系拆步前旧编号笔误——处 5 重编号指令「原 5/6 → 6/7（含编号数字本身）」与 (a) 定位表「原 5/6 顺延 6/7」为明确意图，取 6 将与「6. 归档单独提交一次」重号，实现取 **7.**（与 SKILL.md 第七节「⑦汇报五要素」同构）】「7. **最终汇报五要素**：①变更名与工件路径；②验证证据（命令 + 结果摘要）；③归档位置（`openspec/changes/archive/...` 与同步后的主规格）；④后续宿主操作清单（需要用户在容器外做的事，如 skctl 登记、推送 `git push`、以及命令仍不可见时的 `docker compose restart dsh` 兜底——本流程不代劳）；⑤**沉淀回流清单**——执行期改动的工作流仓文件（skill 文本、工作流配置，含未提交项）逐条列明，交用户决定提交与方式，本流程不代提交。」
 
 **T5 三处**（L13 / L35 / L36，仅 provider 名，行内其余字节不动）：
 - `vision: { provider: zai-coding-cn, model: glm-5.3-flash }`
@@ -114,7 +114,7 @@
 ## 2. spec-workflow 执行侧正文强化
 
 - [ ] 2.1 按触达面 T3 修订 agent/skills/spec-workflow/SKILL.md：五处节改动（②能力自检、⑤恢复协议插步、⑥骨架行、⑦归档链拆步与五要素、⑩绝不做末条）；验证：grep -c '落档副本存在性检查' 该文件 = 1、grep -c 'openspec-verify-change' 该文件 = 2、grep -c '勾选核对' 该文件 = 1、grep -c '汇报五要素' 该文件 = 1、grep -c '分立提交' 该文件 = 1，且码点断言 ≤7849 退出码 0
-- [ ] 2.2 按触达面 T4 修订 agent/skills/spec-workflow/refs/execution.md：六处条目注入（多仓分立提交＋外部仓外溢、勾选核对、前提句、连锁面、归档前校验、五要素）；验证：grep -c '多仓分立提交' = 1、grep -c '外部仓外溢口径' = 1、grep -c '勾选核对' = 1、grep -c '前提——落档副本在变更目录' = 1、grep -c '连锁面' = 2、grep -c 'openspec-verify-change' = 1、grep -c '沉淀回流清单' = 1（均在 agent/skills/spec-workflow/refs/execution.md），且码点断言 ≤7849 退出码 0
+- [ ] 2.2 按触达面 T4 修订 agent/skills/spec-workflow/refs/execution.md：六处条目注入（多仓分立提交＋外部仓外溢、勾选核对、前提句、连锁面、归档前校验、五要素）；验证：grep -c '多仓分立提交' = 1、grep -c '外部仓外溢口径' = 1、grep -c '勾选核对' = 1、grep -c '前提——落档副本在变更目录' = 1、grep -o '连锁面' | wc -l = 2（执行期按 R1 口径更正：单行双锚点，grep -c 行口径只得 1）、grep -c 'openspec-verify-change' = 1、grep -c '沉淀回流清单' = 1（均在 agent/skills/spec-workflow/refs/execution.md），且码点断言 ≤7849 退出码 0
 
 ## 3. 全量验证与一致性复核（只读）
 
@@ -209,15 +209,32 @@
 
 **组 1**
 - 1.1（T1）：只动 L100 ④步步内文本；①②③⑤⑥⑦⑧步名与文本零改动；`refs/planning.md` 链接写法与该节既有链接一致。
-- 1.2（T2）：整步替换 L68，保留「不得带病落档」收尾；`test -f` 路径用 `openspec/changes/<change>/` 占位符（与全文风格一致）；「回到第 1 步」指本节第 1 步（生成四件套+复制两材料）。
+- 1.2（T2）：整步替换 L68，保留「不得带病落档」收尾；`test -f` 路径用 `openspec/changes/<change>/` 占位符（与全文风格一致）；「回到第 1 步」指本节第 1 步（生成四件套+复制两材料）。【执行期更正 R1，用户裁定 A：原验证句 `grep -c '…'` 输出 2 系误用（grep -c 按行计数，逐字文本为同行双锚点只得 1），更正为 `grep -o '…' | wc -l` 输出 2——实现逐字合规不变】
 - 1.3（T5）：三处仅替换 provider 名，行内注释/说明列字节不动；改后 L35-36 与 spec-plan 侧同表（`agent/skills/spec-plan/refs/routing.md:34-35`）逐字一致；**不得触碰 L28 的 `{zai,...}.json`**（真实数据文件名）。
 - 1.4（T5b，Q-A 裁定新增）：仅替换 L9/L10/L11 三处 provider 名，行内注释不动；**:30 pi-ai 路径 `{zai,...}.json` 不触碰**；改后与本文件图片能力表及 yaml 实际值一致。
+**组 1 终形态（执行期实测收口，2026-10-16）**：
+- 1.1 SKILL.md：④步单行替换落地，码点 7125→**7243**（余量 606）；①②③⑤⑥⑦⑧零改动。
+- 1.2 planning.md：第 4 步单行替换落地，码点 5862→**6041**；同行双锚点验证句按 **R1 更正口径**核对（`grep -o … | wc -l` = 2）。
+- 1.3 routing.md（执行侧）：三行仅 provider 名替换；`grep -c zai-coding-cn`=3，`provider: zai[,}]` 与 `` `zai/glm `` 双零命中；L28 pi-ai 路径未触碰。
+- 1.4 routing.md（规划侧）：三行仅 provider 名替换，码点 4374→**4404**；`provider: zai[,}]` 零命中；:30 事实引用未触碰。
+- 被否方案存档：1.2 曾有「拆两物理行凑 grep -c=2」候选，用户裁定 A（修验证句口径）否决——逐字约束优先。
+
 **组 2**
 - 2.1（T3）：五处按 (b) 逐字落；两处步序重编号必须完整：恢复协议原 4/5/6 → 5/6/7（含编号数字本身），第七节原⑤⑥ → ⑥⑦（原④拆新④⑤）；第五节其余步文本不动；「汇报五要素」括注五项逐字。
 - 2.2（T4）：六处按 (b) 逐字落；L36 原例（根仓工件、子仓代码）保留在新条目内；派发要点原 5/6 步重编号 6/7；总增量实测 ~580 码点（4768→~5350，余量 ~2500），若实测超 5500 须回查是否有文本走样。
+**组 2 终形态（执行期实测收口，2026-10-16）**：
+- 2.1 SKILL.md：五处 hunk 落位（④自检加 verify-change、恢复协议插新第 4 步+原 4/5/6→5/6/7、组收尾首加勾选核对、⑦节原④拆④⑤+原⑤⑥→⑥⑦+汇报五要素、⑩末条多仓分立提交），码点 6431→**6810**（余量 1039）；五锚点 1/2/1/1/1 精确命中。
+- 2.2 execution.md：六处落位（多仓分立提交+外部仓外溢口径、勾选核对首条、落档副本前提句、连锁面+推翻句、4/5 拆步原 5/6→6/7、五要素取编号 7），码点 4768→**5269**（增量 +501，< 5500 预警线）；七锚点全命中（连锁面按 R1 次数口径 =2）。
+- 执行期裁定：**R2** 编号 7（主会话裁定、R1 先例延伸，呈证可推翻）；「连锁面」单行双锚点为 R1 第二实例，验证句口径已同步更正。
+
 **组 3**
 - 3.1：单 python 脚本断言两件事——5 文件 `len()<=7849`；(b) 节全部锚点按 (c) 表预期计数（含 2.2 的 `连锁面=2`、T3 的 `openspec-verify-change=2`）。
-- 3.2：三口径跨文件抽查（F2 三处 `多仓分立提交` 各 =1、F1 双侧「落档副本」表述在场：spec-plan SKILL.md 既有 L22「落档副本为权威」未删 + spec-workflow SKILL.md 新增第 4 步）；`openspec validate spec-workflow-execution-hardening --strict` 退出码 0；提交前 `git status --porcelain` 快照比对，`agent/skills/spring-writer/SKILL.md` 与 `dsh/spec-workflow.yaml` 两行与本批开始前逐字一致。
+- 3.2：三口径跨文件抽查【执行期更正 R3：原「三处 grep -c 各 = 1」与 (b)/(d) 自相矛盾——SKILL.md 侧逐字文本为 `多仓**分立提交**`（粗体切分，断言改用 `分立提交`=1，与 2.1 同款）；specs delta 按 (d) 强制三处（Reason/Migration/标题），断言改出现次数=3 + 标题行=1】；F1 双侧「落档副本」表述在场：spec-plan SKILL.md 既有 L22「落档副本为权威」未删 + spec-workflow SKILL.md 新增第 4 步；`openspec validate spec-workflow-execution-hardening --strict` 退出码 0；提交前 `git status --porcelain` 快照比对【执行期现实化：允许集合 = 6 个目标文件 + 变更目录 tasks.md/code-design.md 两工件（勾选与组段终形态化）；spring-writer/SKILL.md 与 spec-workflow.yaml 已随 176e3c6 入库】，`agent/skills/spring-writer/SKILL.md` 与 `dsh/spec-workflow.yaml` 两行与本批开始前逐字一致。
+
+**组 3 终形态（执行期实测收口，2026-10-16）**：
+- 3.1：单脚本 26 断言（6 文件码点 + 20 锚点，R1 口径）**PASS 26 / FAIL 0、退出码 0**；主会话独立复核 ALL PASS 一致。码点：7243 / 6041 / 6810 / 5269 / 3943 / 4404。
+- 3.2：`validate --strict` exit 0（`Change … is valid`）；快照终核 **status 8 行恰为允许集合**（6 目标文件 + 2 工件），无任何越界新增；基线中的 `cordis.patch.yml` 脏行在执行中途被**外部还原消失**（本流程全程未触碰，该文件最后触碰为历史提交 e956bd3，git log 佐证）；spring-writer/yaml 确认已随 176e3c6 入库；A4 双抽查（落档副本为权威 / 落档副本存在性检查）均在场。A1 断言句缺陷按 **R3** 更正后全通过。
+- 执行期裁定汇总：R1（用户裁定 A）→ R2 / R3（主会话裁定、R1 先例延伸，呈证可推翻）。
 
 ## ⑥ 设计假设与未决项
 

@@ -97,7 +97,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 加载 `openspec-propose` skill 生成工件；输入 = 需求原文 + 并行（`line-a.md`+`line-b.md`+`diff-matrix.md`）/ 串行（`explore.md`+`decisions.md`）+ `code-design.md`（缺收敛留痕说明阶段 1.5 未做完、缺设计草案说明阶段 1.7 未做完——先补做再落档）。细节见 [planning.md](refs/planning.md)『附：落档细节』：
 
-**①四件套 + 两份规划材料**（`code-design.md` 与 `diff-matrix.md`/串行 `decisions.md` **复制入变更目录**，落档副本自此为权威）→ **②`tasks.md` 执行批次契约（硬约束）**：`## N. 组名` = 执行审核批次、**组间串行**、**组内可并行**、验证句第三方可核对、单组 ≤ `parallelism` → **③分歧点提问** → **④`openspec validate <change> --strict` 退出码 0**（不得带病落档）→ **⑤落档即停** → **⑥展示摘要** → **⑦工件单独提交一次**（含两材料）→ **⑧固定收尾**：告知 `/spec-flow continue <change>` 随时接续执行。
+**①四件套 + 两份规划材料**（`code-design.md` 与 `diff-matrix.md`/串行 `decisions.md` **复制入变更目录**，落档副本自此为权威）→ **②`tasks.md` 执行批次契约（硬约束）**：`## N. 组名` = 执行审核批次、**组间串行**、**组内可并行**、验证句第三方可核对、单组 ≤ `parallelism` → **③分歧点提问** → **④两材料断言 + `openspec validate <change> --strict` 退出码 0**（`code-design.md` 与 `diff-matrix.md`/串行 `decisions.md` 须 `test -f` 在变更目录，断言展开见 [planning.md](refs/planning.md)；不得带病落档）→ **⑤落档即停** → **⑥展示摘要** → **⑦工件单独提交一次**（含两材料）→ **⑧固定收尾**：告知 `/spec-flow continue <change>` 随时接续执行。
 
 ## 八、模型路由
 

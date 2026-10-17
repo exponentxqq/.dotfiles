@@ -65,7 +65,7 @@
    - **验证句**必须是第三方可核对的（具体命令、文件路径+断言、可观察输出），禁止「已实现」「工作正常」这类空话。例：`验证：python3 -c "import yaml;d=yaml.safe_load(open('x.yaml'));assert 'models' in d"` 退出码 0；或 `验证：grep -n 'spec-plan' agent/skills/README.md 命中且表格行存在`。
    - 单组任务数以映射文件 `parallelism`（默认 3）为上限，超出则拆组。
 3. **分歧点提问**：工件之间存在取舍、design 有多种方案、需求有歧义时，一次问清；不自行拍板。**阶段 1.7 设计线上浮的待决项并入此处**（见「附：代码设计环节（阶段 1.7）」的上浮接线），不新开通道。
-4. **校验**：`openspec validate <change> --strict`，必须退出码 0 且无 error/warning（此时变更目录已含两份材料副本，校验覆盖其存在）；不通过则修工件重跑，**不得带病落档**。
+4. **校验（两段式）**：先机械断言两份落档材料已在变更目录——`test -f openspec/changes/<change>/code-design.md` 与 `test -f openspec/changes/<change>/diff-matrix.md`（串行 `decisions.md`），任一缺失回到第 1 步补复制（`openspec validate` 只认工件结构，不覆盖附加文件）；再跑 `openspec validate <change> --strict`，必须退出码 0 且无 error/warning。任一不通过则修工件重跑，**不得带病落档**。
 5. **落档即停（规划边界）**：本阶段只产出规划工件，**不写项目代码、不在同一轮继续执行**。
 6. **展示摘要**：变更名、四件套与两份材料路径（`code-design.md`、`diff-matrix.md`/`decisions.md`）、任务组数与条数、每组并行度、验证句样例、风险与未决项（含阶段 1.5 收敛中未答的决策项）。
 7. **落档工件单独提交一次**：只 `git add` 该变更目录 `openspec/changes/<change>`（含新建的 spec delta 与两份材料副本），提交信息 `docs(openspec): 落档 <change>`；目标仓库既有中文惯例时从惯例。
