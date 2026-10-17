@@ -174,7 +174,7 @@ spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design�
 
 ### Requirement: 阶段级模型路由（规划键）
 
-spec-plan SHALL 从共用映射文件读取规划阶段路由（键 `lineA`、`lineB`、`panel`、`design` 依次对应 A 线、B 线、复算线、设计线）并在派发时应用；每条路由 SHALL 支持可选 `fallback`；映射为空 SHALL 沿用会话模型；命令参数 SHALL 能覆盖主路由。路由仅适用于 subagent 派发：team 成员无模型参数，team 编排下 `lineA`/`lineB` SHALL NOT 应用（留痕告知）；串行单线无派发，规划键 SHALL NOT 消费；`panel`/`design` 恒为 subagent 派发，不受编排影响；显式 `--model lineA|lineB` 覆盖存在时该线 SHALL 以 subagent 派发兑现路由。执行键（`apply`/`verify`）、引擎与并行度 SHALL 由 `spec-workflow` 消费，spec-plan SHALL NOT 应用；落档在主会话进行，模型由用户切换。
+spec-plan SHALL 从共用映射文件读取规划阶段路由（键 `lineA`、`lineB`、`panel`、`design` 依次对应 A 线、B 线、复算线、设计线）并在派发时应用；每条路由 SHALL 支持可选 `fallback`；映射为空 SHALL 沿用会话模型；命令参数 SHALL 能覆盖主路由。路由仅适用于 subagent 派发：team 成员无模型参数，team 编排下 `lineA`/`lineB` SHALL NOT 应用（留痕告知）；串行单线无派发，规划键 SHALL NOT 消费；`panel`/`design` 恒为 subagent 派发，不受编排影响；显式 `--model lineA|lineB` 覆盖存在时该线 SHALL 以 subagent 派发兑现路由。执行键 `apply`、能力键 `vision` 与 `engine`/`parallelism` SHALL 由 `spec-apply` 消费，`verify` SHALL 由 `spec-done` 复用，spec-plan SHALL NOT 应用；落档在主会话进行，模型由用户切换。
 
 #### Scenario: 映射指定规划阶段模型
 
@@ -295,7 +295,7 @@ spec-plan SHALL 在阶段 1.7 派发前由主会话做栈识别（只读证据�
 #### Scenario: 栈识别结论落盘
 
 - **WHEN** 阶段 1.7 栈识别完成且落档生成 design 工件
-- **THEN** writer skill 名与识别证据写入 design.md 决策记录，spec-workflow 执行侧与接续恢复可从工件读取
+- **THEN** writer skill 名与识别证据写入 design.md 决策记录，spec-apply 执行侧与接续恢复可从工件读取
 
 ### Requirement: 阶段 1 并行双线规划（team 驱动）
 
