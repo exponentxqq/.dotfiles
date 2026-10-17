@@ -306,3 +306,17 @@ dsh 处于 developer preview，官方声明存在破坏性变更。升级 `DSH_V
 1. 提交本仓库改动（`git status` / `git diff`）
 2. 备份 `/data/dsh`（credentials、sessions）
 3. 升级后执行 `--dump-config` 与 `--dump-config-schema` 检查 patch 兼容性
+4. 同步 profile 的官方可选插件版本到 `DSH_VERSION`：`@deepseek-ai/dsh-browser-use` 与
+   `@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp` 在 profile 里是精确 pin，
+   且 npm 上 `latest` 仍停在 `0.1.6-alpha.1`（0.2.x 预发布只挂 `next` tag），
+   `pnpm update` 不会自动跟进。升级后执行（`DSH_VERSION` 取镜像构建用的同一版本）：
+
+   ```bash
+   docker exec dsh dsh plugin --profile web add -w \
+     "@deepseek-ai/dsh-browser-use@${DSH_VERSION}" \
+     "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp@${DSH_VERSION}"
+   ```
+
+   然后重启 dsh。漏做时启动日志会报 `disabling profile plugin row "browser-use"`（peer 版本
+   精确不匹配）。注意镜像 Dockerfile **不再**全局安装这两个包——DSH profile 按 profile 目录
+   解析插件行，镜像全局 node_modules 里的副本不会被用到。
