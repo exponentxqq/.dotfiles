@@ -19,7 +19,7 @@
 
 **输入材料按编排**（提示内逐字读全）：并行 = 需求原文 + `/tmp/spec-flow/<change>/line-a.md` + `line-b.md` + `diff-matrix.md`；串行 = 需求原文 + `/tmp/spec-flow/<change>/explore.md` + `decisions.md`。
 
-**栈识别与 writer skill 接线（派发前，主会话）**：只读探测目标项目（含 monorepo 子包）——`pom.xml`/`build.gradle(.kts)` 含 `spring-boot` 判 **Spring**；`nuxt.config.{ts,js,mjs}` 存在或 package.json 依赖含 `nuxt` 判 **Nuxt**；**双命中则两者都加载**。命中后核对聚合层 `~/.agents/skills/<name>/` 存在，不可加载按 [failure-modes.md](failure-modes.md) 处置顺序修复，仍失败**报告问用户**（**不允许静默降级**，区别于 `grill-me` 缺失降级）。**皆未命中 → 问用户三选一**：①指认现有 skill（可点名任一聚合层 skill）／②明确豁免本次加载并如实标注（仅本次有效）／③终止流程——**不静默跳过**。结论与证据记入阶段摘要，**并写入落档 `design.md` 决策记录**——spec-workflow 执行侧与接续恢复从工件读取该结论，不再依赖本会话记忆；**阶段 3 沿用同一结论**（spec-workflow 侧无从取得时重识别一次）。提示必须**自包含**，模板如下：
+**栈识别与 writer skill 接线（派发前，主会话）**：只读探测目标项目（含 monorepo 子包）——`pom.xml`/`build.gradle(.kts)` 含 `spring-boot` 判 **Spring**；`nuxt.config.{ts,js,mjs}` 存在或 package.json 依赖含 `nuxt` 判 **Nuxt**；**双命中则两者都加载**。命中后核对聚合层 `~/.agents/skills/<name>/` 存在，不可加载按 [failure-modes.md](failure-modes.md) 处置顺序修复，仍失败**报告问用户**（**不允许静默降级**，区别于 `grill-me` 缺失降级）。**皆未命中 → 问用户三选一**：①指认现有 skill（可点名任一聚合层 skill）／②明确豁免本次加载并如实标注（仅本次有效）／③终止流程——**不静默跳过**。结论与证据记入阶段摘要，**并写入落档 `design.md` 决策记录**——spec-apply 执行侧与接续恢复从工件读取该结论，不再依赖本会话记忆；**阶段 3 沿用同一结论**（spec-apply 侧无从取得时重识别一次）。提示必须**自包含**，模板如下：
 
 ```
 你的角色：**代码设计线（阶段 1.7）**——产出**代码级蓝图**（触达哪些文件、怎么改、接口与数据形状、为什么这么定）；双线=需求级轻重与风险（串行单线=需求级调研），设计线=代码级蓝图，**不要把上游结论复读一遍**
@@ -69,4 +69,4 @@
 5. **落档即停（规划边界）**：本阶段只产出规划工件，**不写项目代码、不在同一轮继续执行**。
 6. **展示摘要**：变更名、四件套与两份材料路径（`code-design.md`、`diff-matrix.md`/`decisions.md`）、**触达仓清单**（根仓工件/各代码子仓——执行侧执行环境决策与多仓分立提交的输入）、任务组数与条数、每组并行度、验证句样例、风险与未决项（含阶段 1.5 收敛中未答的决策项）。
 7. **落档工件单独提交一次**：只 `git add` 该变更目录 `openspec/changes/<change>`（含新建的 spec delta 与两份材料副本），提交信息 `docs(openspec): 落档 <change>`；目标仓库既有中文惯例时从惯例。
-8. **固定收尾**：告知用户 `/spec-flow continue <change>` 随时接续执行——本流程不涉及执行模式、不派执行子代理（被 spec-workflow 委托时由其衔接：确认执行模式与引擎后继续）。
+8. **固定收尾**：告知用户 `/spec-flow continue <change>` 随时接续执行——本流程不涉及执行模式、不派执行子代理（被 spec-workflow 委托时由其衔接后委托 spec-apply 继续（模式/引擎由其承接））。

@@ -1,6 +1,6 @@
 ---
 name: spec-plan
-description: spec 驱动工作流的规划半程——并行双线（team 驱动）或串行单线（openspec-explore + grill-me）规划、差异收敛、代码设计、OpenSpec 落档提交一体化，到落档即止不动手实现。Use when 用户只要规划/落档、调用 /spec-plan，或被 spec-workflow 委托执行其阶段 1→2；落档提交后告知 /spec-flow continue 接续执行。
+description: spec 驱动工作流的规划半程——并行双线（team 驱动）或串行单线（openspec-explore + grill-me）规划、差异收敛、代码设计、OpenSpec 落档提交一体化，到落档即止不动手实现。Use when 用户只要规划/落档、调用 /spec-plan，或被 spec-workflow 编排委托其阶段 1→2；落档提交后告知 /spec-flow continue 接续执行。
 ---
 
 # spec-plan 规划半程
@@ -9,7 +9,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ## 一、总览
 
-规划四阶段流水线，入口为用户级命令 `/spec-plan`，或被 `spec-workflow` 委托作为其阶段 1→2（参数转发、已预置不重问）：
+规划四阶段流水线，入口为用户级命令 `/spec-plan`，或被 `spec-workflow` 编排委托作为其阶段 1→2（参数转发、已预置不重问）：
 
 ```
 阶段1 规划编排 → 阶段1.5 收敛 → 阶段1.7 代码设计 → 阶段2 落档（终于落档提交）
@@ -17,7 +17,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 串行=单线（explore）    串行=grill-me 直收
 ```
 
-**本流程到落档提交为止**：不写项目代码、不涉及执行模式、不派执行子代理；收尾固定告知 `/spec-flow continue <变更名>` 接续执行（委托场景由 spec-workflow 无缝衔接：确认执行模式与引擎后继续）。
+**本流程到落档提交为止**：不写项目代码、不涉及执行模式、不派执行子代理；收尾固定告知 `/spec-flow continue <变更名>` 接续执行（委托场景由 spec-workflow 衔接后委托 spec-apply 继续（模式/引擎由其承接））。
 
 **状态载体 = 工件**：`/tmp/spec-flow/<change>/` 规划材料易失、不入库；**唯一例外——`code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）随落档复制入 `openspec/changes/<change>/`，落档后以落档副本为权威**（执行期维护与接续恢复读它）。产物命名辨编排：并行 `line-a.md`+`line-b.md`+`diff-matrix.md`；串行 `explore.md`+`decisions.md`。
 
@@ -101,7 +101,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ## 八、模型路由
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由仅适用于 subagent 派发**：**team 成员无模型参数**——team 编排下 `lineA`/`lineB` **不应用**（留痕告知）；**串行单线无派发，规划键不消费**；`panel`/`design` 恒为 subagent 派发，不受编排影响；**显式 `--model lineA|lineB` → 该线以 subagent 派发兑现路由**（不静默丢弃显式覆盖）。执行键（`apply`/`verify`）、`engine` 由 spec-workflow 消费；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由仅适用于 subagent 派发**：**team 成员无模型参数**——team 编排下 `lineA`/`lineB` **不应用**（留痕告知）；**串行单线无派发，规划键不消费**；`panel`/`design` 恒为 subagent 派发，不受编排影响；**显式 `--model lineA|lineB` → 该线以 subagent 派发兑现路由**（不静默丢弃显式覆盖）。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
 
 红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——`zai-coding-cn/glm-5.3` **不支持图片**，`does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
 

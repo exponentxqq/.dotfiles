@@ -9,8 +9,8 @@ models:                       # 规划键：lineA | lineB | panel | design；能
   lineA: { provider: zai-coding-cn, model: glm-5.3 }        # 值：{ provider, model }
   design: { provider: zai-coding-cn, model: glm-5.3 }       # 设计线（阶段 1.7 代码设计子代理）
   vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
-engine: subagent    # 由 spec-workflow 消费，本 skill 不读
-parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
+engine: subagent    # 由 spec-apply 消费，本 skill 不读
+parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 ```
 
 **优先级：命令行 `--model <阶段>=<provider>/<模型>` > 映射文件 `models` > 继承会话模型。** `--model` 只覆盖主路由，`fallback` 只能写在文件里。
@@ -25,7 +25,7 @@ parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 **编排适用性速查**：路由**仅适用于 subagent 派发**——并行 team 成员无模型参数（`lineA`/`lineB` 不应用，映射值忽略并留痕告知）；串行单线无派发（规划键不消费）；`panel`/`design` 恒为 subagent 派发，不受编排影响；显式 `--model lineA|lineB` 覆盖 → 该线以 subagent 派发兑现路由（不静默丢弃显式覆盖）。
 
-> 执行键 `apply` / `verify` 与 `engine` 由 **spec-workflow** 消费（执行与验证派发、引擎偏好）；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。两半共用同一映射文件与白名单。
+> 执行键 `apply`、`engine`/`parallelism` 由 **spec-apply** 消费，`verify` 由 **spec-done** 复用；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。四段共用同一映射文件与白名单。
 
 **图片输入能力**（出处：dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段；改白名单时同步核对）：
 
@@ -33,9 +33,9 @@ parallelism: 3      # 落档分组上限（SKILL.md 第七节②）消费此键
 | --- | --- | --- |
 | `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 规划三线与设计线默认路由；**读图任务必须改走 `vision`** |
 | `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `vision` 键 |
-| `opencode-go/deepseek-v4.1-flash` | 支持 | 执行侧主路由（spec-workflow 消费） |
+| `opencode-go/deepseek-v4.1-flash` | 支持 | 执行侧主路由（spec-apply 消费） |
 | `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
-| `deepseek-official/deepseek-flash` | 支持 | 执行侧备用路由（spec-workflow 消费） |
+| `deepseek-official/deepseek-flash` | 支持 | 执行侧备用路由（spec-apply 消费） |
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 
@@ -61,7 +61,7 @@ console.log("OK 全部路由 ⊆ 白名单");'
 
 - **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
 - **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
-- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 与 `spawn_teammate` 均不支持模型选择（fork 保持与父会话一致以复用 KV cache；team 成员锁定 Lead 模型）——需要阶段路由时**不要用 fork**；team 编排下 `lineA`/`lineB` 不应用（同 spec-workflow team 引擎忽略 `apply` 键先例），显式 `--model lineA|lineB` 覆盖的线改以 subagent 派发兑现路由。
+- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 与 `spawn_teammate` 均不支持模型选择（fork 保持与父会话一致以复用 KV cache；team 成员锁定 Lead 模型）——需要阶段路由时**不要用 fork**；team 编排下 `lineA`/`lineB` 不应用（同 spec-apply team 引擎忽略 `apply` 键先例），显式 `--model lineA|lineB` 覆盖的线改以 subagent 派发兑现路由。
 - **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是「该会话未生效」而非工具损坏，换新会话即可。
 - **主会话阶段（落档）的模型由用户自行切换**，本 skill 只提示；本 skill 无法修改主会话模型。
 - 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），报告一次后继续。

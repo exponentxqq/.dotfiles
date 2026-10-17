@@ -1,8 +1,8 @@
 ---
-description: 固定工作流：独立双线规划→差异收敛→落档→子代理执行→归档提交（spec-workflow）
+description: 固定工作流：双线规划→落档→衔接→执行→验证归档→收尾（spec-workflow 编排，spec-plan/spec-apply/spec-done 分段承载）
 argument-hint: "[需求描述 | continue <变更名>] [--parallel] [--auto|--step-task|--step-group] [--engine team] [--worktree] [--model <阶段>=<provider>/<模型>]"
 ---
-加载 spec-workflow skill，并按其固定工作流执行。
+加载 spec-workflow skill，并按其四段编排执行（规划→衔接→执行→终末）。
 
 调用参数：$ARGUMENTS
 

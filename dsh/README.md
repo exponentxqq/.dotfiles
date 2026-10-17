@@ -118,11 +118,11 @@ openspec archive <change>           # 评审通过后归档
 > 与插件相关的规范工件（`dsh-multi-repo-git-graph` 主规格与三次变更的归档）已随插件迁到 `~/develop/person/dsh-plugins/openspec/`；本仓库 `openspec/` 保留空壳，供 dotfiles 自身的变更使用。
 > 仓库内不写项目本地 openspec skills 副本（`openspec init --tools none`）——dsh / opencode 的 `openspec-*` skills 已由 skctl 全局装好，见下节。
 
-## spec-workflow 固定工作流（含 spec-plan 规划半程）
+## spec-workflow 固定工作流（四段：spec-plan 规划 / spec-workflow 编排衔接 / spec-apply 执行 / spec-done 终末）
 
 固定 spec 驱动流程：**独立双线规划 → 差异收敛与分歧复算 → 代码设计 → 落档 → 子代理执行 → 验证归档提交**；进度载体只有工件（`openspec/changes/<change>/` 与 `tasks.md` 勾选态），压缩上下文或重启会话后可从工件无损恢复。
 
-**拆分结构**：规划半程（阶段 1→2，至落档提交）独立为 skill `spec-plan`——可经 `/spec-plan` 单独使用（只要规划不要实现），也被 `spec-workflow` 委托作为其阶段 1→2；`spec-workflow` 保留全流程编排与执行半程（阶段 3→4）。规划方法论（双线模板、收敛判据、设计深度契约）以 spec-plan 为唯一权威源。
+**拆分结构**：规划半程（阶段 1→2，至落档提交）独立为 skill `spec-plan`——可经 `/spec-plan` 单独使用（只要规划不要实现），也被 `spec-workflow` 委托作为其阶段 1→2；执行半程独立为 skill `spec-apply`（阶段 3 批次执行：双引擎/三模式/核对与审核-提交分离）——可经 `/spec-apply` 单独使用，也被 `spec-workflow` 衔接后委托；终末半程由 `spec-done` 承载（阶段 4 验证归档链 + 收尾闭环），执行完成后编排层自动委托；`spec-workflow` 保留全流程编排、衔接（模式/引擎/执行环境决策）与恢复协议判段路由。规划方法论（双线模板、收敛判据、设计深度契约）以 spec-plan 为唯一权威源。
 
 ### 文件
 
@@ -133,16 +133,19 @@ openspec archive <change>           # 评审通过后归档
 | `agent/skills/spec-plan/refs/convergence.md` | 阶段 1.5 六步判据与 `grill-me` 设计树/前沿分轮方法——**阶段 1.5 读取** |
 | `agent/skills/spec-plan/refs/routing.md` | 规划键（lineA/lineB/panel/design/vision）路由、图片能力、白名单、三档回退、自检脚本——**派发子代理前读取** |
 | `agent/skills/spec-plan/refs/failure-modes.md` | 规划侧失败处置（grill-me 降级、规划线/设计线失败、栈识别三选一、writer 加载失败）——**异常时读取** |
-| `agent/skills/spec-workflow/SKILL.md` | 全流程编排与执行半程本体（执行手册），skill 名 `spec-workflow`；规划节为 spec-plan 委托指针 |
-| `agent/skills/spec-workflow/refs/execution.md` | 执行引擎编排与三模式、**审核-提交分离**、干净窗口验收两步法、执行期留痕与工件维护、分仓提交、凭据纪律、提示模板（**含 writer skill 加载指令**）、回执格式、team 任务板——**首次派发前读取** |
-| `agent/skills/spec-workflow/refs/routing.md` | 执行键（apply/verify/vision）路由、白名单、三档回退、自检脚本——**派发子代理前读取** |
-| `agent/skills/spec-workflow/refs/failure-modes.md` | 执行侧失败处置（含 team 成员上限降级、凭据缺失明确失败）——**异常时读取** |
+| `agent/skills/spec-workflow/SKILL.md` | 全流程编排与衔接半程本体，skill 名 `spec-workflow`；执行/终末为委托指针 |
+| `agent/skills/spec-workflow/refs/failure-modes.md` | 衔接与编排侧失败处置——**异常时读取** |
+| `agent/skills/spec-apply/SKILL.md` | 执行半程本体（执行手册），skill 名 `spec-apply`；阶段 3 批次执行：双引擎/三模式/核对与审核-提交分离 |
+| `agent/skills/spec-apply/refs/execution.md` | 执行引擎编排与三模式、**审核-提交分离**、干净窗口验收两步法、执行期留痕与工件维护、分仓提交、凭据纪律、提示模板（**含 writer skill 加载指令**）、回执格式、team 任务板——**首次派发前读取** |
+| `agent/skills/spec-apply/refs/routing.md` | 执行键（apply/verify/vision）路由、白名单、三档回退、自检脚本——**派发子代理前读取** |
+| `agent/skills/spec-apply/refs/failure-modes.md` | 执行侧失败处置（含 team 成员上限降级、凭据缺失明确失败）——**异常时读取** |
 | `dsh/commands/spec-flow.md` / `dsh/commands/spec-plan.md` | 两个命令薄壳，加载对应 skill 并把 `$ARGUMENTS` 代入正文 |
-| `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（规划键与执行键共用的单一文件，见下） |
+| `dsh/commands/spec-apply.md` | 执行半程命令薄壳，加载对应 skill 并把 `$ARGUMENTS` 代入正文 |
+| `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（四段共用单一文件，见下） |
 
 ### 入口与委托
 
-四个等价入口：skill `spec-workflow`（全流程，按描述触发）与 `/spec-flow`；skill `spec-plan`（只规划）与 `/spec-plan`。薄壳正文经 `dsh-plugin-user-commands` 从 `~/.dsh/commands/` 现读，调用参数以 `$ARGUMENTS` 全文代入。`/spec-flow` 遇新需求时委托 spec-plan 完成阶段 1→2（转发 `--parallel` 与规划键 `--model`，已预置不重问），落档提交后由 spec-workflow **确认执行模式与引擎**并继续执行——全流程体验不变；`/spec-plan` 落档提交即收尾，告知 `/spec-flow continue <变更名>` 接续。
+八个等价入口（四对）：skill `spec-workflow`（全流程，按描述触发）与 `/spec-flow`；skill `spec-plan`（只规划）与 `/spec-plan`；skill `spec-apply`（只执行）与 `/spec-apply <变更名>`；skill `spec-done`（终末）与 `/spec-done`。薄壳正文经 `dsh-plugin-user-commands` 从 `~/.dsh/commands/` 现读，调用参数以 `$ARGUMENTS` 全文代入。`/spec-flow` 遇新需求时委托 spec-plan 完成阶段 1→2（转发 `--parallel` 与规划键 `--model`，已预置不重问），落档提交后由 spec-workflow **衔接（模式/引擎/执行环境）**并委托 spec-apply 执行，全部完成后自动委托 spec-done 收口归档链——全流程体验不变；`/spec-plan` 落档提交即收尾，告知 `/spec-flow continue <变更名>` 接续。
 
 `/spec-flow` 参数：`<需求描述>`｜`continue <变更名>`（接续，跳过已完成规划与落档）｜`--parallel`（转发）｜`--auto`/`--step-task`/`--step-group`｜`--engine team`｜`--model <阶段>=<provider>/<模型>`（执行键 apply/verify 本地消费；规划键转发）。`/spec-plan` 参数为其规划子集（`<需求描述>`、`--parallel`、规划键 `--model`）。
 
@@ -152,7 +155,7 @@ openspec archive <change>           # 评审通过后归档
 
 **代码设计三档分降**（阶段 1.7 派发前判定）：**L2 全深度**（默认）六字段与二行为约束全部执行；**L1**（触达面 ≤2 文件且无新接口）字段 ③④⑤ 与验证映射单行简述，①⑥ 与二行为约束恒成立；**L0**（trivial：单文件 + 无接口变更 + 无逻辑分支变化）豁免 fresh 派遣，主会话 inline 一行断言落档并标注「未触 writer 约束」，涉分层/拆分/接口即升档；`code-design.md` 产物 schema 恒在。
 
-### 执行半程（spec-workflow 承载）
+### 执行半程（spec-apply 承载）
 
 执行双引擎：`subagent`（默认）每任务派 fresh 子代理（提示自包含：任务原文、design 该组实现要点**逐字引用**、验证句、写范围、**栈对应 writer skill 加载指令**——从落档 design.md 决策记录点名，无从取得则重识别一次），组内并发（上限 `parallelism`）、组间串行，主会话按验证句 + diff 核对通过才勾选任务；`team`（需 `--engine team` 或映射文件显式启用，依赖实验性 Agent Teams）由 Lead 把批次发到共享任务板、spawn ≤ 任务数的 implementer 认领（**任务卡含同款加载指令**），审核反馈走消息保留上下文；**成员上限 8 达限（`Team member limit 8 reached`）或创建失败降级 subagent** 并留痕；**引擎允许批次间切换（含 team↔subagent），切换与原因留痕**。
 
@@ -169,24 +172,24 @@ openspec archive <change>           # 评审通过后归档
 | `team` | 经 team 引擎用 `send_message` 把答复回送**同一成员**（仅 `spawn_teammate` 的具名队友可寻址；tool-subagent 的子代理报 `active teammate … not found`） | 保留，可多轮往返 |
 | `subagent` | 把上一轮回执摘要 + 用户答复并入新提示**接续重派** | 重建 |
 
-上浮时机按半程分流：规划线上浮**并入阶段 1.5 统一提问**、设计线上浮**并入落档分歧点提问**（spec-plan 承载）；执行期上浮**当批次即时代问**（spec-workflow 承载）。用户明确授权「按假设清单推进」时跳过代问，并在产物中标注已授权假设。
+上浮时机按半程分流：规划线上浮**并入阶段 1.5 统一提问**、设计线上浮**并入落档分歧点提问**（spec-plan 承载）；执行期上浮**当批次即时代问**（spec-apply 承载）。用户明确授权「按假设清单推进」时跳过代问，并在产物中标注已授权假设。
 
 ### 阶段模型路由（`dsh/spec-workflow.yaml`）
 
 ```yaml
-models:                       # 规划键（spec-plan 消费）+ 执行键（spec-workflow 消费）+ 能力键 vision（两侧共用）
-  lineA: { provider: zai, model: glm-5.3 }         # 阶段 1 A 线（spec-plan）
-  design: { provider: zai, model: glm-5.3 }        # 阶段 1.7 设计线（spec-plan）
-  apply:                                           # 阶段 3 执行（spec-workflow）；可选 fallback
+models:                       # 规划键（spec-plan 消费）+ 执行键（spec-apply 消费）+ verify（spec-done 复用）+ 能力键 vision（spec-plan/spec-apply 共用）
+  lineA: { provider: zai-coding-cn, model: glm-5.3 }         # 阶段 1 A 线（spec-plan）
+  design: { provider: zai-coding-cn, model: glm-5.3 }        # 阶段 1.7 设计线（spec-plan）
+  apply:                                           # 阶段 3 执行（spec-apply）；可选 fallback
     provider: opencode-go
     model: deepseek-v4.1-flash
     fallback: { provider: deepseek-official, model: deepseek-flash }
-  vision: { provider: zai, model: glm-5.3-flash }  # 读图覆盖路由（能力键，非阶段键）
-engine: subagent    # subagent | team（--engine 覆盖；spec-workflow 消费）
-parallelism: 3      # 同组并行上限 / 落档分组上限
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash }  # 读图覆盖路由（能力键，非阶段键）
+engine: subagent    # subagent | team（--engine 覆盖；spec-apply 消费）
+parallelism: 8      # 同组并行上限 / 落档分组上限
 ```
 
-仓库当前配置（规划用强模型、执行用快模型）：`lineA` / `lineB` / `panel` / `design` → `zai/glm-5.3`；`apply` / `verify` → `opencode-go/deepseek-v4.1-flash`，备用 `deepseek-official/deepseek-flash`；`vision` → `zai/glm-5.3-flash`。
+仓库当前配置（规划用强模型、执行用快模型）：`lineA` / `lineB` / `panel` / `design` → `zai-coding-cn/glm-5.3`；`apply` / `verify` → `opencode-go/deepseek-v4.1-flash`，备用 `deepseek-official/deepseek-flash`；`vision` → `zai-coding-cn/glm-5.3-flash`。
 
 优先级 `--model` 参数 > 映射文件 > 继承会话模型（`--model` 只覆盖主路由，`fallback` 只写在文件里）；各键应用点：
 
@@ -195,11 +198,11 @@ parallelism: 3      # 同组并行上限 / 落档分组上限
 | `lineA` / `lineB` | 阶段 1 两条独立规划线的子代理（仅并行编排派子代理时适用，串行由主会话自身依次完成） | spec-plan |
 | `panel` | 阶段 1.5 的**分歧复算线**：仅在出现无法查证且影响方案走向的分歧时派第三条独立子代理 | spec-plan |
 | `design` | 阶段 1.7 **代码设计子代理**：恒派 fresh，派发前栈识别、先加载栈对应 writer skill，未命中问用户三选一 | spec-plan |
-| `apply` | 阶段 3 执行任务子代理（**team 引擎忽略 apply 键，该引擎下阶段级路由整体不适用**） | spec-workflow |
-| `verify` | 阶段 4 归档前验证子代理 | spec-workflow |
-| `vision` | **读图覆盖路由**（能力键，不改变阶段划分）：子代理需图片输入而该阶段路由不支持图片时忽略阶段路由、改用它 | 两侧共用 |
+| `apply` | 阶段 3 执行任务子代理（**team 引擎忽略 apply 键，该引擎下阶段级路由整体不适用**） | spec-apply |
+| `verify` | 阶段 4 归档前验证子代理 | spec-done |
+| `vision` | **读图覆盖路由**（能力键，不改变阶段划分）：子代理需图片输入而该阶段路由不支持图片时忽略阶段路由、改用它 | spec-plan/spec-apply 共用 |
 
-图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。规划三线的 `glm-5.3` 读图会报 `does not declare image input`（能力事实非故障），**读图任务必须改走 `vision`**。
+图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai-coding-cn/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai-coding-cn/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。规划三线的 `glm-5.3` 读图会报 `does not declare image input`（能力事实非故障），**读图任务必须改走 `vision`**。
 
 落档与归档在主会话进行，模型由用户自行切换。
 
@@ -214,10 +217,14 @@ parallelism: 3      # 同组并行上限 / 落档分组上限
 mkdir -p ~/.dsh/commands
 ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-flow.md ~/.dsh/commands/spec-flow.md
 ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-plan.md ~/.dsh/commands/spec-plan.md
+ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-apply.md ~/.dsh/commands/spec-apply.md
+ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-done.md ~/.dsh/commands/spec-done.md
 
 # 2. skill 登记进 skctl 聚合层（机制见下节「skill 复用」）
 node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-workflow
 node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-plan
+node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-apply
+node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-done
 
 # 3. 无需重启：symlink 建好、skctl 登记后即时可用（已实测，通常无需重启 dsh）
 #    命令面板未出现时，先在当前会话执行内置 /commands-reload 手动重扫（插件热加载，见下节）
@@ -225,7 +232,7 @@ node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/
 cd ~/develop/docker && docker compose restart dsh
 ```
 
-校验：命令面板出现 `/spec-flow`、`/spec-plan`，skill 列表出现 `spec-workflow`、`spec-plan`（已实测，运行中的 dsh 即时可见）；`subagent` 工具的模型字段需新会话/重启后才出现。
+校验：命令面板出现 `/spec-flow`、`/spec-plan`、`/spec-apply`、`/spec-done`，skill 列表出现 `spec-workflow`、`spec-plan`、`spec-apply`、`spec-done`（已实测，运行中的 dsh 即时可见）；`subagent` 工具的模型字段需新会话/重启后才出现。
 
 ## skill 复用（与 opencode 同源，经 skctl 聚合）
 
