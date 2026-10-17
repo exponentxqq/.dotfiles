@@ -1,5 +1,9 @@
 # Spec Delta
 
+## Purpose
+
+spec 驱动工作流的收尾半程：已归档变更的分支闭环（rebase、全量复验、推送、合并确认、worktree 删除与分支清理、本地环境处置）与非隔离轻量收尾，从归档工件与 git 事实三方重建进度、不依赖对话记忆。
+
 ## ADDED Requirements
 
 ### Requirement: 收尾入口与三方重建
