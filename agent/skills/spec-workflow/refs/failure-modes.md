@@ -14,6 +14,9 @@
 | 旧会话报 `child model selection is disabled for this tool instance` | 该会话在**组合期**未读到开关与白名单（配置改动只对新会话生效）：**新建会话**重试，必要时重启 dsh 兜底；**不要判定工具损坏** |
 | team 成员创建失败 / 长时间无进展 / **成员上限达限**（`Team member limit 8 reached`） | `interrupt_agent` 中断或重建；无法恢复则**降级 subagent** 完成该任务，并把降级与原因写入留痕 |
 | 验证需真实密钥而凭据缺失 | 以明确报错失败（如提示缺少参数），**不静默跳过、不伪造结果**；密钥只经参数/环境变量传入进程（第十节红线） |
-| 需要宿主操作（重启容器兜底、skctl、推送、装依赖） | 给出确切命令交给用户执行，**本 skill 不代劳** |
+| 需要宿主操作（重启容器兜底、skctl、装依赖） | 给出确切命令交给用户执行，**本 skill 不代劳**；**推送例外**——先探测（fetch 成功 / `ssh -T` 可达），可行则按用户指示代推，不可行才给宿主命令 |
+| worktree 分支已被其他 worktree 检出（创建/重建时） | git 约束一分支一 worktree：换 worktree 路径或问用户，**不强拆他人检出**（worktree.md） |
+| 恢复时 worktree 缺失或脏 | 按 worktree.md「恢复核对」处置：缺失但分支在 → 重建+装配+三方对齐核对；均无 → 问用户；脏 → 呈证问处置，不擅自清理 |
+| 收尾期 rebase 冲突 / push 被拒 / worktree 脏不能删 | **收尾半程归 skill spec-done**（abort+呈证三选一 / fetch+rebase 一次重试 / 停下不 force），本 skill 只在遗留待办指路 |
 
 > 注：红线级条目（绝不副作用创建 `openspec/`、不在用户审核确认前提交实现改动、不静默把待决项变假设、不提交未过验证内容、`DELEGATED_CALLER` 是平台设计不是故障、`auto` 硬停四条件、真实密钥只经参数、分仓提交）留在 SKILL.md 第十节，不在此文件。
