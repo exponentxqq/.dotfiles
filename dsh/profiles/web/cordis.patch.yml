@@ -12,8 +12,8 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: deepseek-official
-    model: deepseek-flash
+    provider: zai
+    model: glm-5.3
     reasoningEffort: max
 # 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
 - id: llm-deepseek
@@ -21,18 +21,21 @@
   config:
     # deepseek-official 路由；与内置默认一致，显式声明以自文档
     apiKeyEnv: DEEPSEEK_API_KEY
+    # subagent 路由不携带 effort，取 provider 默认（不配置时内置默认 high）→ 规划/设计锚点统一 max
+    reasoningEffort: max
 - id: llm-pi-ai
   name: "@deepseek-ai/dsh-llm-pi-ai"
   config:
     providers:
       zai:
         apiKeyEnv: ZAI_API_KEY
-        reasoningEffort: max
+        reasoning: max
       opencode-go:
         apiKeyEnv: OPENCODE_GO_API_KEY
-        reasoningEffort: max
+        reasoning: max
       zai-coding-cn:
         apiKeyEnv: ZAI_CODING_CN_API_KEY
+        reasoning: max
 # 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
 - id: skill-filesystem
   name: "@deepseek-ai/dsh-skill-filesystem"
@@ -135,10 +138,19 @@
   config:
     enabled: true
     allowedModels:
-      - { provider: zai, model: glm-5.3 }
-      - { provider: zai, model: glm-5.3-flash }
-      - { provider: zai-coding-cn, model: glm-5.3 }
-      - { provider: zai-coding-cn, model: glm-5.3-flash }
-      - { provider: opencode-go, model: deepseek-v4.1-flash }
-      - { provider: opencode-go, model: deepseek-v4-pro }
-      - { provider: deepseek-official, model: deepseek-flash }
+      - provider: zai
+        model: glm-5.3
+      - provider: zai
+        model: glm-5.3-flash
+      - provider: zai-coding-cn
+        model: glm-5.3
+      - provider: zai-coding-cn
+        model: glm-5.3-flash
+      - provider: opencode-go
+        model: deepseek-v4.1-flash
+      - provider: deepseek-official
+        model: deepseek-flash
+- id: subagent
+  name: "@deepseek-ai/dsh-subagent"
+  config:
+    maxDepth: 2
