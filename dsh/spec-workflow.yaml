@@ -2,34 +2,43 @@
 #   规划键 lineA/lineB/panel/design → spec-plan 消费
 #   apply、engine、parallelism → spec-apply 消费；verify → spec-done 复用（归档前验证与收尾复验）
 #   vision 为能力键（读图覆盖），spec-plan（规划线读图）与 spec-apply 共用；四段共用本文件与白名单
-# 路由现状说明（2026-10-17 DeepSeek-V4.1-Flash-1017 发布后重排）：
-#   规划/设计用 DeepSeek V4.1 Flash（官方 deepseek-flash 即最新版：综合 agentic 能力最强、成本最低、原生支持读图）
-#   执行用 opencode-go 通道的 V4.1 Flash（更便宜）；验证用最便宜的视觉可用模型（glm-5.3-flash）
-#   GLM-5.3（异家）只作规划线兜底：DeepSeek 官方不可用/限流时规划线不停摆
+# 分档策略（GLM Coding Plan Max 优先，但质量不降级；2026-10-17 DeepSeek-V4.1-Flash-1017 发布后重排）：
+#   高（规划/设计）= DeepSeek V4.1 Flash 1017：当前清单内 agentic 能力最强、错误会级联且无法自动发现，不降档；
+#     四条规划键均配 GLM-5.3 异家兜底（DeepSeek 官方不可用/限流时规划线继续，顺带消耗 GLM 套餐）
+#   中（执行）= GLM-5.3：调用量最大的环节，GLM Max 套餐内成本最优；
+#     有「设计契约 + 验证句 + 主会话核对 + 用户审核」四道兜底，路由失败/限流自动兜底 1017
+#   低（验证）= GLM-5.3-Flash：机械跑命令 + 汇证据，套餐内最便宜；兜底 1017
+#   视觉 = GLM-5.3-Flash：执行主路由 GLM-5.3 为纯文本，执行期需读图时改走 vision
+#   进一步多用 GLM 的开关：把 lineB 主路由也换成 zai-coding-cn/glm-5.3（异构第二线，代价是 B 线质量下降）
 models:
-  # 规划阶段：DeepSeek V4.1 Flash（1017，支持 text+image）——规划线读图无需再改道 vision
+  # 高：规划三线 + 设计线 → 1017（质量锚点；原生支持读图，无需改道 vision）
   lineA:
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+    fallback: { provider: zai-coding-cn, model: glm-5.3 } # 异家兜底（GLM Max 套餐；纯文本）
   lineB:
     provider: deepseek-official
     model: deepseek-flash
     fallback: { provider: zai-coding-cn, model: glm-5.3 }
-  panel: { provider: deepseek-official, model: deepseek-flash }
-  # 设计线阶段路由：阶段 1.7 代码设计子代理（恒派 fresh；与规划三线同路由）
-  design: { provider: deepseek-official, model: deepseek-flash }
-  # 执行阶段：opencode-go 通道的 V4.1 Flash 更便宜，主用；备用 DeepSeek 官方 flash（最新 1017）
+  panel:
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  design:
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  # 中：执行 → GLM-5.3（GLM Max 套餐，承接最大调用量）；失败/限流兜底 1017
   apply:
-    provider: zai-coding-cn
-    model: glm-5.3
+    provider: opencode-go/deepseek-v4.1-flash-1017
+    model: glm-5.3-flash
     fallback: { provider: deepseek-official, model: deepseek-flash }
-  # 归档前验证与收尾复验：机械跑命令 + 汇证据，用最便宜的视觉可用模型
+  # 低：验证 → GLM-5.3-Flash（机械活，套餐内）；兜底 1017
   verify:
     provider: zai-coding-cn
     model: glm-5.3-flash
-    fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
-  # 读图覆盖：主路由已支持图片，vision 仅作低成本读图 / 落到不支持图片的路由时兜底
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  # 视觉：GLM-5.3-Flash（套餐内视觉；执行主路由纯文本，需读图时改走此键）
   vision: { provider: zai-coding-cn, model: glm-5.3-flash }
 
 # 执行引擎偏好（可被 --engine 覆盖）：subagent | team

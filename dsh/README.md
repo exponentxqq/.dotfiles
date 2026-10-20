@@ -181,23 +181,37 @@ models:                       # 规划键（spec-plan 消费）+ 执行键（spe
   lineA:                                                    # 阶段 1 A 线（spec-plan）
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }   # 异家兜底（可选）
-  design: { provider: deepseek-official, model: deepseek-flash }  # 阶段 1.7 设计线（spec-plan）
-  apply:                                           # 阶段 3 执行（spec-apply）；可选 fallback
-    provider: opencode-go
-    model: deepseek-v4.1-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }   # 异家兜底（GLM Max 套餐）
+  lineB:                                                    # 阶段 1 B 线（同款兜底）
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  panel:                                                    # 阶段 1.5 复算线（同款兜底）
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  design:                                                   # 阶段 1.7 设计线（同款兜底）
+    provider: deepseek-official
+    model: deepseek-flash
+    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+  apply:                                           # 阶段 3 执行（spec-apply）：GLM Max 套餐主力
+    provider: zai-coding-cn
+    model: glm-5.3
     fallback: { provider: deepseek-official, model: deepseek-flash }
-  verify:                                          # 阶段 4 归档前验证（spec-done）
+  verify:                                          # 阶段 4 归档前验证（spec-done）：套餐内快模型
     provider: zai-coding-cn
     model: glm-5.3-flash
-    fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
-  vision: { provider: zai-coding-cn, model: glm-5.3-flash }  # 读图覆盖路由（能力键，非阶段键）
+    fallback: { provider: deepseek-official, model: deepseek-flash }
+  vision: { provider: zai-coding-cn, model: glm-5.3-flash }  # 读图覆盖路由（能力键；执行主路由为纯文本）
 engine: subagent    # subagent | team（--engine 覆盖；spec-apply 消费）
 parallelism: 8      # 同组并行上限 / 落档分组上限
 ```
 
-仓库当前配置（2026-10-17 `DeepSeek-V4.1-Flash-1017` 发布后重排：规划/设计用最强且最便宜的 1017，执行用快模型，验证用最低成本，GLM-5.3 降为规划线异家兜底）：
-`lineA` / `lineB` / `panel` / `design` → `deepseek-official/deepseek-flash`（官方 `deepseek-flash` 即最新 1017，支持读图），其中 `lineA` / `lineB` 备用 `zai-coding-cn/glm-5.3`（异家兜底）；`apply` → `opencode-go/deepseek-v4.1-flash`，备用 `deepseek-official/deepseek-flash`；`verify` → `zai-coding-cn/glm-5.3-flash`，备用 `opencode-go/deepseek-v4.1-flash`；`vision` → `zai-coding-cn/glm-5.3-flash`（主路由已支持读图，仅低成本读图或落到不支持图片的路由时使用）。
+仓库当前配置（**GLM Coding Plan Max 优先，质量不降级**；2026-10-17 `DeepSeek-V4.1-Flash-1017` 发布后重排）：
+`lineA` / `lineB` / `panel` / `design` → `deepseek-official/deepseek-flash`（官方 `deepseek-flash` 即最新 1017，**质量锚点**、支持读图），四条规划键均备用 `zai-coding-cn/glm-5.3`（异家兜底，GLM Max 套餐）；`apply` → `zai-coding-cn/glm-5.3`（**GLM Max 套餐**，承接最大调用量），备用 `deepseek-official/deepseek-flash`；`verify` → `zai-coding-cn/glm-5.3-flash`（套餐内最低成本），备用 `deepseek-official/deepseek-flash`；`vision` → `zai-coding-cn/glm-5.3-flash`（执行主路由为纯文本，执行期读图改走此键）。
+
+分档依据：规划/设计错误会级联且无法自动发现 → 用最强的 1017；执行/验证有「设计契约 + 验证句 + 主会话核对 + 用户审核」四道兜底，且路由失败/限流会按三档回退自动兜底 1017 → 用 GLM Max 套餐承接调用量最大的环节，成本最优。**进一步多用 GLM 的开关**：把 `lineB` 主路由也换成 `zai-coding-cn/glm-5.3`（异构第二线，代价是 B 线质量下降、收敛仍由 1017 主导），改一行即可。
+**GLM 通道路径**：路由当前走 `zai-coding-cn`（bigmodel CN 通道，与仓库近期 provider 切换一致）；若 Max 套餐实际是 z.ai 那条（provider 名 `zai`），把上述三处 `zai-coding-cn` 替换为 `zai` 即可——两条通道均已实测可用。
 
 优先级 `--model` 参数 > 映射文件 > 继承会话模型（`--model` 只覆盖主路由，`fallback` 只写在文件里）；各键应用点：
 
@@ -210,9 +224,13 @@ parallelism: 8      # 同组并行上限 / 落档分组上限
 | `verify` | 阶段 4 归档前验证子代理 | spec-done |
 | `vision` | **读图覆盖路由**（能力键，不改变阶段划分）：子代理需图片输入而该阶段路由不支持图片时忽略阶段路由、改用它 | spec-plan/spec-apply 共用 |
 
-图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai-coding-cn/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai-coding-cn/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。当前主路由（规划/设计/执行）均支持读图，**无需改道**；仅当显式路由或 `fallback` 落到不支持图片的 `glm-5.3` 且任务需读图时，改走 `vision`；其余不支持图片的路由遇到读图会报 `does not declare image input`（能力事实非故障，不重试、改路由）。
+图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai-coding-cn/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai-coding-cn/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。规划/设计主路由（1017）原生支持读图，**无需改道**；**执行主路由 `glm-5.3` 是纯文本**——执行期子任务需读图（截图、设计稿、渲染结果）时改走 `vision`（`glm-5.3-flash`）；落到其他不支持图片的路由遇到读图会报 `does not declare image input`（能力事实非故障，不重试、改路由）。
 
-落档与归档在主会话进行，模型由用户自行切换。
+落档与归档在主会话进行，模型由用户自行切换。**主会话分段切换建议**：规划段保持 `deepseek-official/deepseek-flash`（默认串行规划、1.5 收敛、落档判断都在主会话，用质量锚点）；到衔接点提示「如需切换主会话模型请现在切换」时切到 `zai-coding-cn/glm-5.3` 跑执行半程与收尾（team 引擎执行时 teammate 继承 Lead 模型，也会跟着走套餐）。
+
+**执行质量升级开关**：某批次反复验证失败/返工时，本轮用 `--model apply=deepseek-official/deepseek-flash` 覆盖为 1017（整轮生效）；或临时改映射文件后重派。
+
+**reasoning effort**：subagent 路由不携带 effort、取 provider 默认。profile 已显式配置 `llm-deepseek.reasoningEffort: max` 与 pi-ai `providers.{zai,zai-coding-cn,opencode-go}.reasoning: max`（**pi-ai 的字段名是 `reasoning`**，此前误写为 `reasoningEffort` 不生效，已修正）——**profile 改动需重启 dsh 生效**；映射文件（本 YAML）改动在下一次派发即生效。
 
 > **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
 >
