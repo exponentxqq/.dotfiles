@@ -338,3 +338,9 @@ dsh 处于 developer preview，官方声明存在破坏性变更。升级 `DSH_V
    然后重启 dsh。漏做时启动日志会报 `disabling profile plugin row "browser-use"`（peer 版本
    精确不匹配）。注意镜像 Dockerfile **不再**全局安装这两个包——DSH profile 按 profile 目录
    解析插件行，镜像全局 node_modules 里的副本不会被用到。
+5. `chrome-devtools-mcp` 经 profile `package.json` 的 `pnpm.overrides` 提升到 `1.12.0`：
+   官方插件全版本（≤0.2.1-rc.3）都把该依赖精确 pin 在 `1.9.0`，而该版本进程用后不退出，
+   在容器内累积（每个 ~150MB）曾于 2026-10-24 撑满 4G 上限触发 OOM 重启。注意
+   `dsh plugin add` 重写 `package.json` 时可能丢失 `pnpm.overrides` 字段——插件操作后需
+   复查该字段，必要时重跑 `docker exec dsh bash -lc 'cd /home/docker/.dsh/profiles/web
+   && pnpm install'`。官方插件跟进新版本后可移除此 override。

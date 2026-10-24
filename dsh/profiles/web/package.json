@@ -39,5 +39,10 @@
     "dsh-prompt-history": "^1.4.2",
     "dsh-rewind-plugin": "^0.17.0",
     "dshmarket": "^1.66.42"
+  },
+  "pnpm": {
+    "overrides": {
+      "chrome-devtools-mcp": "1.12.0"
+    }
   }
 }
