@@ -8,6 +8,7 @@
 | ---------------------------------- | -------------------------------------------------------------------- |
 | `profiles/<name>/cordis.patch.yml` | 用户配置层（主题、默认模型、provider 等），每个 profile 一份          |
 | `profiles/<name>/package.json`     | profile manifest：bundles 列表与树外插件依赖（按 tag 的 git spec，由 pnpm / dsh plugin 维护） |
+| `commands/*.md`                    | 用户级斜杠命令源（symlink 到容器 `~/.dsh/commands/`，经 `dsh-plugin-user-commands` 热加载；spec-* 四件与 `/code-review`） |
 | `install.sh`                       | 安装脚本：纳管旧布局 profile、保障目录，幂等可重复执行                |
 
 ## 挂载机制
@@ -245,6 +246,8 @@ ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-flow.md ~/.dsh/command
 ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-plan.md ~/.dsh/commands/spec-plan.md
 ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-apply.md ~/.dsh/commands/spec-apply.md
 ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-done.md ~/.dsh/commands/spec-done.md
+# /code-review：通用代码评审（自 opencode agents/code-reviewer.md 迁移，源文件保留）
+ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/code-review.md ~/.dsh/commands/code-review.md
 
 # 2. skill 登记进 skctl 聚合层（机制见下节「skill 复用」）
 node ~/develop/dotfiles/tools/skctl/src/cli.ts install ~/develop/dotfiles/agent/skills/spec-workflow
