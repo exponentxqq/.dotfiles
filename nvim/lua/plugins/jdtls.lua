@@ -1,5 +1,5 @@
--- JDTLS 进程本身需要 JVM ≥ 21（Mason 的 jdtls 脚本会校验）；项目仍可用 JDK 17。
--- 可选：export JDTLS_JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+-- JDTLS 进程本身需要 JVM：jdtls ≥ v1.63 的 bundle 要求 Java 25（旧版为 21）；项目仍可用 JDK 17。
+-- 可选：export JDTLS_JAVA_HOME=/usr/lib/jvm/java-25-openjdk
 -- 项目 JDK：继续用 JAVA_HOME（例如 java-17-openjdk）。
 -- DAP 调试由 LazyVim Java extra 自动配置，不要在此手动设置。
 
@@ -36,27 +36,20 @@ local function jdtls_java_executable()
       return exe
     end
   end
-  for _, candidate in ipairs({
-    "/usr/lib/jvm/java-21-openjdk/bin/java",
-    "/usr/lib/jvm/java-22-openjdk/bin/java",
-    "/usr/lib/jvm/java-openjdk/bin/java", -- Arch "当前默认 JDK"，可能是 21+
-  }) do
-    if vim.uv.fs_stat(candidate) then
-      local v = java_major_version(candidate)
-      if v and v >= 21 then
-        return candidate
-      end
-    end
-  end
+  -- jdtls ≥ v1.63 要求 Java 25：优先选满足 25+ 的最高版本，回退 21+（旧版 jdtls）
+  local best, best_v = nil, 0
+  local fallback, fallback_v = nil, 0
   for _, path in
     ipairs(vim.fn.glob("/usr/lib/jvm/*/bin/java", true, true) --[[@as string[] ]])
   do
-    local v = java_major_version(path)
-    if v and v >= 21 then
-      return path
+    local v = java_major_version(path) or 0
+    if v >= 25 and v > best_v then
+      best, best_v = path, v
+    elseif v >= 21 and v > fallback_v then
+      fallback, fallback_v = path, v
     end
   end
-  return nil
+  return best or fallback
 end
 
 ---@param home string
@@ -127,7 +120,7 @@ return {
       local run_java = jdtls_java_executable()
       if not run_java then
         vim.notify(
-          "未找到 Java 21+：请安装 JDK 21（如 pacman -S jdk-openjdk）或设置 JDTLS_JAVA_HOME",
+          "未找到 Java 21+：jdtls ≥ v1.63 需要 JDK 25（pacman -S jdk25-openjdk）或设置 JDTLS_JAVA_HOME",
           vim.log.levels.ERROR
         )
       else
@@ -228,6 +221,12 @@ return {
       end
 
       opts.dap_main = false
+
+      -- java-test（vscode-java-test 0.47）内置 jacoco 0.8.14，要求 asm [9.9,9.10)，
+      -- 而 jdtls v1.63 自带 asm 9.10.1，OSGi 无法解析 → 每次初始化刷
+      -- "Could not resolve module: org.jacoco.core / com.microsoft.java.test.plugin"。
+      -- 关闭 java-test bundles（java-debug-adapter 调试能力不受影响）。
+      opts.test = false
 
       opts.project_name = function(root_dir)
         if not root_dir then
