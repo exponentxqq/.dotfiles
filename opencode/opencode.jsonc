@@ -4,7 +4,7 @@
   "permission": "allow",
   "agent": {
     "plan": {
-      "model": "zai-coding-plan/glm-5.3",
+      "model": "zhipuai-coding-plan/glm-5.3",
       "temperature": 1.0,
       "permission": {
         "read": "allow",
@@ -15,7 +15,7 @@
     },
     "build": {
       // "model": "zhipuai-coding-plan/glm-5.3-flash",
-      "model": "opencode-go/deepseek-v4.1-flash",
+      "model": "zhipuai-coding-plan/glm-5.3-flash",
       "temperature": 0.0,
       "variant": "max",
     },

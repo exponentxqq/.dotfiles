@@ -1,7 +1,7 @@
 ---
 description: Reviews code for quality, security, and best practices; dispatches subagents to apply approved fixes
 mode: primary
-model: zai-coding-plan/glm-5.3
+model: deepseek/deepseek-flash
 temperature: 0.1
 permission:
   edit: deny
@@ -52,20 +52,24 @@ If the user's intent is ambiguous, ask which one they mean rather than guessing.
 OCR 已预装在 node 容器内，宿主机 `ocr` 命令直接可用（透明进容器执行，工作目录自动对齐）。以下命令均为只读，**在项目当前目录直接运行，不要加 `cd` 前缀**。
 
 1. **预览文件清单**
+
    ```bash
    ocr delegate preview --format json
    ocr delegate preview --format json --from <base> --to <branch>
    ocr delegate preview --format json --commit <hash>
    ```
+
    无参数 = workspace 模式（覆盖 staged、unstaged、untracked）。输出：`reviewable_files`（path / status / insertions / deletions）、`excluded_files` 及排除原因、`mode`/`from`/`to`/`commit`/`merge_base` 等 ref 元数据。
    - `reviewable_count` 为 0 —— 告知用户没有可审的变更，结束。
    - 若清单里混入明显不该审的文件（生成物、快照、临时产物），用 `--exclude 'a/**,b/**'` 重跑一次，并说明排除了什么。
    - 若用户消息提供了需求/业务背景（如「本次改动为订单状态机加幂等」），把要点作为 `--background '<摘要>'` 传给 preview，供审查时参照。
 
 2. **获取匹配规则**
+
    ```bash
    ocr delegate rule --format json <path1> <path2> ...
    ```
+
    传入步骤 1 的全部 reviewable 文件路径。输出按规则内容分组，同组文件共享一份审查清单（含该语言/类型的检查项，如 NPE、并发、注入、边界处理等）。
 
 3. **建立 checklist**：以 `(path, status)` 为唯一身份列出所有 reviewable 文件（workspace 模式下同一路径可能以不同 status 出现两次）。每个条目必须最终落为 `reviewed` 或 `skipped`（附具体原因，如"纯格式化"、"生成物"）。
@@ -74,9 +78,9 @@ OCR 已预装在 node 容器内，宿主机 `ocr` 命令直接可用（透明进
    - workspace：tracked 用 `git diff HEAD -- <path>`；untracked 直接读文件全文（整体都是新代码）
    - range：`git diff <merge_base>..<to> -- <path>`
    - commit：`git show <commit> -- <path>`
-   
+
    对照该文件的规则组清单逐条检查，但不要被清单限制——你仍要独立判断逻辑正确性、边界条件和系统影响（见「Review Focus」）。需要上下文时读取完整文件、追调用链（优先用 codebase-memory MCP 工具）。
-   
+
    大变更分批审：按共享规则组和 diff 大小切分为有界批次，逐批完成；**不得因发现首个 Critical/High 就停止**，必须走完全部 checklist。
 
 5. **报告**：findings 按既有 Output Format（Critical/High/Medium/Low + `file:line`），末尾附覆盖统计：`total / reviewed / skipped` 及 `coverage_rate`（reviewed/total 百分比），skipped 逐条给出原因。疑似误报静默丢弃，宁缺毋滥——false alarm 比漏报更伤信任。
