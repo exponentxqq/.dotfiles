@@ -71,7 +71,7 @@ cd ~/develop/person/dsh-plugins
 pnpm install          # 装齐全部插件依赖（会触发各插件的 prepare 构建）
 pnpm verify           # 发布前自检
 pnpm release 1.0.0    # 同步版本 + 发布提交 + tag v1.0.0
-git push origin main --tags   # 在宿主执行（容器内没有 ssh）
+git push origin main --tags   # 容器内可直接执行（dsh 容器已挂载宿主 ~/.ssh）
 ```
 
 装到 profile（`#<tag>&path:` 同时指定版本与单仓子目录）：
@@ -92,7 +92,7 @@ docker exec dsh dsh --profile web --dump-config-schema   # 校验配置可加载
 两个常见阻碍：
 
 - **构建授权**：git 来源要在安装现场跑 `prepare`，pnpm ≥10 默认拦下依赖构建脚本，首次 `add` 会以非 0 退出并把待决项写进 `dsh/profiles/web/pnpm-workspace.yaml`（`allowBuilds:` 下 `koffi`、插件包名等占位 `set this to true or false`）；改成 `true` 后重跑。
-- **`insteadOf` 陷阱**：宿主 `~/.gitconfig` 的 `url.git@github.com:.insteadOf = https://github.com/` 会随只读挂载进入 dsh 容器，容器内 `git ls-remote` 被改写成 ssh 而容器没有 ssh，安装必败。推荐把该段拆到宿主专属的 `~/.gitconfig-github-ssh` 并用 `[include]` 引回（容器读不到即静默跳过）；临时办法是给命令加 `-e GIT_CONFIG_GLOBAL=/dev/null`。
+- **`insteadOf` 改写**：宿主 `~/.gitconfig` 的 `url.git@github.com:.insteadOf = https://github.com/` 会随只读挂载进入 dsh 容器，容器内 `git ls-remote` 被改写成 ssh——dsh 容器现已挂载宿主 `~/.ssh`，钥匙对 GitHub 可用时 ssh 直连正常；不可用时再把该段拆到宿主专属的 `~/.gitconfig-github-ssh` 并用 `[include]` 引回（容器读不到即静默跳过），或临时给命令加 `-e GIT_CONFIG_GLOBAL=/dev/null`。
 
 本地开发调试仍可用 `link:`：`docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>`（改源码重启 profile 即生效，无需发布）。
 
