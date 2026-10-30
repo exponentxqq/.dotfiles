@@ -2,20 +2,18 @@
 
 ## 八、模型路由（规划键）
 
-映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`），schema：
+映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`）。**各键用什么模型，一律以该文件当前内容为唯一来源**——本文件不例举、不复述任何具体模型、fallback 组合与套餐策略（分档口径见该文件头部注释），防双源漂移。schema（只约定键与结构，值以文件为准）：
 
 ```yaml
 models:                       # 规划键：lineA | lineB | panel | design；能力键：vision
   lineA:                                            # 值：{ provider, model }，可选 fallback
-    provider: deepseek-official
-    model: deepseek-flash                           # 官方 deepseek-flash = 最新 V4.1 Flash（1017，支持读图）
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }  # 异家兜底（GLM Max 套餐；纯文本）
-  design: { provider: deepseek-official, model: deepseek-flash }  # 设计线（阶段 1.7 代码设计子代理）
-  vision: { provider: zai-coding-cn, model: glm-5.3-flash }       # 读图覆盖路由（能力键；主路由支持图片时不需要）
+    provider: <provider>
+    model: <model>
+    fallback: { provider: <provider>, model: <model> }   # 可选；备用路由（三档回退第①档）
+  # lineB / panel / design 与 lineA 同构；vision 为单行 { provider, model }，均逐一在文件里显式配置
 engine: subagent    # 由 spec-apply 消费，本 skill 不读
 parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 ```
-`lineB` / `panel` / `design` 与 `lineA` 同款异家兜底（映射文件里逐一配置）。
 
 **优先级：命令行 `--model <阶段>=<provider>/<模型>` > 映射文件 `models` > 继承会话模型。** `--model` 只覆盖主路由，`fallback` 只能写在文件里。
 
@@ -31,17 +29,9 @@ parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 > 执行键 `apply`、`engine`/`parallelism` 由 **spec-apply** 消费，`verify` 由 **spec-done** 复用；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。四段共用同一映射文件与白名单。
 
-**图片输入能力**（出处：dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段；改白名单时同步核对）：
+**图片输入能力**（判定方法，**快照表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
 
-| 路由 | 图片输入 | 说明 |
-| --- | --- | --- |
-| `deepseek-official/deepseek-flash` | 支持（`["text","image"]`） | 规划三线与设计线主路由（官方 `deepseek-flash` 即最新 V4.1 Flash，2026-10-17 起为 1017 版）；**读图无需改道** |
-| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | 四条规划键的异家兜底（GLM Max 套餐）+ 执行主路由（spec-apply 消费）；落到它且需读图时改走 `vision` |
-| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `verify` 主路由 + `vision` 键（低成本读图 / 降级通道） |
-| `opencode-go/deepseek-v4.1-flash` | 支持 | 备用（未启用；转售通道，版本是否同步 1017 以渠道为准） |
-| `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
-
-> **版本口径与套餐策略**：2026-10-17 起 DeepSeek 官方 `deepseek-flash` 即 `DeepSeek-V4.1-Flash-1017` 最新版（API model 名不变，路由无需改动）；`opencode-go/deepseek-v4.1-flash` 为转售通道，版本是否同步以渠道为准。新版建议配合 DeepSeek Harness ≥ `0.2.1-rc.1`。**GLM Coding Plan Max 优先**：规划/设计用 1017（质量锚点、错误会级联），执行/验证用 GLM 套餐模型（调用量最大、有验证句与审核兜底）；衔接点的主会话模型分段切换建议见 `dsh/README.md`。
+> **版本口径与套餐策略**：单一来源 = 映射文件**头部注释**（随文件更新，本文件不复述）；衔接点的主会话模型分段切换建议见 `dsh/README.md`。
 
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。

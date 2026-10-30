@@ -2,19 +2,15 @@
 
 ## 五、模型路由（执行侧）
 
-映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`），schema：
+映射文件：**`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（宿主与容器同形的**绝对**路径；dsh 容器内 `~` 解析为 `/home/docker`，**不要**写 `~/develop/...`）。**各键用什么模型，一律以该文件当前内容为唯一来源**——本文件不例举、不复述任何具体模型、fallback 组合与套餐策略（分档口径见该文件头部注释），防双源漂移。schema（只约定键与结构，值以文件为准）：
 
 ```yaml
 models:                       # 执行键：apply；verify 由 spec-done 复用；能力键：vision（规划键见下注）
-  apply:                                          # 值：{ provider, model }
-    provider: zai-coding-cn
-    model: glm-5.3                                # GLM Max 套餐主力；纯文本，需读图改 vision
-    fallback: { provider: deepseek-official, model: deepseek-flash }  # 最新 V4.1 Flash（1017）
-  verify:                                         # 阶段 4 归档前验证与收尾复验（spec-done 消费）
-    provider: zai-coding-cn
-    model: glm-5.3-flash
-    fallback: { provider: deepseek-official, model: deepseek-flash }
-  vision: { provider: zai-coding-cn, model: glm-5.3-flash } # 读图覆盖路由（能力键，非阶段键）
+  apply:                                          # 值：{ provider, model }，可选 fallback
+    provider: <provider>
+    model: <model>
+    fallback: { provider: <provider>, model: <model> }   # 可选；备用路由（三档回退第①档）
+  # verify（spec-done 消费）与 apply 同构；vision 为单行 { provider, model }
 engine: subagent    # subagent | team（--engine 覆盖）
 parallelism: 8      # 同组并行上限
 ```
@@ -29,17 +25,9 @@ parallelism: 8      # 同组并行上限
 
 > **规划键归属**：`lineA` / `lineB` / `panel` / `design`（规划三线与设计线）由 **spec-plan** 消费（其 `refs/routing.md` 为该侧唯一权威源）；`--model` 参数中的规划键由编排层 **spec-workflow 原样转发** spec-plan，本 skill 不消费。四段共用同一映射文件与白名单。
 
-**图片输入能力**（出处：dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段；改白名单时同步核对）：
+**图片输入能力**（判定方法，**快照表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
 
-| 路由 | 图片输入 | 说明 |
-| --- | --- | --- |
-| `zai-coding-cn/glm-5.3` | **不支持**（`input: ["text"]`） | `apply` 主路由（GLM Max 套餐）；执行期需读图改走 `vision`；兼规划线异家兜底（spec-plan 消费） |
-| `zai-coding-cn/glm-5.3-flash` | 支持（`["text","image"]`） | `verify` 主路由 + `vision` 键 |
-| `deepseek-official/deepseek-flash` | 支持 | 官方最新 V4.1 Flash（2026-10-17 起为 1017 版）；`apply` / `verify` 兜底 + 规划/设计主路由（spec-plan 消费） |
-| `opencode-go/deepseek-v4.1-flash` | 支持 | 备用（未启用；转售通道，版本是否同步 1017 以渠道为准） |
-| `opencode-go/deepseek-v4-pro` | 不支持 | 备用（未启用） |
-
-> **版本口径与套餐策略**：2026-10-17 起 DeepSeek 官方 `deepseek-flash` 即 `DeepSeek-V4.1-Flash-1017` 最新版（API model 名不变，路由无需改动）。新版建议配合 DeepSeek Harness ≥ `0.2.1-rc.1`。执行/验证主用 GLM Max 套餐模型（调用量最大、有设计契约与验证句兜底），路由失败/限流按三档回退自动兜底 1017。**质量升级开关**：某批次反复验证失败时，整轮用 `--model apply=deepseek-official/deepseek-flash` 覆盖为 1017。
+> **版本口径与套餐策略**：单一来源 = 映射文件**头部注释**（随文件更新，本文件不复述）。**质量升级开关**：某批次反复验证失败时，整轮用 `--model apply=<provider>/<model>` 显式覆盖为白名单内更强模型（选哪个、怎么取舍见映射文件头部注释）。
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 
