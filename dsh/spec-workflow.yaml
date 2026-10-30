@@ -28,12 +28,10 @@ models:
     provider: deepseek-official
     model: deepseek-flash
     fallback: { provider: zai-coding-cn, model: glm-5.3 }
-  # 中：执行 → GLM-5.3（GLM Max 套餐，承接最大调用量）；失败/限流兜底 1017
   apply:
-    provider: opencode-go/deepseek-v4.1-flash-1017
+    provider: zai-coding-cn
     model: glm-5.3-flash
-    fallback: { provider: deepseek-official, model: deepseek-flash }
-  # 低：验证 → GLM-5.3-Flash（机械活，套餐内）；兜底 1017
+    fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
   verify:
     provider: zai-coding-cn
     model: glm-5.3-flash
