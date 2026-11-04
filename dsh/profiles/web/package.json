@@ -20,7 +20,9 @@
         "@tt-a1i/archify-dsh",
         "dsh-rewind-plugin",
         "dsh-prompt-history",
-        "dsh-remote"
+        "dsh-remote",
+        "dsh-plugin-session-tool-toggle",
+        "dsh-plugin-zcode-plan"
       ]
     }
   },
@@ -32,10 +34,12 @@
     "@zzerx/dsh-plugin-notes": "0.5.0",
     "dsh-better-input": "0.2.6",
     "dsh-context": "^0.77.0",
-    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/dsh-plugin-multi-root-workspace",
+    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.3.0&path:plugins/multi-root-workspace",
     "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/project-mcp",
-    "dsh-plugin-user-commands": "github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/user-commands",
-    "dsh-plugin-web-ux": "github:exponentxqq/dsh-plugins#v1.2.1&path:plugins/web-ux",
+    "dsh-plugin-session-tool-toggle": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/session-tool-toggle",
+    "dsh-plugin-user-commands": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/user-commands",
+    "dsh-plugin-web-ux": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/web-ux",
+    "dsh-plugin-zcode-plan": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/zcode-plan",
     "dsh-pocket": "^2.12.0",
     "dsh-prompt-history": "^1.6.5",
     "dsh-remote": "0.8.54",

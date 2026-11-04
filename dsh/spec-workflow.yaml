@@ -5,39 +5,40 @@
 # 分档策略（GLM Coding Plan Max 优先，但质量不降级；2026-10-17 DeepSeek-V4.1-Flash-1017 发布后重排）：
 #   高（规划/设计）= DeepSeek V4.1 Flash 1017：当前清单内 agentic 能力最强、错误会级联且无法自动发现，不降档；
 #     四条规划键均配 GLM-5.3 异家兜底（DeepSeek 官方不可用/限流时规划线继续，顺带消耗 GLM 套餐）
-#   中（执行）= GLM-5.3：调用量最大的环节，GLM Max 套餐内成本最优；
+#   中（执行）= GLM-5.3：调用量最大的环节，GLM Coding Plan 套餐（ZCode PAT 折扣刻度 ~0.95）内成本最优；
 #     有「设计契约 + 验证句 + 主会话核对 + 用户审核」四道兜底，路由失败/限流自动兜底 1017
 #   低（验证）= GLM-5.3-Flash：机械跑命令 + 汇证据，套餐内最便宜；兜底 1017
 #   视觉 = GLM-5.3-Flash：执行主路由 GLM-5.3 为纯文本，执行期需读图时改走 vision
-#   进一步多用 GLM 的开关：把 lineB 主路由也换成 zai-coding-cn/glm-5.3（异构第二线，代价是 B 线质量下降）
+#   进一步多用 GLM 的开关：把 lineB 主路由也换成 zcode-plan/glm-5.3（异构第二线，代价是 B 线质量下降）
 models:
   # 高：规划三线 + 设计线 → 1017（质量锚点；原生支持读图，无需改道 vision）
   lineA:
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 } # 异家兜底（GLM Max 套餐；纯文本）
+    fallback: { provider: zcode-plan, model: glm-5.3 } # 异家兜底（GLM Coding Plan 套餐；纯文本）
   lineB:
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+    fallback: { provider: zcode-plan, model: glm-5.3 }
   panel:
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+    fallback: { provider: zcode-plan, model: glm-5.3 }
   design:
     provider: deepseek-official
     model: deepseek-flash
-    fallback: { provider: zai-coding-cn, model: glm-5.3 }
+    fallback: { provider: zcode-plan, model: glm-5.3 }
   apply:
-    provider: zai-coding-cn
+    provider: opencode-go
+    model: deepseek-v4.1-flash
+    # fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
+    fallback: { provider: zcode-plan, model: glm-5.3-flash }
+  verify:
+    provider: zcode-plan
     model: glm-5.3-flash
     fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
-  verify:
-    provider: zai-coding-cn
-    model: glm-5.3-flash
-    fallback: { provider: deepseek-official, model: deepseek-flash }
   # 视觉：GLM-5.3-Flash（套餐内视觉；执行主路由纯文本，需读图时改走此键）
-  vision: { provider: zai-coding-cn, model: glm-5.3-flash }
+  vision: { provider: zcode-plan, model: glm-5.3-flash }
 
 # 执行引擎偏好（可被 --engine 覆盖）：subagent | team
 engine: subagent

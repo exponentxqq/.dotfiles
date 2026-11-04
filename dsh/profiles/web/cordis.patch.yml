@@ -12,10 +12,11 @@
 - id: agent-default-model
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
-    provider: zai-coding-cn
+    provider: zcode-plan
     model: glm-5.3
     reasoningEffort: max
-# 三个模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml）
+# 模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml，
+# zcode-plan 例外：凭证由插件全生命周期自管，apiKeyEnv 仅兜底）
 - id: llm-deepseek
   name: "@deepseek-ai/dsh-llm-deepseek-api-key"
   config:
@@ -33,9 +34,73 @@
       opencode-go:
         apiKeyEnv: OPENCODE_GO_API_KEY
         reasoning: max
+        # 目录收窄：models 整体替换内置 28 模型目录（未设字段从同 id 已安装模型取默认），
+        # 仅保留 deepseek 系列与 Kimi K3
+        models:
+          - id: deepseek-v4-pro
+          - id: deepseek-v4.1-flash
+          - id: kimi-k3
       zai-coding-cn:
         apiKeyEnv: ZAI_CODING_CN_API_KEY
         reasoning: max
+      zcode-plan:
+        displayName: GLM Coding Plan (ZCode PAT)
+        apiKeyEnv: ZCODE_PLAN_PAT
+        api: openai-completions
+        baseURL: https://open.bigmodel.cn/api/coding/paas/v4
+        reasoning: max
+        retryPolicy:
+          mode: normal
+          retryableCodes:
+            - EMPTY_RESPONSE
+            - RATE_LIMIT
+            - SERVER
+            - TIMEOUT
+            - TRANSPORT
+            - INVALID_CREDENTIAL
+        models:
+          - id: glm-5.3
+            name: GLM-5.3
+            contextWindow: 1000000
+            maxTokens: 131072
+            input:
+              - text
+            reasoningEfforts:
+              off: null
+              low: low
+              medium: high
+              high: high
+              max: max
+            compat:
+              thinkingFormat: zai
+              supportsReasoningEffort: true
+              supportsStore: false
+              supportsDeveloperRole: false
+              supportsStrictMode: true
+              maxTokensField: max_tokens
+          - id: glm-5.3-flash
+            name: GLM-5.3 Flash
+            contextWindow: 1000000
+            maxTokens: 131072
+            input:
+              - text
+              - image
+            reasoningEfforts:
+              off: null
+              low: low
+              medium: high
+              high: high
+              max: max
+            compat:
+              thinkingFormat: zai
+              supportsReasoningEffort: true
+              supportsStore: false
+              supportsDeveloperRole: false
+              supportsStrictMode: true
+              maxTokensField: max_tokens
+# 历史备注：曾试装 dsh-zcode-persona 插件，其 settings 装配路径在 dsh 0.2.1 失效，
+# 后手工配置 zai-coding-zcode provider（API Key + 仿客户端指纹头直连）；
+# 2026-11-04 已被 zcode-plan 插件（PAT 签名通道，折扣刻度）取代并移除。
 # 启用 skill 工具链，扫描 skctl 聚合层（容器内挂载 ~/.agents/skills，见 docker compose SKCTL_STORE_PATH）
 - id: skill-filesystem
   name: "@deepseek-ai/dsh-skill-filesystem"
@@ -131,7 +196,7 @@
       - ~/.cache
       - /tmp
 # 阶段级模型路由白名单：dsh/spec-workflow.yaml 的 models 路由必须是本列表子集，
-# 覆盖 zai / opencode-go / deepseek-official 三家常用路由。
+# 覆盖 zai / zai-coding-cn / zcode-plan / opencode-go / deepseek-official 常用路由。
 # 注：tool-subagent.modelSelectionSettings 已由 agent 预设层（cordis/standard/ptc）
 # 自带 true，profile 层再写同 id 只会落到被禁用的宿主行（无效果），故此处不再覆盖。
 - id: subagent-model-selection-settings
@@ -145,6 +210,10 @@
       - provider: zai-coding-cn
         model: glm-5.3
       - provider: zai-coding-cn
+        model: glm-5.3-flash
+      - provider: zcode-plan
+        model: glm-5.3
+      - provider: zcode-plan
         model: glm-5.3-flash
       - provider: opencode-go
         model: deepseek-v4.1-flash
@@ -164,3 +233,9 @@
   config:
     searchProvider: deepseek-search-api
     fetchProvider: deepseek-fetch-api
+
+# zcode-plan 插件配置（organization / project 为必填项，从 bigmodel 控制台/用量页 URL 取得）
+- id: zcode-plan
+  config:
+    organization: org-410f85E2098545a6A21392Ad5219f949
+    project: proj_edc492aAfee84c85BF582dD57be6108A
