@@ -1,4 +1,4 @@
-> 本文件为 SKILL.md §二（前置检查展开）、§六（代码设计环节）与 §七（落档细节）的外移正文，回入口引用写『SKILL.md 第 X 节』。阶段 1 编排手册已按编排拆分至 [../mode/parallel.md](../mode/parallel.md) 与 [../mode/serial.md](../mode/serial.md)，本文件不再承载。
+> 本文件为 SKILL.md §二（前置检查展开）、§六（代码设计环节 + 阶段 1.75 界面演示 gate）与 §七（落档细节）的外移正文，回入口引用写『SKILL.md 第 X 节』。阶段 1 编排手册已按编排拆分至 [../mode/parallel.md](../mode/parallel.md) 与 [../mode/serial.md](../mode/serial.md)，本文件不再承载。
 
 ## 附：前置检查展开（自 SKILL.md §二 外移；仅展开 ①④⑤，编号与入口 §二 一一对应）
 
@@ -51,11 +51,20 @@
 - **L1**（触达面 ≤2 文件**且**无新接口）：字段 ③④⑤ 与验证映射允许**单行简述**；①⑥ 与二行为约束**恒成立**。
 - **L0**（trivial：单文件 + 无接口变更 + 无逻辑分支变化）：**豁免 fresh 派遣**，主会话 **inline 一行断言**落档；**产物 schema 恒在**（`code-design.md` 必须存在，内容即该一行断言）；该断言标注「**未触 writer 约束**」，发现涉分层/拆分/接口即升 L1/L2 并照常加载 writer skill。
 
+## 附：阶段 1.75 界面演示 gate（自 SKILL.md §六 外移）
+
+**消费时机**：阶段 1.7 回执核对通过之后、阶段 2 落档之前；**由主会话 inline 执行**（不派子代理——本环节要逐轮看图确认，子代理无法直问用户；映射文件不设 `demo` 键）。判定标准、排除表、L1/L2/L3、产物规范与自检序列的**唯一权威源是 skill `ui-demo`**——本文件不复述判据，只写落点、留痕与落档接线。
+
+1. **判定与留痕**：加载 `ui-demo` 按其判定表判 C1∧C2∧C3 与排除表。命中 → 在 `/tmp/spec-flow/<change>/code-design.md` 末尾追加 `## 附：阶段 1.75 界面演示（判定与确认）`，逐行记 C1/C2/C3 事实依据、分档与理由、产物路径、确认结论（确认／改稿轮次／豁免依据）。未命中 → 同处记一行 `1.75 未触发：<哪条不成立或命中哪行排除表>`——**一行也必须有**，供执行侧与接续恢复审计。
+2. **产出与预览**：先落 `/tmp/spec-flow/<change>/demos/<slug>.html`（容器内路径），**宿主等价路径 = `/data/tmp/spec-flow/<change>/demos/<slug>.html`**（容器 `/tmp` 即宿主 `/data/tmp`，身份挂载三端同见）。自检按 `ui-demo` 的 chrome-shared 序列对 `file:///tmp/...` 截图并核对控制台；MCP 不可用按该 skill 的降级路径如实标注证据缺口。
+3. **确认问法（一次问清）**：`①确认，转入落档　②要改：<具体点>　③降档/豁免（写明依据）`。**未取得确认不得落档**；否决则改稿重出，不进入落档。
+4. **落档接线**：复制清单与机械断言分别见『附：落档细节』第 1 步与第 4 步新增的两句（本文件不另立第三处）。
+
 ## 附：落档细节（自 SKILL.md §七 外移）
 
 加载 `openspec-propose` skill，按其规程生成工件；输入 = 需求原文 + 并行（`line-a.md`+`line-b.md`+`diff-matrix.md`）/ 串行（`explore.md`+`decisions.md`）+ `code-design.md`（**第 5 材料**，阶段 1.7 产物；缺收敛留痕说明阶段 1.5 未做完、缺 `code-design.md` 说明阶段 1.7 未做完——先补做再落档）。
 
-1. **生成四件套 + 复制两份规划材料**：生成 `proposal.md`、`specs/<capability>/spec.md`（delta，保持既有 capability 路径）、`design.md`、`tasks.md`。`design.md` **逐断言承载 `code-design.md` 的深度契约**（①触达面 ②证据锚 ③接口与数据形状 ④决策 ⑤逐组要点 ⑥假设与未决项），落档时**逐条核对**通过后再继续；**决策记录须含栈识别结论**（writer skill 名与证据，SKILL.md 第六节）。**随后把 `/tmp/spec-flow/<change>/code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）复制入 `openspec/changes/<change>/`**——**落档副本自此为权威**（执行期组段终形态化、R<n> 留痕与接续恢复读它；`/tmp` 侧原件不再维护；`explore.md`/`line-a.md`/`line-b.md` 不入库）。
+1. **生成四件套 + 复制两份规划材料**：生成 `proposal.md`、`specs/<capability>/spec.md`（delta，保持既有 capability 路径）、`design.md`、`tasks.md`。`design.md` **逐断言承载 `code-design.md` 的深度契约**（①触达面 ②证据锚 ③接口与数据形状 ④决策 ⑤逐组要点 ⑥假设与未决项），落档时**逐条核对**通过后再继续；**决策记录须含栈识别结论**（writer skill 名与证据，SKILL.md 第六节）。**随后把 `/tmp/spec-flow/<change>/code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）复制入 `openspec/changes/<change>/`**——**落档副本自此为权威**（执行期组段终形态化、R<n> 留痕与接续恢复读它；`/tmp` 侧原件不再维护；`explore.md`/`line-a.md`/`line-b.md` 不入库）。**界面演示已触发时**（`code-design.md` 含「阶段 1.75 界面演示」附录），把 `/tmp/spec-flow/<change>/demos/` **整目录**复制入 `openspec/changes/<change>/demos/`（保留文件名，空目录视为缺失）；未触发则不建 `demos/`。
 2. **`tasks.md` 必须满足执行批次契约**（硬约束，后续执行直接依赖）：
    - 以 `## N. 组名` 编号分组表达**执行批次**；`N` 递增即执行顺序，**组间严格串行**。
    - **组即执行审核批次**：组内单任务是合法常态（单任务因依赖或写冲突单独成组时不强行拆并）；分组粒度**兼顾用户审核节奏**。
@@ -66,6 +75,7 @@
    - 单组任务数以映射文件 `parallelism`（默认 3）为上限，超出则拆组。
 3. **分歧点提问**：工件之间存在取舍、design 有多种方案、需求有歧义时，一次问清；不自行拍板。**阶段 1.7 设计线上浮的待决项并入此处**（见「附：代码设计环节（阶段 1.7）」的上浮接线），不新开通道。
 4. **校验（两段式）**：先机械断言两份落档材料已在变更目录——`test -f openspec/changes/<change>/code-design.md` 与 `test -f openspec/changes/<change>/diff-matrix.md`（串行 `decisions.md`），任一缺失回到第 1 步补复制（`openspec validate` 只认工件结构，不覆盖附加文件）；再跑 `openspec validate <change> --strict`，必须退出码 0 且无 error/warning。任一不通过则修工件重跑，**不得带病落档**。
+   - **界面演示产物断言（条件项）**：`code-design.md` 含「阶段 1.75 界面演示」附录时，`test -d openspec/changes/<change>/demos && test -n "$(ls -A openspec/changes/<change>/demos/)"` 退出码 0，且该目录随第 7 步一并 `git add`；未触发则跳过本行并在 `design.md` 决策记录留未触发判定。
 5. **落档即停（规划边界）**：本阶段只产出规划工件，**不写项目代码、不在同一轮继续执行**。
 6. **展示摘要**：变更名、四件套与两份材料路径（`code-design.md`、`diff-matrix.md`/`decisions.md`）、**触达仓清单**（根仓工件/各代码子仓——执行侧执行环境决策与多仓分立提交的输入）、任务组数与条数、每组并行度、验证句样例、风险与未决项（含阶段 1.5 收敛中未答的决策项）。
 7. **落档工件单独提交一次**：只 `git add` 该变更目录 `openspec/changes/<change>`（含新建的 spec delta 与两份材料副本），提交信息 `docs(openspec): 落档 <change>`；目标仓库既有中文惯例时从惯例。

@@ -33,6 +33,7 @@ node $SKCTL doctor                            # 修复 ~/.agents/skills 链接�
 | `analyzing-elastic-logs` / `codebase-memory` / `context7-mcp`                             | 自写（依赖各自 MCP，dsh 侧工具未接时模型自行降级）                                                       |
 | `openspec-*` ×7（core 6 + verify `openspec-verify-change`）                               | 经 skctl 从 [Fission-AI/OpenSpec] `skills/<name>` 安装，git 源（commit `9111a765`），`skctl update` 升级 |
 | `dsh-plugin-writer`                                                                       | 自写（本目录 local symlink）                                                                             |
+| `ui-demo`                                                                                 | 自写（本目录 local symlink）                                                                             |
 
 宿主侧增删/更新 skill 后 opencode 与 dsh 均即时生效：容器内
 `/home/docker/.agents/skills` 是宿主聚合层的只读 bind mount **实时视图**

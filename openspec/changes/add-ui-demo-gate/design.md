@@ -59,6 +59,7 @@
 **栈识别结论（阶段 1.7 硬契约）**：writer skill = **`writing-skills`**（用户三选一裁定；证据：聚合层 `~/.agents/skills/writing-skills/` 实存可加载，其 Iron Law（RED 前置）/SDO（description 只写触发条件）/Match-the-Form/按消费时机外移为本次 skill 写作的硬约束）。
 **阶段 1.75 判定行（本变更自身）**：**未触发**——C1 不成立（本变更是流程/skill 工程，无界面产出）；无 demos/ 目录，落档不含演示产物。
 **落档裁定**（分歧点提问已答）：Q-A RED 本期做（5 组）；Q-B L3 = tab 主 + 并排可选；Q-C /plan 场景走 /tmp 即确认即弃；Q-D 摘要不强制演示字段；Q-E 示意数据强制标注；1.75 子节形态知会无异议。
+- 执行环境：直用主工作区（创建于 2026-11-05）。唯一触达仓 dotfiles 即工件仓，按 worktree.md「根仓（工件仓）不建 worktree」隔离集合为空；主工作区 3 个无关脏改动（dsh/profiles/web/{cordis.patch.yml,package.json,pnpm-lock.yaml}）与本变更编辑域（`agent/skills/`、`openspec/`）路径不相交，git 断言全程路径域限定；无装配与环境错开项。衔接裁定：模式 auto、引擎 subagent（映射文件 `engine`）、模型覆盖无。
 
 ## 逐任务组实现要点（与 tasks.md 一一对应；命令级细节见 code-design.md ⑤）
 

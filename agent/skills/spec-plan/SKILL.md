@@ -12,8 +12,8 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 规划四阶段流水线，入口为用户级命令 `/spec-plan`，或被 `spec-workflow` 编排委托作为其阶段 1→2（参数转发、已预置不重问）：
 
 ```
-阶段1 规划编排 → 阶段1.5 收敛 → 阶段1.7 代码设计 → 阶段2 落档（终于落档提交）
-并行=双线（team 驱动）  并行=七步（含审视）   code-design.md   四件套+两规划材料
+阶段1 规划编排 → 阶段1.5 收敛 → 阶段1.7 代码设计 → 阶段1.75 界面演示（条件） → 阶段2 落档（终于落档提交）
+并行=双线（team 驱动）  并行=七步（含审视）   code-design.md      演示 HTML+确认      四件套+两材料+demos/
 串行=单线（explore）    串行=grill-me 直收
 ```
 
@@ -38,7 +38,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 | 阶段 1 开始前 | **按编排读其一**：[parallel.md](mode/parallel.md)（并行手册——team 派发、回退判据、模板、回执核对）或 [serial.md](mode/serial.md)（串行手册——explore 契约、grill-me 收敛） |
 | 并行阶段 1.5 | [convergence.md](refs/convergence.md) —— 七步判据（含探索审视） |
 | 派发子代理前 | [routing.md](refs/routing.md) —— 规划键路由、三档回退、白名单、图片能力、自检 |
-| 阶段 1.7 / 落档 | [planning.md](refs/planning.md) —— 前置检查展开、设计契约、落档细节 |
+| 阶段 1.7 / 1.75 / 落档 | [planning.md](refs/planning.md) —— 前置检查展开、设计契约、界面演示 gate、落档细节 |
 | 异常、边界、失败 | [failure-modes.md](refs/failure-modes.md) —— 处置表主体（红线见第九节） |
 
 **压缩后恢复速查**（红线级）：规划材料易失（落档入库的两材料除外）——中断后重进，按 `/tmp/spec-flow/<change>/` 现存文件名辨编排与阶段（`explore.md`/`decisions.md`=串行、`line-*.md`=并行），缺失即重做对应阶段并如实告知；落档后两材料从变更目录取；**绝不把待决项静默变成假设**。
@@ -89,9 +89,13 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 **只问决策，不问事实。**
 
-## 六、代码设计（阶段 1.7）
+## 六、代码设计（1.7）与界面演示 gate（1.75）
 
 1.5 收敛后、落档前：**恒派 fresh 子代理**（`design` 路由，不随阶段 1 编排模式变化）产出 `code-design.md`——深度契约**六字段**（触达面清单——**逐条注明所属仓** / 证据锚 / 接口与数据形状 / 决策记录 / 逐任务组实现要点 / 设计假设与未决项）+ **二行为约束**，**三档分降** L2/L1/L0（trivial 豁免派遣、inline 一行断言落档）。**派发前主会话做栈识别**，设计子代理**须先加载栈对应 writer skill**（未命中问用户三选一，**不静默跳过**）；**栈识别结论（writer 名与证据）须写入落档 design.md 决策记录**——执行侧与接续恢复从工件读取。**输入材料按编排**：并行 = 需求原文+`line-a.md`+`line-b.md`+`diff-matrix.md`；串行 = 需求原文+`explore.md`+`decisions.md`。模板、深度契约与回执核对见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
+
+### 阶段 1.75 界面演示 gate（1.7 后、落档前）
+
+加载 skill `ui-demo` 判定（C1∧C2∧C3 且不在排除表）：命中 → 产出演示交用户确认，**未确认不得落档**（改稿至确认，或用户书面豁免并留痕）；未命中 → `code-design.md` 记一行「1.75 未触发：<判据事实>」。演示先落 `/tmp/spec-flow/<change>/demos/`，落档复制入变更目录（第七节④断言）。细则见 [planning.md](refs/planning.md)『附：阶段 1.75 界面演示 gate』。
 
 ## 七、落档（阶段 2）
 

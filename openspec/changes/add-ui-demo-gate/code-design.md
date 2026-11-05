@@ -181,7 +181,7 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
 | spec-plan 阶段 1.75 | `/tmp/spec-flow/<change>/demos/<slug>.html` | `openspec/changes/<change>/demos/<slug>.html`（落档复制） |
 | openspec explore / propose（变更目录已存在） | 直接写 `<change>/demos/<slug>.html` | 同左（无需二次迁移） |
 | openspec explore（变更目录未建） | `/tmp/spec-flow/<change>/demos/<slug>.html` | 建目录后迁入 `<change>/demos/`，并在产出时**告知最终位置** |
-| `/plan`（无 openspec 根或不经 openspec） | `docs/ui-demos/<change>/<slug>.html`（项目内；`docs/` 不存在则新建） | 同左（随项目提交） |
+| `/plan`（无 openspec 根或不经 openspec） | `/tmp/ui-demos/<change>/<slug>.html`（易失区；Q-C 落档裁定终口径，2026-11-05 组 2 终形态更正，原文 `docs/ui-demos/` 已废） | **不入库：即确认即弃** |
 
 - `slug` = kebab-case、描述场景而非编号（如 `login-captcha-l1.html`、`dashboard-l3-directions.html`）；同一变更多档多文件时用 `-l1/-l2/-l3` 后缀
 - 变更名 `<change>` 与 `/tmp/spec-flow/<change>/` 一致（spec-plan 既有命名）
@@ -256,7 +256,7 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
 | --- | --- | --- | --- |
 | spec-plan 阶段 1.75 | **硬 gate**（本 skill 手册规定，未确认不得落档） | `/tmp/spec-flow/<change>/demos/` → 落档复制入变更目录 | `code-design.md` 附录 → `design.md` 决策记录 |
 | openspec explore / propose | **软**（frontmatter 触发词 + skill 正文接线规则） | 变更目录在则 `<change>/demos/`；否则 `/tmp/spec-flow/<change>/demos/` 再迁入 | 会话产出 + 对话摘要；有 code-design 时同左 |
-| `/plan` 规划模式 | **软**（同上；plan 无手册可改） | `docs/ui-demos/<change>/<slug>.html` | 计划文件末「界面演示」一行（路径 + 确认状态） |
+| `/plan` 规划模式 | **软**（同上；plan 无手册可改） | `/tmp/ui-demos/<change>/<slug>.html`（易失即弃；Q-C 裁定终口径） | 计划文件末「界面演示」一行（路径 + 确认状态） |
 
 ### 3.8 `planning.md` 接口（逐字改动，A–D）
 
@@ -323,7 +323,7 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
 | # | Requirement 标题 | 正文要点（≤500 字符） | Scenario 清单（每条带 WHEN/THEN） |
 | --- | --- | --- | --- |
 | R1 | `界面演示触发判定与产出分级` | C1/C2/C3 三条件同时成立且不命中排除表才进入演示；按语义判据分 L1（默认）/L2（关键交互流或多状态）/L3（视觉方向完全开放且未给偏好 → 2–3 并列方向）；**排除表列出五类不适用** | `界面需求无设计稿命中判定` / `命中排除表不进入演示` / `含关键交互流升级 L2` / `视觉方向开放出多方案 L3` |
-| R2 | `界面演示产物规范` | 静态自包含单 HTML（内联样式、零外部请求、≤100KB）；openspec 场景 `openspec/changes/<change>/demos/<slug>.html`（落档前先落易失区）；plan 场景 `docs/ui-demos/<change>/<slug>.html`；顶部标注变更名/分档/「非最终实现」；支持宿主 `file://` 直开；**统一服务入口（nginx）不在本能力内实现，只留扩展位** | `openspec 场景产物路径` / `plan 场景产物路径` / `自包含与外链禁令` / `file:// 直开预览` |
+| R2 | `界面演示产物规范` | 静态自包含单 HTML（内联样式、零外部请求、≤100KB）；openspec 场景 `openspec/changes/<change>/demos/<slug>.html`（落档前先落易失区）；plan 场景 `/tmp/ui-demos/<change>/<slug>.html`（即确认即弃，与落档 delta R2 同口径）；顶部标注变更名/分档/「非最终实现」；支持宿主 `file://` 直开；**统一服务入口（nginx）不在本能力内实现，只留扩展位** | `openspec 场景产物路径` / `plan 场景产物路径` / `自包含与外链禁令` / `file:// 直开预览` |
 | R3 | `界面演示自检与用户确认` | chrome-shared MCP 以 `file://` 新标签页导航 → 截图 → 控制台零 error 后才交用户；MCP 不可用降级为告知用户自行打开并标注证据缺口；确认以「确认／要改／降档或豁免」三选一提问，**未取得确认不得视为通过**；共享浏览器须用独立标签页 | `自检通过后交用户确认` / `自检不可用降级如实标注` / `用户否决则改稿重出` / `用户豁免须留痕` |
 | R4 | `三个流程的接线与留痕` | spec-plan 阶段 1.75 为**硬 gate**（未确认不得落档）、openspec explore/propose 与 `/plan` 为**软接线**（依赖 skill 目录描述触发）；三者各自规定产物落点与留痕位置；软接线**不得**宣称强制 | `spec-plan 阶段 1.75 硬 gate` / `explore 场景接线` / `plan 场景接线` / `软接线不宣称强制` |
 | R5 | `ui-demo 入口与资源预算` | 目录 bundle `agent/skills/ui-demo/`；入口 SKILL.md 单次加载完整交付且判定表在前 2000 码点内；重参考（HTML 骨架与分档元素清单）外移 `refs/` 按需读取；入口与各资源各自 ≤8192 码点 | `入口单次加载完整` / `重参考按需读取` / `判定表前置` |
@@ -418,12 +418,16 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
 - **1.2 RED 基线压测**（writing-skills Iron Law；单轮即可）：起一个**未加载本 skill** 的子代理，喂真实需求句式「给用户列表页加一个筛选面板，我没设计稿，你看着办」，观察它是否直接写实现代码/跳过演示确认；逐字记录其合理化借口；若**基线零失败**（它自发去画演示），上浮待决、不硬写判定表。
   **验证**：记录文件 `/tmp/spec-flow/add-ui-demo-gate/red-baseline.md` 存在、含 ≥1 条逐字借口引用（`grep -c '^> ' …` ≥1），且**演练零落库**：`git -C /home/xuqinqin/develop/dotfiles status --short -- openspec agent` 输出为空（注意：仓内 `dsh/profiles/web/{cordis.patch.yml,package.json,pnpm-lock.yaml}` 有 3 个与本变更无关的既存改动，**断言必须限定路径**，不得用全仓 `git status`）。
 
+  **终形态（2026-11-05 组 1 收尾，实测）**：1.1 materials.md 203 行落位（M1-a 降级表 / M1-b 容器浏览器事实 / M2 附节体例 / M3-a 判据表 / M3-b 词表 / M3-c delta 摘要句；引用精度偏差 `SKILL.md:30-34`→实测 `:30-37` 已在材料注中标明，属补全非改写）；1.2 RED **命中 1/1**（fresh 子代理零线索提示下直接实现 487 行筛选面板、零演示零方案确认；借口链含「属于产品决策，未获需求授权」却无设计确认意识 → 确认盲区正落本 gate 靶点）→ 非零失败，**不上浮**，判定表按原文进 GREEN；沙箱 `/tmp/spec-flow/add-ui-demo-gate/red-sandbox/`（预置中性列表页，测试对象沙箱内自由写，主工作区零污染）；路径域断言口径细化为 **R1**（见 tasks.md 附录：工件改动豁免、其余条目=污染）。
+
 ### 组 2 · ui-demo skill 撰写（GREEN）
 
 - **2.1 `agent/skills/ui-demo/SKILL.md`**（触达#1）：按 ③3.1–3.6 逐字实现 frontmatter 与 8 节；判定表置于前 2000 码点；三处入口接线表（③3.7-E）进第 6 节；**不复述** `refs/html-recipe.md` 的内容，只留一指针。
   **验证**：`python3` 三条断言全 0 —— ①`len(read(f)) <= 6000`；②`t.index('C1') < 2000`；③frontmatter 键集 == `{name, description}` 且 `len(description) <= 400`（`python3 -c` 见组 4 附脚本）。
 - **2.2 `agent/skills/ui-demo/refs/html-recipe.md`**（触达#2）：自包含 HTML 骨架（含 `<style>` 变量、演示约束条、L1/L2/L3 三套 section 模板）、零外链清单、窄屏适配片段、自检四步命令卡。
   **验证**：`grep -c 'src="http\|href="http\|@import' agent/skills/ui-demo/refs/html-recipe.md` 输出 `0`；`python3 -c "print(len(open('agent/skills/ui-demo/refs/html-recipe.md',encoding='utf-8').read()))"` ≤ 7000。
+
+  **终形态（2026-11-05 组 2 收尾，实测与裁定）**：2.1 SKILL.md 123 行/5397 码点，断言脚本 3/3 过（desc 223、`C1`@544<2000）。五项偏差裁定：①description 补第三入口名 `spec-plan`（3.1 自查③要求，草案允许加词至 ≤400）；②`/plan` 路径按 Q-C 落档裁定实现 `/tmp/ui-demos/` 即确认即弃——code-design 3.5 路径矩阵 / 3.7-E 接线表 / delta 摘要行三处陈旧行已终形态更正（:398 D5 与 :512-515 Q-C 待决历史保留原文不动）；③L3 按 Q-B 裁定 tab 主 + 并排仅显式要求；④超出 3.2 契约的补充（示意数据 Q-E、三选一确认 R3、多 tab 逐验）均源自已落档 delta，非自创；⑤分节预算（§4 实 1615>900、§5 实 865>600）经裁定接受**总量 ≤6000 兜底**——3.5 原文自身 1635 码点即超 §4 预算，预算不可行；tasks.md 验证句仅总量三条且全过。2.2 html-recipe.md 179 行/**6998 码点**（≤7000）、零外链 grep=0；三 TOP 裁定：窄屏片段嵌 §1 骨架 `<style>` 单一来源 + §4 核对点（接受）；`.bar-note` 不补 CSS 规则（继承 .bar 白字渲染正确）；跨文件指针一致性主会话核对通过（SKILL.md ↔ refs §1-§7 无断链）。2.2 主会话修正一处：refs §7 `/plan` 行陈旧 `docs/ui-demos/` → `/tmp/ui-demos/`（子代理开工早于 code-design 消毒；压缩括注回 7000 线内）。`agent/skills/` 全域 `docs/ui-demos` 残留终检 = 0。
 
 ### 组 3 · 手册接线（spec-plan + planning.md + spec-workflow）
 
@@ -436,6 +440,8 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
 
 ### 组 4 · openspec 工件校验与 skill 登记
 
+> **组 3 终形态（2026-11-05 收尾，实测与裁定）**：3.1 SKILL.md 7338→**7687**（+349，四处逐字，子代理程序化保真：四块 count==1、A 块 180/C 块 275 与文档自记吻合）；**基线勘误**——7694 是 D8 改后预测值，改前实测 7338，距 7800 断言线余 113；**验证句口径勘误 R2**——tasks.md 3.1 的 grep `阶段 1.75`（带空格）系笔误，裁定改无空格口径（3.7-A 逐字稿无空格且与 180 码点自记及同句风格一致，3.3 同款句已证；tasks.md 已同步修正）；D7「标题 +16」实测 +13。3.2 planning.md 6111→**7372**（四处逐字，两既有附节零变动）；派发提示笔误「收敛差异」（实为「落档细节」，子代理按 ③3.8-B 权威定位正确处置）；D 断言缩进裁定**保留 3 空格**（挂落档第 4 步子项层级，与文件体例一致，验证句只核文本本体）；materials M2-c 标题建议与 3.8-B 权威稿不一致，按权威稿。3.3 spec-workflow/SKILL.md 6314→**6388**（两处，:55/:66 逐字节未动）；验证句「改动块 2 处」按 **`git diff -U0` 口径**核（-U3 下两处相距 3 行被合并为单 hunk，实测 -U0 恰 2 个 @@）。
+
 - **4.1 delta 断言与校正**（触达#8/#9/#10）：写一次性断言脚本（`/tmp/spec-flow/add-ui-demo-gate/assert-delta.py`）：逐文件解析 `## ADDED Requirements` 下每个 requirement 正文长度 ≤500；`## MODIFIED Requirements` 的 scenario 名集合 ⊇ 主规格同名 requirement 的 scenario 名集合（`落档工件与执行批次契约` ⊇ 9 条、`固定工作流入口` ⊇ 3 条）；每条 scenario 含 WHEN 与 THEN；每个 requirement 含 `SHALL` 或 `MUST`；新能力 delta 含 `## Purpose` 且 ≥50 字符。
   **验证**：`python3 /tmp/spec-flow/add-ui-demo-gate/assert-delta.py` 退出码 0（不过则改 delta 重跑）。
 - **4.2 `openspec validate` 严格校验**（触达#7-#11）：`openspec validate add-ui-demo-gate --strict`。
@@ -444,6 +450,10 @@ C3 AI 必须自行决定视觉与布局方向：不是纯逻辑/后端/数据/�
   **验证**：`grep -c 'ui-demo' agent/skills/README.md` 输出 `1`；`readlink ~/.local/share/agent-skills/skills/ui-demo` 输出实体目录；`node $SKCTL list --all --desc | grep ui-demo` 命中 enabled/local 行；`ls -d /home/docker/.agents/skills/ui-demo` 存在。
 
 ### 组 5 · 验证（发现 / 触发 / 行为演练）
+
+> **组 5 终形态（2026-11-05，实测与裁定）**：5.1 **加载完整**（按名加载：首部 `# 界面演示`、尾部 `## 按需读取`、8 节齐全、零裁剪标记；聚合层 symlink 实时生效）——但实测**目录信封对全部 skill 均不下发**（部署级既有事实，非本变更引入），验证句按 R5 勘误口径通过；实际发现通道 = 磁盘枚举 description。5.2 **三句全中零摇摆**（trigger-routes.md：①订单筛选→命中 L2+三选一自发收尾、实现零改动（**RED→GREEN 行为反转实证**）；②后端导出→不命中（排除条款拦下，负对照干净）；③/plan 仪表盘→命中 L3 3 方向×L2 深度 + PLAN 末行留痕 + 即确认即弃）；两方法偏差已留痕（沙箱路径约束、`emulate` 替代 `resize_page`）。**5.3 移交裁定（用户 2026-11-05）**：不在本会话演练，由用户**新开会话以真实场景需求**演练——1.75 硬 gate 将自然拦截并走 ui-demo 全链（加载/演示/chrome-shared 自检/三选一确认/留痕），完成后按 tasks.md 5.3 验证句核对勾选（产物 `/tmp/spec-flow/<演练change>/demos/` 非空 + `code-design.md` 含 `## 附：阶段 1.75 界面演示` + 未确认前未落档）；5.3 保持未勾选，归档（spec-done）待其完成。
+
+> **组 4 终形态（2026-11-05 收尾，实测与裁定）**：4.1 `assert-delta.py`（20043 字节，标准库）**首跑 63/63 全绿，delta 零改动**；义肢自检 6 类缺陷注入全拦（非空转）；「正文 ≤500」口径裁定 **R4**（陈述段，与 validate 权威实现一致；字面整块口径将迫使 6 条 ADDED 重写且与 CLI 漂移）。4.2 `openspec validate add-ui-demo-gate --strict` **PASS**（exit=0、WARNING=0、零文件改动，未用 `--all`）。4.3 README :36 对齐行（+1，第二列逐字）+ skctl 经 **node 容器**等效执行（dsh 内 EACCES，裁定 **R3**：写操作须经 node 容器/宿主，dsh `list` 静默空表不得判未安装）；聚合层 symlink 实时可见（`/home/docker/.agents/skills/ui-demo` → 实体目录）。组 4 收尾留痕 R3/R4 见 tasks.md 附录。
 
 - **5.1 发现与加载**：新开会话目录含 `ui-demo` 条目；`skill ui-demo` 返回正文（无 `[..., middle pruned ...]` 标记）。
   **验证**：目录消息含 `ui-demo` 一行；`skill` 工具返回正文首尾各含 `# 界面演示` 与 `## 按需读取`（截断即可见性反证）。
