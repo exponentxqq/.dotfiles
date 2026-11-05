@@ -135,3 +135,110 @@ Q7 自定义答案的查证与推论（主会话自行裁定）：
 | 共识项 | C1–C8 全部采信（含范围仅本仓、指路真源策略、演练验证、维护挂靠 dsh:upgrade 复验） | 三分类 + 单边核验 |
 
 未决项：无（前沿为空）。单边遗留事实 U1（.agents/skills 全 profile 组合扫描）随 Q1 落定为 dotfiles 方案而失效；U2（openspec update 对 .dsh/skills 非 openspec 文件行为）随宿放位置变更而失效；U3（500 规范化算法）以描述留余量规避；U4（0.3.x 兼容）超出基线，写入 skill 边界声明。
+
+## 七、执行期留痕（R 条目，组收尾追加）
+
+> 条目自包含：规则/事实 + 依据 + 适用范围 + 连锁面（联动需同步的工件/代码/任务）。证据原件在 `/tmp/spec-flow/add-dsh-plugin-writer-skill/`（materials.md / red-baseline.md），易失不入库，结论以本节为准。
+
+**R1 · 模型路由自检脚本正则漂移**（组 1 实测）
+- 事实：`dsh/profiles/web/cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 已改为**多行 YAML**（`- provider: x` 换行 `model: y`），spec-apply refs/routing.md 的路由自检脚本正则仍假设单行 flow 格式 → 白名单解析为空、全部映射误报「不在白名单」。
+- 处置：人工核对——映射文件 12 条路由（含 fallback）⊆ 白名单 9 条（zai×2 / zai-coding-cn×2 / zcode-plan×2 / opencode-go/deepseek-v4.1-flash / deepseek-official/deepseek-flash），全部合法，路由可用。
+- 连锁面：后续变更可修自检脚本正则（非本变更范围）；本变更执行期以人工核对口径为准。
+
+**R2 · multi-root 无 build.mjs（任务 1.1 原文结构性偏差）**（组 1 实测）
+- 事实：三模板中仅 zcode-plan / session-tool-toggle 有 `build.mjs`（esbuild）；multi-root 构建入口为 `tsdown.config.ts`（`package.json` build = tsc 类型 + tsdown 打包）。
+- 处置：materials.md §1.4 以「build.mjs 共有契约 + multi-root tsdown 对位行号」呈现，未虚构。
+- 连锁面：组 2 `structure.md`/`build.md` 撰写时按「两模板 build.mjs 为主、multi-root 特例小节注明 tsdown」口径；design.md 触达#2/#3 的「build.mjs」表述按此口径理解；主会话裁定不改 D1 分册切分（素材量够塞小节，见 R4）。
+
+**R3 · RED 压测结论：命令级零失败 + 三个真实坑**（组 1 实测，491 行日志）
+- 事实：未加载任何 skill 的子代理在 dsh-plugins 仓从零搭 `plugins/host-beacon`（host-only）全链命令级全绿（pnpm install / verify:all / dsh:check / plugin add / dump-config 均 exit 0），终态仓零残留。动态素材却极丰富：数十条逐字决策理由与合理化判断。
+- 代理自发现的三个坑（AGENTS.md 未覆盖、skill 增量价值点）：
+  1. `--dump-config` 只证明注册行进合成树、**不证明代码可加载**（它不 import 模块）；深验证 = `--dump-config-schema`（host-only 无 Config 时 `status:"absent"` 是正常态）+ 容器内直接 import + apply。
+  2. profile `plugin remove` 后 **pnpm 留悬空 symlink**（`node_modules/<包名>` 指向已删目录）；remove 只改清单不清 link: 依赖链接，须手工按 readlink 确认后删除。
+  3. `--dump-config-schema` exit 1 可能来自 profile **既有 agent-preset 行的 schema 噪音**（与插件无关）；排障必须先跑一次基线对照 stdout 条目清单。
+- 过程另有：版本号选择推理（统一版本=tag 约定 vs dsh:check 不查版本）、pnpm store 复用判断、MCP 措辞歧义消解。
+- 连锁面：组 2 `build.md`（验证深度语义）/`verify-install.md`（卸载残留、schema 噪音排障、先跑基线）应收录三条坑；组 8 REFACTOR 以演练实测对照；「基线零失败是否继续组 2」已按任务条款上浮用户（见组 1 呈证）。
+
+**R4 · 组 1 待决项主会话裁定**（依据 materials.md §6 建议 + design 既有决策，未超出规划）
+1. 「宿主侧 MCP 插件」措辞歧义 → **按 host-only 插件正解**（design 触达#9 原文即「最小 host-only 插件」；MCP server 由 profile 配置驱动无插件侧注册 API，压测代理判断正确）。
+2. F7 最终形态 → 采纳 materials §3.7 建议：改写为「插件包内 `.agent/` ≠ DSH 扫描根」+「skill 必须 `<name>/SKILL.md` 深度 1」，不照搬 `.agents/skills` 宿放说法（该口径已被收敛 Q1 取代）。
+3. F8 实样指路 → 采纳建议：只描述现象、不写 `.dsh/skills/` 具体路径（实样是 gitignore 的本机 openspec 生成物，不入库不可依赖）。
+4. multi-root 特例归属 → 维持 D1 四册切分不改（素材量够塞 structure/build 小节）；不改分册结构属规划内裁量。
+- 连锁面：组 2 派发提示按上述四条口径传递。
+
+**R5 · 沙箱 workspace 根与 cwd 不一致（平台行为）**（组 1 实测）
+- 事实：子代理 cwd 指向 `person/dsh-plugins` 不改变文件沙箱根（仍按会话 workspace roots 判定）；用户把该仓加为会话附加根后**即时生效**（新轮次 runtime 快照刷新），无需重启会话。压测代理全程未用 docker exec 绕过 policy denial（纪律正确）。
+- 连锁面：本变更后续组 6/7/9 派发提示无需再附沙箱说明；如遇同类阻塞，处置路径 = 上浮主会话 → 用户加根，不走 docker exec 写仓通道。
+
+## 八、组 1 呈证与待决
+
+- 组 1 两任务核对通过（2026-11-05）：1.1 验证句复跑 PASS（materials.md 375 行、39 路径索引全过、主会话绝对路径抽查全过）；1.2 验证句 PASS（red-baseline.md 491 行含数十条逐字借口、主会话复跑 `git status --short` 空 + profile 无 host-beacon 残留）。
+- 待决（任务 1.2 条款触发）：压测命令级零失败 → 按条款「上浮待决不硬写 skill」，用户裁定是否继续组 2（结论见 R3 与组 1 呈证汇报）。
+- **用户裁定（2026-11-05）：继续组 2（推荐案）**——F1–F12 静态失败面 + 491 行动态素材已构成充分基线；压测三坑（R3）直接进组 2 撰写内容。RED 基线判定就此关闭。
+
+**R6 · frontmatter YAML 序列化口径（design ③-2 示例的落地修正）**（组 2 / 任务 2.1 实测）
+- 事实：design ③-2 的 description 原文含 `link: 装入`（冒号+空格）——作为 YAML **plain scalar 非法**，DSH 实测用 `yaml.parse` 解析 frontmatter，不加引号抛 `incomplete explicit mapping pair` → 整条 skill 被 `invalid YAML frontmatter` **静默丢弃**（正是 design 风险表「静默失效」面）。
+- 处置：SKILL.md 用 `description: >-` 折叠块标量承载，**文案一字未改**；DSH 同款 `yaml` 包 + skctl 同款 gray-matter 双解析验证，解析值 === 设计原文（278 字符 ≤300）。
+- 连锁面：组 3 断言按 **YAML 解析口径**执行（键集/name/字符数/可解析四项都从解析后对象断言，不得用行首 grep 朴素断言——`>-` 形式下 description 不在行首）；design.md ③-2 示例为语义呈现，落地序列化以本条为准；后续任何人手改 description 时必须保持可解析（含引号或块标量）。
+
+**R7 · 组 2 内容级裁定**（主会话，依据官方实现与指路真源策略，未越 design 契约）
+1. `dsh.client.inject` 措辞 → 采纳 2.3 有意偏差：按官方类型注释（`dsh-package-manifest` types:75-89）与 client-modules 实现写「包名依赖 / 启动图到达顺序」，不用 materials §1.2「client 服务列表」旧口径。
+2. `/inventory` 前置依赖 → 接受册内处理：明示由 `dsh-plugin-user-commands` 提供、未装则降级插件自有面（F11 假故障排障已含 `skill:` 开关检查）。
+3. `dsh.client.external` → 接受只给语义与官方指路不写示例（本仓无使用先例，编示例违背「真源指路」原则）。
+- 连锁面：组 5 发现层验证时注意 `/inventory` 依赖 user-commands 在位（本机 profile 有，不构成阻塞）；组 8 REFACTOR 时上述三条口径不动。
+
+**R8 · 组 4 执行环境事实**（任务 4.2 实测，后续组核对口径）
+1. dsh 会话容器（HOME=/home/docker）**无法直读宿主 `~/.local`**（未挂载，仅 skills 只读视图挂到 `/home/docker/.agents/skills`）——宿主态断言（readlink / registry.json）须经 `/home/xuqinqin/develop/docker/run.sh node '<cmd>'` 在 node 容器（rw 挂载宿主 home）执行。
+2. registry.json 实际结构为 `{"skills": {"<name>": {...}}}`（design ⑤ 写的顶层形状是语义简写，取值须经 `skills` 键）；skctl 条目字段名 `installedAt`（非 design 示例的 `installed_at`）。
+3. `~/develop/docker/bin/` 无 node 包装，等价形式 = `run.sh node '<cmd>'`（node 22.18.0 原生跑 .ts）；skctl `USER_HOME` 硬编码 `/home/xuqinqin`（paths.ts:4）。
+4. skctl install 固有产物：`/home/xuqinqin/.cache/agent-skills/tmp` 空目录（工具行为，非本变更写入，收尾不清理）。
+- 连锁面：组 5 无依赖；spec-done 收尾复验发现层时按本条口径核对容器视图即可。
+
+**R9 · 组 5 环境级发现与判据调整**（实测 + 用户确认 2026-11-05）
+1. **目录消息缺失（平台层既定现象）**：dsh-tool-skill 的 `<available_skills>` 目录消息在本环境**从未发布过**（父会话日志 630 条跨安装点 + 全新子会话 + 62 个历史会话抽样，`<available_skills>` 零命中；`skill:` 开关未关 disabled=[]，非 F11）。门槛代码 `dsh-tool-skill/lib/index.js:931-960`（精确实例门 + snapshot.complete）从未满足。→ **description 自动触发链路在本环境缺失**；skill 显式调用正常（#3 正向加载出正文 / #4 反向报错双 PASS）。
+2. **用户确认口径 + 诊断收敛**：skill 经 skctl 安装即为正确安装（本变更 4.2 四断言已证）；目录消息属 dsh 平台层现象，非本变更产物缺陷，不追修、不调 description（改了模型也看不到）。
+   - **诊断补强（用户实测 2026-11-05）**：Web 主会话 `/inventory` 的 skill 段**可见 `dsh-plugin-writer`**——`/inventory` 与目录消息共用同一快照 API（`ctx.skills.snapshot`），快照含本条目 → **排除候选 (b) snapshot.complete=false / 快照残缺**；根因高度收敛于候选 (a)：dsh-tool-skill 发布门槛中的**精确实例门**（`dsh-tool-skill/lib/index.js:931-960` 的 `ctx.tools.get('skill', agent) === skillTool` 判定不成立——工具实例被遮蔽/包装/多实例化）。修复属 DSH 平台任务，遗留观察项随 spec-done 汇报。
+3. **5.2A 判据调整（原「新写一个插件→命中本 skill」不成立）**：在「触发链路缺失 + dsh-plugins AGENTS.md 工作流约定（新功能先走 openspec-propose）」双重作用下，实测路由 openspec-propose 先行属该环境**合理行为**；两 skill 实为接力关系（规格→实现）。dsh-plugin-writer 的实际使用入口 = 用户显式 `/dsh-plugin-writer` 或指名加载。B 语句让位达成（本 skill 正确自分流至官方 skill，探针实证）；C 语句命中 openspec-propose 达成。
+4. **cordis-plugin-development 不可加载 = 预期**：它是 DSH 包内 preset 资产（`dsh-agent-preset/skills/`），未经 skctl 登记聚合层，仅带该 preset 的会话注入——与 5.2B 代理观察一致，非缺陷。
+- 连锁面：组 8 REFACTOR 不因 A 偏差改 description/触发词；spec-done 汇报含「目录消息平台层遗留观察」；后续任何触发类问题先查本条再动手。
+
+**R10 · 组 6 演练结论与验收口径终态**（任务 6.1 实测，过程记录 /tmp/spec-flow/add-dsh-plugin-writer-skill/group6-drill.md）
+1. **全链实质通过**：`pnpm install` / `verify:all` / `dsh:check` / `plugin add` 四条 exit 0；`--dump-config-schema` exit 1 与 add 前基线**逐字节一致**（既有 preset-* 行噪音），`x-cordis.entries` 223→224 恰新增本包（`status:"absent"` = host-only 无 Config 正常态）；`--dump-config | grep demo-echo` 注册行三行在位（diff 恰 +3 行）。**验收口径终态**：原「五条命令全 0」在本机不可达（环境噪音），以「4 条 0 + schema 基线对照无新增 error + 注册行在位」为准（与 build.md §9 / verify-install.md §4.1 文档口径一致）。
+2. **skill 文档问题清单 7 条（组 8 REFACTOR 回填输入，已实测坐实）**：
+   - ① SKILL.md:67 主册「schema 退出 0 = 通过」与分册矛盾 → 改「退出 0 **或** 基线对照无新增 error」（必改）
+   - ② SKILL.md:61 件套漏 `vitest.config.ts`、「三个文件」指代不明 → 补全（必改）
+   - ③ SKILL.md §4 必改清单缺 `src/index.ts` 入口形状（inject 空值写法/Config 可省/无需 src/host 转发层，三个决策全靠读源码）→ structure.md 增节
+   - ④ SKILL.md:51 version 缺「演练/未发布包 `0.0.0`」例外 → 主册补括号
+   - ⑤ structure.md §1 缺 `tsconfig.host.json` include 目录改写提示（静默通过但留脏配置）
+   - ⑥ verify-install.md §4 缺「Unsupported engine 既有 WARN（node 22.18.0 vs engines 下限 22.19.0，全 importer 刷）」假故障条目
+   - ⑦ verify-install.md §2.1 缺「新增 importer 致 lockfile peer-context 哈希整体迁移（362+/5- 中仅 33 行为新 importer），**整份保留勿局部还原**」——**组 7/9 直接相关**：还原 lockfile 必须整份 git restore，不得手工局部回滚
+3. **正向印证**：structure.md §2/§3 行号锚全准、§5 0.0.0 判定成立、build.md §9「恰四条 preset error」与容器 import 自检命令逐字吻合、verify-install §2.3 两处核对点命中——文档主体可执行性成立，7 条均为增量修正。
+4. **现场保留**（组 7/8/9 接力）：`plugins/demo-echo/` 11 文件在位、lockfile 已改未还原、profile link: 安装未移除（容器内 `live`）。
+- 连锁面：组 7 双端抽验基于本现场；组 8 按第 2 条清单回填后重跑组 3 断言；组 9 清理四步按第 2-⑦条整份 restore lockfile；验收口径如上终态。
+
+**R11 · 组 7 双端抽验结论：A7 假设被推翻 + 等价验收链**（任务 7.1 实测，强度 a 用户已选；过程记录 /tmp/spec-flow/add-dsh-plugin-writer-skill/group7-drill.md）
+1. **双端改造完成且全绿**：`src/client/index.ts` + `lib/client.js` ModuleLoader 壳 + `dsh.client` + `exports["./client"]` + 双段 build.mjs + tsconfig 拆分 + `.oxlintrc.json`；verify:all（5 tests）/ dsh:check / link: 幂等刷新 add 全部 exit 0。
+2. **design A7 假设被实测推翻（重要）**：`--dump-config` 只打印 patch 层合成树、**不运行 client-module scan**——双端改造前后输出逐字节相同，「dump-config 出现 client 注册行」口径技术上不成立。scan 证据层 = **启动图**（重启后 `__DSH_BOOT__` 含本包 entry / Web 设置→插件列表），必须重启 profile。
+3. **等价硬证据链（技术验收完成态）**：裸包名行在位（F1 前提）+ 四处声明成对 + 容器内 scan 判定链静态回放 EXIT=0（parseDshClient / clientExportOf / 壳 id 全通过）+ `lib/client.js` 壳形状正确 + verify:all / dsh:check 绿。**7.1 勾选待目检决议后一并处理**。
+4. **skill 文档问题 +7 条（组 8 素材，累计 14 条）**：react peer 是条件非形态属性（①）；件套漏 `.oxlintrc.json`（②，缺它 oxlint 扫生成壳报 2 条）；缺 `exports "./package.json"` 提示（③，scan 回退分支需要）；双端验收口径须改「dump-config 只证载体行，scan 识别重启后看插件列表」（④）；link: 幂等刷新指引（⑤，改源码重跑 add 即可无需 remove→add）；无 UI 座位包的目检入口说明（⑥）；files 写法 `lib/**/*.js` 通配统一（⑦）。
+5. **事故记录（已完全恢复，主会话复核现场完好）**：`dsh web --help` 在本机挂起（prepareProfile teardown timeout EXIT=124，两次复现，**本机既有行为，不可当验证命令用**——已记平台层现象）；代理 pkill 清理时误杀自身 shell（node 容器内，仅剩 PID 1，工具容器无损失），产物由备份还原 + verify:all 复绿；主会话复核：lib 双产物在位、profile 2 处登记、注册行在位、dsh:check all agree。
+6. **现场**：双端 demo-echo 在位、profile link: live、运行中 dsh 未重启（其 boot 图不含本包属预期——dsh 启动早于装入）。
+- 连锁面：组 8 回填清单累计 14 条（R10 的 7 条 + 本条 7 条）；7.1 勾选与组 9 清理均待「重启目检时机」决议（重启 dsh = 中断本会话，恢复协议可续）。
+
+**R12 · 组 8 回填终态**（任务 8.1 实测，14/14 条全部回填、0 条不回填）
+- 五文件终态行数：SKILL.md 100（+3，含新反例 F13「双端验收错位」）、structure.md 121（+11，含 §1.1 src/index.ts 入口形状节）、dual-client.md 121（+7，含 §4 双端验收口径专段）、verify-install.md 194（+6，含 §4.4 engine WARN 假故障、lockfile 整份保留）、build.md 114（不变）；frontmatter 未动。
+- 复验四项全过（主会话复跑确认）：组 3 断言 4/4 PASS、五文件版本数字 grep 零命中、SKILL.md ≤150、受影响演练抽查（容器 import `apply,inject,name` / dsh:check all agree / 注册行三行）全过。
+- 处置明细（14 条 → 终版 file:line）见执行代理回执；要点：①schema 判据 SKILL.md:69 与 verify-install.md §4.1 一致化 ④验收口径 dual-client.md:103 + SKILL.md:99（F13）⑦lockfile 整份保留 verify-install.md:31（组 9 直接相关）。
+- 连锁面：组 9 清理按 verify-install.md:31 口径整份 git restore lockfile；skill 产物终态 = 本组输出，收尾审核以此为准。
+
+**R13 · 双端目检决议（组 7 收口）**
+- 用户决议（2026-11-05）：**跳过 Web UI 目检，按等价证据链收案**（重启 dsh 将中断本会话，代价大于增量证据价值；等价链 = 裸包名行 + 四处声明成对 + 静态 scan 回放 EXIT=0 + `lib/client.js` 壳正确 + verify:all/dsh:check 绿）。
+- 7.1 就此勾选收口；skill 文档中的目检指引（dual-client.md:109 / verify-install.md:99）对未来真实插件仍有效。
+- 连锁面：组 9 清理不受影响（remove demo-echo 时 profile 内本就未产生 scan 态）；spec-done 汇报提一句「双端 scan 的启动图层证据未取（目检跳过），文档口径已按 R11-④ 修正」。
+
+**R14 · 组 9 终态清理结论与执行期收口**（任务 9.1 实测）
+1. **五项终态断言全绿**（主会话复核确认）：dsh-plugins 仓 `git status --short` 空（lockfile 经 `pnpm install` **精确回 HEAD**，无 peer-context churn，未触发 restore 兜底）；`--dump-config` demo-echo 零命中；容器内无悬空链接（R3 坑 2 实操命中并按文档 §3 处置）；dotfiles `dsh/profiles/web/{package.json,pnpm-lock.yaml}` diff 空（remove 恢复原状）；skill 产物与登记态不受影响（`skctl list` 命中 `enabled/local`）。**触达#10「dsh-plugins 仓零入库改动」达成**，`pnpm dsh:check` 复跑 exit 0。
+2. **外部并发提交知会（非本变更）**：13:49:56 他变更 `project-mcp-primary-root-priority` 落档提交 `e11b656`（7 个 openspec 文件，不涉 lockfile/demo-echo，无冲突）；其文档中 3 处「demo-echo 残留」描述已随本次清理过时，订正归该变更负责代理。
+3. **skctl 调用姿势精化（补 R8）**：经 `run.sh node` 执行时整条命令须引号包裹（`run.sh node "node $SKCTL list …"`），直接拼接会 126。
+4. **9.1 代理环境视角误判澄清**：其称「`~/.local/share/agent-skills` 宿主上不存在」系 dsh 容器视角（HOME=/home/docker 未挂宿主 `.local`）；宿主侧登记态真实存在且有效（4.2 创建、主会话复核 skctl enabled/local），A5 结论不受影响。
+- 连锁面：全部 14 任务完成 → auto 模式收口：停留呈证 → 用户审核确认 → dotfiles 单仓提交（多仓分立：dsh-plugins 零改动无提交）→ 委托 spec-done。

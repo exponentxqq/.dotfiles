@@ -100,6 +100,8 @@ description: Use when 在 dsh-plugins 仓（/home/xuqinqin/develop/person/dsh-pl
 
 落档分歧点拍板记录（设计线上浮 4 条，2026-11-05 用户拍板）：**分2 RED 规模=1 轮至首败**；**分3 触发测试=各 1 轮（摇摆再升级 5 轮微测）**；**分4 本 design.md=以 code-design.md 为基底修订**；**分1 双端抽验强度=留执行期由用户现场决策**（见 Open Questions）。
 
+- 执行环境：直用主工作区。衔接确认（2026-11-05）：判据零命中（两仓工作树干净、无并行 worktree、均在常规主分支 dotfiles@master / dsh-plugins@main）+ 用户选定；auto 模式 + 引擎 subagent（映射文件）。
+
 | # | 决策 | 理由 | 被否方案与理由（反例） |
 |---|---|---|---|
 | D1 | 分册目录 `references/`、四册切分 | 收敛结论用词即「references/ 分主题分册」；四主题正交且发布主题已被收敛 Q4 砍除 | ① `refs/`（spec-plan 惯例）与收敛用词不一致；② 单文件——复算 2:1 已否；③ 按插件逐个分册——必复述源码注释 |
