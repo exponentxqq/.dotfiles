@@ -84,7 +84,7 @@
 
 | 注释位置 | 这段注释在讲什么（去读原文） | 复制后必须改 |
 |---|---|---|
-| `tooling/template/build.mjs` | 薄入口范文：策略全部在 build-kit，本文件只声明 `hostExternals` / `cjsRequireShim` / `cssClassPrefix` | 按本包形态改旋钮；不要展开 esbuild 配置，也不要从旧插件抄 `build.mjs` |
+| `templates/default/build.mjs` | 薄入口范文：策略全部在 build-kit，本文件只声明 `hostExternals` / `cjsRequireShim` / `cssClassPrefix` | 按本包形态改旋钮；不要展开 esbuild 配置，也不要从旧插件抄 `build.mjs` |
 | `tooling/build-kit/src/{host,client,css,guards}.mjs` | 构建策略与产物守卫的原理注释（banner、ModuleLoader 壳、CSS 作用域、自包含判定） | 一般不改；行为不符先读 `tooling/build-kit/README.md`，不要就地改 kit |
 | `plugins/project-mcp/build.mjs` | 薄入口 + 「某个官方子包刻意不进产物」的例外理由 | 只有确实需要「与宿主同实例」时才抄这段（判据见 `build.md` §4） |
 | `plugins/multi-root-workspace/tsdown.config.ts:1-16` | 两个构建面 + 生产包外置的理由 | 特例路线才用；普通插件别抄 |

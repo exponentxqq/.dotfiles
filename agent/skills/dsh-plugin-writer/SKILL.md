@@ -33,7 +33,7 @@ description: >-
 判定不了 → 回退官方三篇文档（§6）
 ```
 
-> 三种形态里，host-only 与双端都从 `tooling/template/` 生成（`pnpm gen:plugin <name> --kind host-only|dual`），件套差异只剩 `--kind`；特例 multi-root 是既有路线，不是新插件模板、不走生成器。
+> 三种形态里，host-only 与双端都从 `templates/default/` 生成（`pnpm gen:plugin <name> --kind host-only|dual`），件套差异只剩 `--kind`；特例 multi-root 是既有路线，不是新插件模板、不走生成器。
 
 `multi-root-workspace` 只为「必须替换上游 provider 或要精确版本门禁」而选；普通插件以它为模板会整包继承上一代杂质（原生依赖、精确 peer 枚举、compat gate）。
 
@@ -65,7 +65,7 @@ description: >-
 ## 5. 生命周期步骤
 
 1. 定形态（§2），读 `tooling/build-kit/README.md` 的「旋钮语义」与 `references/structure.md` §1 的件套清单；不要手工复制现有插件。
-2. `pnpm gen:plugin <name> --kind host-only|dual`（`--help` 看用法，`--dry-run` 先看文件清单）。生成器只写文件、不跑 git / pnpm；`tooling/template/` 是唯一素材，host-only 与双端的件套差异由 `--kind` 决定。
+2. `pnpm gen:plugin <name> --kind host-only|dual`（`--help` 看用法，`--dry-run` 先看文件清单）。生成器只写文件、不跑 git / pnpm；`templates/default/` 是唯一素材，host-only 与双端的件套差异由 `--kind` 决定。
 3. 按 §4 右栏改写；版本类字段现取现派生，不从模板或文档抄。
 4. `pnpm install`（新包进 workspace；只有带原生依赖才需在根 `pnpm-workspace.yaml` 表态）。
 5. `pnpm --filter dsh-plugin-<name> verify:all`（lint → typecheck → build → test）。
@@ -81,7 +81,7 @@ description: >-
 |---|---|
 | DSH 基线版本、软插件可安装范围 | `scripts/dsh-baseline.mjs`（`DSH_BASELINE` / `softDshRange()`）——仓内唯一版本常量，任何文档都不要抄数值 |
 | 仓库约定、目录结构、开发命令 | `AGENTS.md`；安装 / 构建授权 / 插件一览见 `README.md` |
-| 新插件脚手架与模板素材 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；模板与件套说明在 `tooling/template/README.md` |
+| 新插件脚手架与模板素材 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；模板与件套说明在 `templates/default/README.md` |
 | 构建策略、薄入口旋钮 | `tooling/build-kit/README.md`；实现分在 `tooling/build-kit/src/{host,client,css,guards}.mjs` |
 | 运行期共享内核（归属 / 监听 / 触发器 / 根枚举 / 日志） | `tooling/host-kit/README.md`（被内联进产物，产物零 `@dsh-plugins/` 词） |
 | 三组门禁与聚合入口 | `scripts/dsh-check.mjs`；基线 `scripts/check-dsh-baseline.mjs`、结构不变式 `scripts/check-architecture.mjs`（AR1–AR7）、产物契约 `scripts/check-artifacts.mjs`（B1–B5） |

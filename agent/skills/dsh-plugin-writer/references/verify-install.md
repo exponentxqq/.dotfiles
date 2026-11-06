@@ -202,7 +202,7 @@ diff /tmp/schema-before.err /tmp/schema-after.err
 | 安装 / 构建授权 / `link:` 姿势 | `README.md`「装入 profile」节 |
 | 三组门禁与 hard/soft 分流 | `scripts/dsh-check.mjs`；`scripts/check-dsh-baseline.mjs`、`scripts/check-architecture.mjs` |
 | 基线唯一常量与软范围派生 | `scripts/dsh-baseline.mjs` |
-| 新插件脚手架与生成物验证 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；`tooling/template/README.md` |
+| 新插件脚手架与生成物验证 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；`templates/default/README.md` |
 | `--dump-config` 与 `--dump-config-schema` 的语义差别 | `/usr/local/lib/node_modules/@deepseek-ai/dsh/README.zh.md`；`/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/README.zh.md` |
 | `/inventory` 的口径与降级 | `plugins/user-commands/README.md`；实现 `plugins/user-commands/src/host/inventory-command.ts`、`plugins/user-commands/src/host/index.ts` |
 | `skill:` 开关语义 | `plugins/session-tool-toggle/README.md`；`plugins/session-tool-toggle/src/host/skills-plan.ts`、`plugins/session-tool-toggle/src/host/address.ts` |

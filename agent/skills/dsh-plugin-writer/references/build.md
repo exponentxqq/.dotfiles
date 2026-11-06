@@ -20,7 +20,7 @@
 
 ## 2. host 半构建骨架（build-kit）
 
-六个软插件的 `build.mjs` 只有一行 import + 一次 `await buildPlugin({...})`（有效代码 2–3 行）：从 `build-kit` 导入 `buildPlugin`（逐字见 `tooling/template/build.mjs`）。esbuild 配置固定在 `tooling/build-kit/src/host.mjs`，不再逐包维护。
+六个软插件的 `build.mjs` 只有一行 import + 一次 `await buildPlugin({...})`（有效代码 2–3 行）：从 `build-kit` 导入 `buildPlugin`（逐字见 `templates/default/build.mjs`）。esbuild 配置固定在 `tooling/build-kit/src/host.mjs`，不再逐包维护。
 
 | 配置 | 在哪 | 说明 |
 |---|---|---|
