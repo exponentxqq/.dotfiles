@@ -13,8 +13,7 @@
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
     provider: zcode-plan
-    model: glm-5.3-flash
-    reasoningEffort: max
+    model: glm-5.3
 # 模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml，
 # zcode-plan 例外：凭证由插件全生命周期自管，apiKeyEnv 仅兜底）
 - id: llm-deepseek
@@ -135,17 +134,37 @@
         transport: stdio
         command: codebase-memory-mcp
         args: []
-# 启用 browser-use：chrome-devtools-mcp 提供方（实验性）
-# attach 常驻共享浏览器：entrypoint.d/70-shared-chromium.sh 起的 9222 实例，多会话 attach
-# 同一实例（exclusive：同一时刻仅一个会话可用，其余会话浏览器工具自动掩码）；
-# chrome-devtools-mcp 进程恒 ≤1，根治每会话 spawn 泄漏（实测 45 分钟 1→8 个、每个 139MB）。
-# 浏览器状态（cookie/登录态）跨会话共享、跨容器重启持久（--user-data-dir 在 ~/.dsh 下）。
-# 回退：改回 mode: launch + headless: true + executablePath: /home/docker/.dsh/bin/chromium-launch
+# chrome-devtools MCP：全局共享挂载（多会话同时可用）
+# dsh-mcp-client 在 profile 级为宿主作用域单实例——所有会话同时看到 mcp__chrome-shared__*，
+# 并发请求经同一 MCP 进程多路复用（--pageIdRouting 默认开、按 pageId 路由，官方即为并发
+# agent 会话设计）；直连 entrypoint.d/70-shared-chromium.sh 常驻的 9222 共享浏览器。
+# 进程恒 =1、随 dsh 主进程生灭：无每会话 spawn、无泄漏（对比 project-mcp 的按工作区隔离
+# 仍是每会话实例）。启动命令与官方包装器 dsh-experimental-browser-use-chrome-devtools-mcp
+# 完全一致（node + --no-usage-statistics + --browser-url）。
+# 注意：多会话共用一个浏览器，操作同一标签页会互相干扰——不同会话请用不同标签页。
+# 依赖：chrome-devtools-mcp 由本 profile package.json 直接 pin（1.12.0），与包装器无关。
+- insert:
+    - id: mcp-chrome-shared
+      name: "@deepseek-ai/dsh-mcp-client"
+      config:
+        serverName: chrome-shared
+        transport: stdio
+        command: node
+        args:
+          - /home/docker/.dsh/profiles/web/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js
+          - --no-usage-statistics
+          - --browser-url
+          - http://127.0.0.1:9222
+# browser-use 互斥挂载（exclusive：同一时刻仅一个会话可用、其余会话工具自动掩码，且占用
+# 不随归档释放、dsh 无「关闭会话」操作可解）已由上面的全局共享挂载取代，停用保结构。
+# 回退：删掉两条 disabled: true 即恢复互斥单会话模式（与 chrome-shared 不同名，可并存不冲突）。
 - insert:
     - id: browser-use
       name: "@deepseek-ai/dsh-browser-use"
+      disabled: true
     - id: browser-use-devtools
       name: "@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp"
+      disabled: true
       config:
         mode: attach
         endpoint: http://127.0.0.1:9222
@@ -241,3 +260,7 @@
   config:
     organization: org-410f85E2098545a6A21392Ad5219f949
     project: proj_edc492aAfee84c85BF582dD57be6108A
+- id: dsh-context
+  name: dsh-context
+  config:
+    defaultOverviewRange: 30d

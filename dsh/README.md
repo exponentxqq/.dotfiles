@@ -49,7 +49,7 @@ cd ~/develop/docker && docker compose restart dsh
 cd ~/develop/docker
 
 docker exec dsh dsh --profile web --dump-config          # 查看合成后的配置树（含各 patch 层）
-docker exec dsh dsh --profile web --dump-config-schema   # 校验配置 schema（会 import 插件，可验证插件可加载）
+docker exec dsh dsh --profile web --dump-config-schema   # 校验配置 schema（会 import 插件模块；0.2.2-rc.1 全局 exit 1 为既有 preset 4 条豁免，按条目核对）
 docker compose logs dsh | grep "dsh web:"                # 取带 token 的启动 URL
 
 # 注：`bin/dsh` 包装脚本已删除（dsh 不经包装脚本）；宿主侧一律 `docker exec dsh dsh …`
@@ -80,7 +80,7 @@ git push origin main --tags   # 容器内可直接执行（dsh 容器已挂载�
 ```bash
 docker exec dsh dsh plugin --profile web add \
   "github:exponentxqq/dsh-plugins#v1.0.0&path:plugins/dsh-plugin-multi-root-workspace"
-docker exec dsh dsh --profile web --dump-config-schema   # 校验配置可加载（会 import 插件）
+docker exec dsh dsh --profile web --dump-config          # 校验配置可加载（安装冒烟探针；schema dump 有 4 条既有 preset error，不作门禁）
 ```
 
 `dsh plugin add` 会自动完成两件事：
@@ -326,7 +326,7 @@ dsh 处于 developer preview，官方声明存在破坏性变更。升级 `DSH_V
 
 1. 提交本仓库改动（`git status` / `git diff`）
 2. 备份 `/data/dsh`（credentials、sessions）
-3. 升级后执行 `--dump-config` 与 `--dump-config-schema` 检查 patch 兼容性
+3. 升级后执行 `--dump-config`（exit 0）与 `--dump-config-schema`（按条目核对；全局 exit 1 的 4 条官方 preset 载体 error 为 0.2.2-rc.1 既有豁免）检查 patch 兼容性
 4. 同步 profile 的官方可选插件版本到 `DSH_VERSION`：`@deepseek-ai/dsh-browser-use` 与
    `@deepseek-ai/dsh-experimental-browser-use-chrome-devtools-mcp` 在 profile 里是精确 pin，
    且 npm 上 `latest` 仍停在 `0.1.6-alpha.1`（0.2.x 预发布只挂 `next` tag），
