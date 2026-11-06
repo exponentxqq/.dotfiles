@@ -18,7 +18,7 @@
 两条硬判据：
 
 1. **双端 = 一个包两个面，不是一个功能拆两个包。** 宿主半与浏览器半共用同一个 `package.json`、同一个包名、同一个 patch 文件；`dsh plugin add` / `remove` 只有一个安装单位。
-2. **浏览器半是可选增强，不是宿主半的前提。** 宿主命令、RPC 通道、服务注册在无 Web 组合的 profile 里必须照常工作；浏览器半加载失败只能影响 UI（软注册、降级），不能拖垮宿主半。模板里 UI 入口的注册被 `try/catch` 吞掉拒绝、只写 warn 就是这个纪律（`plugins/session-tool-toggle/README.md:89`）。
+2. **浏览器半是可选增强，不是宿主半的前提。** 宿主命令、RPC 通道、服务注册在无 Web 组合的 profile 里必须照常工作；浏览器半加载失败只能影响 UI（软注册、降级），不能拖垮宿主半。模板里 UI 入口的注册被 `try/catch` 吞掉拒绝、只写 warn 就是这个纪律（`plugins/session-tool-toggle/README.md:90`）。
 
 ## 2. 声明形状：四处成对，缺一即静默失效
 
@@ -33,15 +33,15 @@
 
 模板对照：
 
-- 双端声明：`plugins/session-tool-toggle/package.json:11-20`（`exports`，`./client` 在 `:15-17`）、`:28-38`（`dsh.client`，`inject` 在 `:29-36`、`platform` 在 `:37`）；`plugins/web-ux/package.json:11-20`、`:21-44`。
-- 产物与图标进 `files`：`plugins/session-tool-toggle/package.json:40-45`（`icon.svg` 在 `:5`）；`plugins/web-ux/package.json:46-50`。
-- 特例路线同一形状：`plugins/multi-root-workspace/package.json:41-44`（`./client`）、`:217-230`（`dsh.client`）。
+- 双端声明：`plugins/session-tool-toggle/package.json:11-20`（`exports`，`./client` 在 `:15-17`）、`:28-38`（`dsh.client`，`inject` 在 `:29-35`、`platform` 在 `:36`）；`plugins/web-ux/package.json:11-20`、`:21-44`。
+- 产物与图标进 `files`：`plugins/session-tool-toggle/package.json:39-44`（`icon.svg` 在 `:5`）；`plugins/web-ux/package.json:45-50`。
+- 特例路线同一形状：`plugins/multi-root-workspace/package.json:41-44`（`./client`）、`:217-229`（`dsh.client`）。
 
 ### 2.1 `dsh.client` 的字段语义
 
 - `platform` 固定 `"web"`：只声明 Web 组合消费浏览器半；宿主半不受影响，仍可装任意 profile。
 - `inject` 是**包名依赖**，不是 Cordis 服务注入：列出浏览器半要用、且由组合内其它 client 包提供的包名，让它们在启动图里先于本包到达。别把宿主服务名写进去。字段定义见 `/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-package-manifest/lib/types/types.d.ts:75-89`。
-- `external` 只在浏览器半 import 了**基座模块表之外**的模块时才需要精确列出；两个双端模板都只用到模块表基座，所以没有这个字段。基座与 `external` 语义见 `dsh-client-modules` 包的 `README.zh.md`（完整路径见 §5）。
+- `external` 只在浏览器半 import 了**基座模块表之外**的模块时才需要精确列出；现有三个双端包（`session-tool-toggle` / `web-ux` / `workspace-config`）都只用到模块表基座，所以没有这个字段。基座与 `external` 语义见 `dsh-client-modules` 包的 `README.zh.md`（完整路径见 §5）。
 
 ### 2.2 裸包名行为什么是 REQUIRED
 
@@ -85,12 +85,12 @@ window.__ModuleLoader__.load({
 
 两份可直接对照的实现：
 
-- esbuild 路线：`plugins/session-tool-toggle/build.mjs:121-152`（CJS + 手写壳；`PACKAGE_NAME` / 外置清单在 `:30-43`），`plugins/web-ux/build.mjs:121-148` 同款。
-- tsdown 路线：`plugins/multi-root-workspace/tsdown.config.ts:86-118`（client 配置，`banner`/`intro`/`footer` 拼出同一个壳，`:110-117`）。
+- esbuild 路线：壳与 CJS 编译都在 `tooling/build-kit/src/client.mjs`（`moduleLoaderShell`；包名由 `manifest.name` 推导，外置清单是 `DEFAULT_CLIENT_EXTERNALS`），薄入口只声明 `cssClassPrefix`（有 CJS 内联的包再加 `cjsRequireShim`）。
+- tsdown 路线：`plugins/multi-root-workspace/tsdown.config.ts` 的 client 配置（`banner`/`intro`/`footer` 拼出同一个壳）。
 
-CSS modules 在构建期编译成运行时 `<style>` 注入，不单独产出样式表（`plugins/session-tool-toggle/build.mjs:11-15`）；样式细节归 UI 写法，本册不展开。
+CSS modules 在构建期编译成运行时 `<style>` 注入，不单独产出样式表（`tooling/build-kit/src/css.mjs`）；防重护栏固定按「包 + 模块」双维度（`data-dsh-plugin` + `data-dsh-css`），只按包名查询会让同包第二个 module 的样式永不注入。样式细节归 UI 写法，本册不展开。
 
-**生成产物别进 lint 视野**：`plugins/session-tool-toggle/.oxlintrc.json` 用 `ignorePatterns: ["lib/**", …]`（`:7-11`）把生成产物排除在 lint 外；`plugins/web-ux` 未带这份配置，抄它时补上。缺它时 oxlint 会扫 `lib/client.js`，对壳里的 `factory: (require) => { var exports = … }` 报 `no-unused-vars`——EXIT 仍是 0，但 lint 不再干净。
+**生成产物别进 lint 视野**：唯一 lint 基准是仓库根 `.oxlintrc.json`，它的 `ignorePatterns` 含 `**/lib/**`（软插件目录不再放本地 `.oxlintrc.json`，AR6 会拦）。缺这条时 oxlint 会扫 `lib/client.js`，对壳里的 `factory: (require) => { var exports = … }` 报 `no-unused-vars`——EXIT 仍是 0，但 lint 不再干净。
 
 ## 4. 静默失效排查（按成本从低到高）
 
@@ -117,5 +117,6 @@ CSS modules 在构建期编译成运行时 `<style>` 注入，不单独产出样
 | 裸包名行因果与事故复盘 | `plugins/multi-root-workspace/docs/troubleshooting/client-bundle-not-in-boot-graph.md` |
 | `dsh.client` 字段定义 | `/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-package-manifest/lib/types/types.d.ts:75-89` |
 | 浏览器 bundle 与共享模块表 | `/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-modules/README.zh.md` |
-| 构建自包含 / 产物入库 / externals 判定 | 构建分册与两个模板的 `build.mjs` / `tsdown.config.ts` 头注释 |
+| 浏览器半产物壳 / 默认 externals | `tooling/build-kit/README.md` 与 `tooling/build-kit/src/client.mjs` |
+| 构建自包含 / 产物入库 / externals 判定 | 构建分册与 `tooling/build-kit/README.md`；特例看 multi-root 的 `tsdown.config.ts` 头注释 |
 | 官方插件开发三篇 | `README.md` 末「插件开发文档（官方）」 |

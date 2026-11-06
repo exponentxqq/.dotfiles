@@ -6,11 +6,11 @@ description: >-
 
 # DSH 插件撰写（dsh-plugins 仓）
 
-> 下文路径一律相对 `/home/xuqinqin/develop/person/dsh-plugins`（本 skill 的唯一锚点，不按 cwd 猜仓库）。
+> 下文路径一律相对 `/home/xuqinqin/develop/person/dsh-plugins`（本 skill 的唯一锚点，不按 cwd 猜仓库）；命令里的 `$REPO` 即该路径。
 
 ## 1. 适用判定与分工
 
-**适用于**：在本仓 `plugins/` 下新增插件、复制模板起工程骨架、或对已有插件做结构性修改（形态 / 入口 / 构建 / 声明 / 安装链）。
+**适用于**：在本仓 `plugins/` 下新增插件（用 `pnpm gen:plugin` 起工程骨架）、或对已有插件做结构性修改（形态 / 入口 / 构建 / 声明 / 安装链）。
 
 **分工（三类任务不归本 skill，先分流再动手）**：
 
@@ -33,39 +33,44 @@ description: >-
 判定不了 → 回退官方三篇文档（§6）
 ```
 
+> 三种形态里，host-only 与双端都从 `tooling/template/` 生成（`pnpm gen:plugin <name> --kind host-only|dual`），件套差异只剩 `--kind`；特例 multi-root 是既有路线，不是新插件模板、不走生成器。
+
 `multi-root-workspace` 只为「必须替换上游 provider 或要精确版本门禁」而选；普通插件以它为模板会整包继承上一代杂质（原生依赖、精确 peer 枚举、compat gate）。
 
 ## 3. 模板插件对照表
 
-| 形态 | 模板 | 构建入口 | 版本契约 | 与 host-only 的差集 | 主要失败面 |
+| 形态 | 生成方式 / 模板 | 构建入口 | 版本契约 | 与 host-only 的差集 | 主要失败面 |
 |---|---|---|---|---|---|
-| host-only（只加命令 / 工具 / 服务） | `plugins/zcode-plan`（更小：`plugins/project-mcp`） | esbuild `build.mjs` | 软：由基线脚本派生 | — | F3 自包含、F4 产物未重建 |
-| 双端（多一个浏览器半） | `plugins/session-tool-toggle` | `build.mjs`，host + client 两段 | 软：同左；浏览器半渲染 React 才另加 `react` peer | `dsh.client` + `exports "./client"` + `lib/client.js` 壳 | F1 丢裸包名行（浏览器半静默消失） |
-| 特例（替换 provider / 精确门禁 / 原生依赖） | `plugins/multi-root-workspace` | `tsc` 类型 + `tsdown`（**无** `build.mjs`） | 精确 allowlist，三处落点同源 | 精确 peer 枚举、`peerDependenciesMeta`、`allowBuilds` | 漏版本即启动抛错、原生依赖未表态 |
+| host-only（只加命令 / 工具 / 服务） | `pnpm gen:plugin <name> --kind host-only`；成品对照 `plugins/zcode-plan`（更小：`plugins/project-mcp`） | `build-kit` 薄入口（约 3–5 行） | 软：由基线脚本派生 | — | F3 自包含、F4 产物未重建 |
+| 双端（多一个浏览器半） | `pnpm gen:plugin <name> --kind dual`；成品对照 `plugins/session-tool-toggle` | `build-kit` 薄入口（host + client 两段） | 软：同左；浏览器半渲染 React 才另加 `react` peer | `dsh.client` + `exports "./client"` + `lib/client.js` 壳 | F1 丢裸包名行（浏览器半静默消失） |
+| 特例（替换 provider / 精确门禁 / 原生依赖） | 既有路线，不从生成器走：`plugins/multi-root-workspace` | `tsc` 类型 + `tsdown`（**无** `build.mjs`） | 精确 allowlist，三处落点同源 | 精确 peer 枚举、`peerDependenciesMeta`、`allowBuilds` | 漏版本即启动抛错、原生依赖未表态 |
 
-## 4. 必改清单一览（7 项）
+## 4. 必改清单：生成器已代劳 vs 仍需手工（7 项）
 
-| # | 位置 | 改成什么 |
+`pnpm gen:plugin` 已把骨架事实写成终态。逐项核对左栏；要动手的只有右栏，左栏有偏差时先查生成器 / 模板版本，不要手写覆盖。
+
+| # | 生成器已代劳（核对即可） | 仍需手工 |
 |---|---|---|
-| 1 | `name` / 目录名 | `dsh-plugin-<目录名>`；`description` 换成本插件一句话 |
-| 2 | `version` | 恒等于仓库当前 tag（仓库级统一版本，`release` 统一同步）；演练 / 未发布包用 `0.0.0`（`structure.md` §5） |
-| 3 | `cordis.patch.yml` | 头注释按本插件重写；行 `id` 改本插件；行 `name` 必须是**裸包名**（双端必需，见 F1） |
-| 4 | `files` | 必含 `cordis.patch.yml` 与产物：模板写 `lib/**/*.js`，已覆盖双端 `lib/client.js`；改显式清单才逐项列（漏 patch = git 安装缺文件，F2） |
-| 5 | `main` / `exports` | `.` → `./lib/index.js`；双端加 `"./client"` → `./lib/client.js`，且与 `dsh.client` 成对 |
-| 6 | `dsh.engines.dsh` + DSH peer | 只由 `scripts/dsh-baseline.mjs` 的 `softDshRange()` 派生，**禁止手写数值**（F5） |
-| 7 | 模板残留 | 删模板的业务脚本 / 组件 / 文档 / 测试；`test/` 与 `tests/` 别抄错目录名；`lib/` 是提交物而非临时产物 |
+| 1 | 目录名与 `name` = `dsh-plugin-<目录名>`；`description` 有占位文案 | `description` 换成本插件一句话 |
+| 2 | `version` 取根 `package.json`（= 当前 tag，`release` 统一同步） | 演练 / 未发布包可临时 `0.0.0`，入库前交给 `release`（`structure.md` §5） |
+| 3 | `cordis.patch.yml` 的 `insert:`、行 `id`、**裸包名** `name` | 头注释按本插件重写；双端 `dsh.client.inject` 按真实依赖填 |
+| 4 | `files` 含 `cordis.patch.yml` 与产物：`lib/**/*.js`（已覆盖双端 `lib/client.js`）+ `src` | 新增运行期文件（`LICENSE` / `lib/types/**` 等）时逐项进白名单（漏文件 = git 安装缺件，F2） |
+| 5 | `main` / `exports["."]`；双端自动补 `exports["./client"]` 与 `dsh.client` 骨架 | 只有真要多入口才加子路径；`"./package.json"` 按需带（`dual-client.md` §2） |
+| 6 | `dsh.engines.dsh` + DSH peer 由 `softDshRange()` 现取现派生 | 禁止手写数值；升级走 `pnpm dsh:upgrade`（F5） |
+| 7 | 薄 `build.mjs`、extends 根基准的 tsconfig、`catalog:` / `catalog:dsh` devDeps、冒烟测试 | 旋钮按包事实调（`hostExternals` / `cjsRequireShim` / `cssClassPrefix`）；删占位文案与示例残留 |
 
-入口形状（`src/index.ts` 的 `name` / `inject` / `Config` / `apply`）不在上表：最小导出集合与 `Config` 可省见 `references/structure.md` §1.1。
+- 目录名约定：软插件用 `test/`，multi-root 特例用 `tests/`；`lib/` 是提交物而非临时产物。
+- 入口形状（`src/index.ts` 的 `name` / `inject` / `Config` / `apply`）不在上表：最小导出集合与 `Config` 可省见 `references/structure.md` §1.1。
 
 ## 5. 生命周期步骤
 
-1. 定形态（§2）→ 读模板三件套（`package.json` / `cordis.patch.yml` / `build.mjs`）的**头注释**，它写明哪些必须 bundle、哪些外置。
-2. `mkdir plugins/<name>`，复制件套：三件套（`package.json` / `cordis.patch.yml` / `build.mjs`，特例为 `tsdown.config.ts`）+ `tsconfig*.json` + `vitest.config.ts` + `src/` + `test/`；双端另加 `.oxlintrc.json`（防 lint 扫 `lib/` 生成壳；模板差异见 `structure.md` §1）。
-3. 按 §4 七项改写；版本类字段现取现派生，不从模板或文档抄。
+1. 定形态（§2），读 `tooling/build-kit/README.md` 的「旋钮语义」与 `references/structure.md` §1 的件套清单；不要手工复制现有插件。
+2. `pnpm gen:plugin <name> --kind host-only|dual`（`--help` 看用法，`--dry-run` 先看文件清单）。生成器只写文件、不跑 git / pnpm；`tooling/template/` 是唯一素材，host-only 与双端的件套差异由 `--kind` 决定。
+3. 按 §4 右栏改写；版本类字段现取现派生，不从模板或文档抄。
 4. `pnpm install`（新包进 workspace；只有带原生依赖才需在根 `pnpm-workspace.yaml` 表态）。
 5. `pnpm --filter dsh-plugin-<name> verify:all`（lint → typecheck → build → test）。
-6. `pnpm dsh:check`（仓库级基线门禁，会动态枚举 `plugins/*`）。
-7. `docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>`（本地路径 = `link:` 调试安装，改源码重启 profile 即生效）。
+6. `pnpm dsh:check`（聚合三组门禁：DSH 基线 / 结构不变式 AR1–AR7 / 产物契约 B1–B5；动态枚举 `plugins/*`）。
+7. `docker exec dsh dsh plugin --profile web add "$REPO/plugins/<name>"`（本地路径 = `link:` 调试安装，改源码重启 profile 即生效）。
 8. `docker exec dsh dsh --profile web --dump-config-schema` 退出 0 **或**基线对照无新增 error = 装载性通过（它真实 import 插件；既有 profile 行会让退出码恒非 0，退出非 0 先做基线对照再怀疑插件，见 `references/verify-install.md` §4.1）；`--dump-config` 只证明注册行进了合成树。
 
 **止于安装验证**：发布（版本统一 / tag / push）不属本 skill，一句指路 `AGENTS.md`「发布与版本」；排障见 `references/verify-install.md`。
@@ -76,7 +81,11 @@ description: >-
 |---|---|
 | DSH 基线版本、软插件可安装范围 | `scripts/dsh-baseline.mjs`（`DSH_BASELINE` / `softDshRange()`）——仓内唯一版本常量，任何文档都不要抄数值 |
 | 仓库约定、目录结构、开发命令 | `AGENTS.md`；安装 / 构建授权 / 插件一览见 `README.md` |
-| 基线门禁断言、hard 与 soft 的分流 | `scripts/check-dsh-baseline.mjs` |
+| 新插件脚手架与模板素材 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；模板与件套说明在 `tooling/template/README.md` |
+| 构建策略、薄入口旋钮 | `tooling/build-kit/README.md`；实现分在 `tooling/build-kit/src/{host,client,css,guards}.mjs` |
+| 运行期共享内核（归属 / 监听 / 触发器 / 根枚举 / 日志） | `tooling/host-kit/README.md`（被内联进产物，产物零 `@dsh-plugins/` 词） |
+| 三组门禁与聚合入口 | `scripts/dsh-check.mjs`；基线 `scripts/check-dsh-baseline.mjs`、结构不变式 `scripts/check-architecture.mjs`（AR1–AR7）、产物契约 `scripts/check-artifacts.mjs`（B1–B5） |
+| 仓级 ADR（两套编号，引用必须带路径） | `docs/decisions/`（索引见 `docs/decisions/README.md`） |
 | 官方插件开发文档（三篇） | `README.md` 末「插件开发文档（官方）」；DSH 源码与 API 在 `/usr/local/lib/node_modules/@deepseek-ai/dsh/`（各子包 `README.zh.md`） |
 | 可直接对照的成品 | `plugins/zcode-plan`、`plugins/session-tool-toggle`、`plugins/project-mcp`、`plugins/web-ux`、`plugins/user-commands` |
 
@@ -87,7 +96,7 @@ description: >-
 | 分册 | 何时读 |
 |---|---|
 | `references/structure.md` | 逐字段对照（`package.json` / `cordis.patch.yml` / `src/index.ts` 入口形状）、必改清单全量、特例路线三落点 |
-| `references/build.md` | 自包含与 external 判定、CJS banner、`lib/` 入库、`allowBuilds`、engines 派生 |
+| `references/build.md` | build-kit 薄入口与旋钮、自包含与 external 判定、CJS banner、`lib/` 入库、`allowBuilds`、engines 派生 |
 | `references/dual-client.md` | 双端选型与声明形状、裸包名行因果、浏览器半 CJS 壳 |
 | `references/verify-install.md` | 命令链与证明强度分层、`/inventory` 核对、排障（卸载残留 / schema 噪音 / 假故障） |
 

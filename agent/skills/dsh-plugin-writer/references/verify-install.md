@@ -2,7 +2,7 @@
 
 ## 适用时机
 
-包内构建已经过了（`pnpm build` / `verify:all`），要把插件装进 profile、验证它**真的能加载、真的出现在会话里**时读本册。起点是包内自检，终点是安装验证；发布（版本、tag、push、发布红线）不在本册展开，见仓库根 `AGENTS.md`「发布与版本」。路径一律相对 `/home/xuqinqin/develop/person/dsh-plugins`。
+包内构建已经过了（`pnpm build` / `verify:all`），要把插件装进 profile、验证它**真的能加载、真的出现在会话里**时读本册。起点是包内自检，终点是安装验证；发布（版本、tag、push、发布红线）不在本册展开，见仓库根 `AGENTS.md`「发布与版本」。路径一律相对 `/home/xuqinqin/develop/person/dsh-plugins`，命令里的 `$REPO` 即该路径。
 
 ## 1. 证明强度阶梯
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | `pnpm build` | 产物能生成 | 产物可装载 |
 | `pnpm --filter <包名> verify:all` | lint / typecheck / build / test 包内自洽 | 宿主组合能装载它 |
-| `pnpm dsh:check` | 基线、pin、软范围、安装树、豁免清单互相一致 | 插件可装载 |
+| `pnpm dsh:check` | 三组门禁全绿：DSH 基线 / 结构不变式（AR1–AR7）/ 产物契约（B1–B5） | 插件可装载（产物能 import 仍是下一级） |
 | `dsh plugin … add` | profile 清单 + bundle 列表 + patch 解析通过 | 代码可 import |
 | `--dump-config` | 注册行进了合成树（双端包的裸包名载体行在位） | 不 import、不跑 client-module scan；双端的 scan 识别要重启后看启动图 |
 | `--dump-config-schema` | 每个组合模块真实 import、schema 可读 | 不 mount / 不执行 `apply`，不证明运行时行为 |
@@ -20,46 +20,62 @@
 
 ## 2. 命令链（按序）
 
-### 2.1 装齐与包内自检
+### 2.1 生成、装齐与包内自检
+
+新插件从生成器开始，不要手工复制件套：
 
 ```bash
+pnpm gen:plugin --help                              # 先核对用法与退出码契约
+pnpm gen:plugin <name> --kind host-only|dual --dry-run   # 只看将创建的文件，不写盘
+pnpm gen:plugin <name> --kind host-only|dual        # 真实生成（只写文件，不跑 git / pnpm）
 pnpm install
 pnpm --filter dsh-plugin-<name> verify:all
+pnpm dsh:check                                      # 生成物开箱应过三组门禁；先过它再装 profile
 ```
 
+- `pnpm gen:plugin` 的验证入口就是 `--help` 与 `--dry-run`：前者打印用法（缺参 exit 2、名字/kind 非法 exit 1），后者逐文件列出将写内容。生成器拒绝已存在的目标目录，不会覆盖任何现有插件。
 - `pnpm install`：新包进 workspace、写 lockfile；带原生依赖时还要在根 `pnpm-workspace.yaml` 的 `allowBuilds` 表态一次（机制见 `plugins/multi-root-workspace/docs/troubleshooting/install-stops-at-build-approval.md`）。
-- **lockfile 的 churn 大于新增 importer 属预期**：新包进 workspace 会让 pnpm 重解析，既有 importer 的 peer-context 哈希被整体重写（新增 importer 可能只占 diff 的零头）。交接 / 回滚时**整份保留或整份 `git restore`**，不要按「只该多一个 importer」局部还原——`dsh:check` 断言 6 要求豁免清单与 lockfile 精确相等（`scripts/check-dsh-baseline.mjs:228-238`）。
-- `verify:all` 的组成是 lint → typecheck → build → test（`plugins/zcode-plan/package.json:52`、`plugins/session-tool-toggle/package.json:90`）；multi-root 追加 `kernel:probe` 与 `smoke`，需要运行中的 dsh（`plugins/multi-root-workspace/package.json:87`）。
+- **lockfile 的 churn 大于新增 importer 属预期**：新包进 workspace 会让 pnpm 重解析，既有 importer 的 peer-context 哈希被整体重写（新增 importer 可能只占 diff 的零头）。交接 / 回滚时**整份保留或整份 `git restore`**，不要按「只该多一个 importer」局部还原——`dsh:check` 的发布年龄豁免断言要求豁免清单与 lockfile 精确相等。
+- `verify:all` 的组成是 lint → typecheck → build → test（见任一软插件 `package.json` 的 `scripts.verify:all`）；multi-root 追加 `kernel:probe` 与 `smoke`，需要运行中的 dsh（`plugins/multi-root-workspace/package.json` 的 `scripts.verify:all`）。
 - 这一级失败就在包内修，不要带着红去装 profile。
 
-### 2.2 仓库级门禁
+### 2.2 仓库级门禁（聚合三组）
 
 ```bash
 pnpm dsh:check
 ```
 
-脚本动态枚举 `plugins/*`，**新插件立刻进入断言面**；七条断言见 `scripts/check-dsh-baseline.mjs:1-18`，失败会一次列全而不是遇错即停（`:16`）。
+`dsh:check` 是 `scripts/dsh-check.mjs` 聚合入口，顺序跑三组脚本，任一非 0 即整体非 0；三组都「收集全部失败再退出」，一次运行能看见全部问题。
 
-新插件最常见的首轮失败与处置：
+| 组 | 脚本 | 守什么 |
+|---|---|---|
+| DSH 基线 | `scripts/check-dsh-baseline.mjs` | 基线常量 / `catalog` 两册 / devDeps 归一化后等于基线 / engines 与 peer / 安装树 / 发布年龄豁免 / 无残留引用 |
+| 结构不变式 | `scripts/check-architecture.mjs` | AR1–AR7：内部包边界、tooling 包白名单、软插件核心脚本与薄入口、tsconfig 继承、lint 唯一基准、workspace 清单 |
+| 产物契约 | `scripts/check-artifacts.mjs` | B1–B5：入口存在且被 `files` 覆盖、自包含、无内部包词、`lib/client.js` 的 `id` 与要求词 |
+
+三组都动态枚举 `plugins/*`，**新插件立刻进入断言面**。新插件最常见的首轮失败与处置：
 
 | 报错关键词 | 原因与处置 |
 |---|---|
-| `declares no DSH devDependency` / `devDependencies[...] is ..., expected ...` | 从模板复制 devDeps 集合；版本由基线派生，不手写（`scripts/dsh-baseline.mjs:12-32`） |
-| `dsh.engines.dsh is missing` / `is "...", expected "..."` | 软插件必须声明派生范围，同源派生见构建分册 |
-| `peerDependencies does not declare @deepseek-ai/dsh` / `peerDependencies[...] is ...` | 同上，peer 与 engines 用同一个范围 |
+| `devDependencies[...] is ..., expected ...` / `declares no DSH devDependency` | 依赖被写成字面量或版本漂移；统一改 `catalog:` / `catalog:dsh`，由基线派生（`scripts/dsh-baseline.mjs`） |
+| `dsh.engines.dsh is missing` / `peerDependencies[...] is ...` | 软插件必须声明派生范围；peer 与 engines 同值，不手写 |
 | `expected exactly one exact-contract plugin` | 你的插件目录带了 `src/compat/dsh-version.ts`；普通插件不要复制 multi-root 的 compat 目录 |
+| `AR3 ... 核心脚本 ...` / `AR4 ... 薄入口 ...` | `build.mjs` 被改厚、加了 `esbuild` 字样或不再单次调用 `buildPlugin`；改回生成器的薄入口形态 |
+| `AR5 ... extends 为 ...` / `不得出现 composite` | tsconfig 没 `extends` 根 `tsconfig.plugin.base.json`，或重声明了编译选项；只留 `extends` + `include` |
+| `AR6 .oxlintrc.json ...` | 软插件目录放了本地 lint 配置；删掉，唯一基准是根 `.oxlintrc.json` |
+| `B1 ...` / `B2 ...` / `B3 ...` | 产物缺失、`files` 未覆盖、出现未声明外部词或内部包作用域词；先 `pnpm build`，再按构建分册排查 |
 | `is declared but not installed` | `pnpm install` 没跑或没装全 |
 | `allowlist is missing / has stale ...` | 新增 `@deepseek-ai/dsh-*` 依赖时，`pnpm-workspace.yaml` 的 `minimumReleaseAgeExclude` 要与 lockfile 精确相等 |
 
-`dsh:check` 绿只说明事实一致，不说明插件能装载——下一级才算。
+`dsh:check` 绿只说明三组事实一致，不说明插件能装载——下一级才算。生成器产出的骨架开箱应过这三组；**生成后先跑通它，再进 §2.3 装 profile**。
 
 ### 2.3 link: 装进 profile
 
 ```bash
-docker exec dsh dsh plugin --profile web add /home/xuqinqin/develop/person/dsh-plugins/plugins/<name>
+docker exec dsh dsh plugin --profile web add "$REPO/plugins/<name>"
 ```
 
-- 绝对本地路径 = `link:` 依赖：改源码后重启 profile 即生效，不需要发布。tag / git 安装是发布姿势，不属本册。
+- `$REPO/plugins/<name>` 展开后是绝对本地路径 = `link:` 依赖：改源码后重启 profile 即生效，不需要发布。tag / git 安装是发布姿势，不属本册。
 - **刷新安装 = 重跑 `add`，不需要 remove→add**：`link:` 安装指向源码目录，改源码 / `package.json` 声明 / 重建产物后，重跑一次上面的 `add`（幂等）即可让 profile 侧同步；运行中的进程仍要按 §2.5 重启才看得到。`remove` 只在卸载与悬空链接（§3）时用。
 - `add` 会解析该包的 `dsh.bundle.patch`，并把包追加进 `dsh.profile.bundles`；包没有 `dsh.bundle` 时会打 warn「installed as a plain dependency, not a profile layer」——**装了但不激活**（F2）。patch 解析失败则 `add` 直接失败，按报错修 `cordis.patch.yml`。
 - 核对清单（宿主机上 profile 位于 dotfiles）：
@@ -80,7 +96,7 @@ docker exec dsh dsh --profile web --dump-config-schema > /tmp/schema.json 2> /tm
 ```
 
 - `--dump-config`：只报告「配置出的组合」。注册行在合成树里出现，说明 patch 层已应用；它**不 import 模块、也不跑 client-module scan**——双端包看不到「client 注册行」，只能证明裸包名载体行在位。
-- `--dump-config-schema`：真实 import 组合里每个模块并读 schema（`/usr/local/lib/node_modules/@deepseek-ai/dsh/README.zh.md:48`），`exit=0` 是 CLI 级装载性证据。stdout 是 JSON Schema，其中 `x-cordis.entries[]` 每项带 `path` / `id` / `name` / `status`：
+- `--dump-config-schema`：真实 import 组合里每个模块并读 schema（`/usr/local/lib/node_modules/@deepseek-ai/dsh/README.zh.md`），`exit=0` 是 CLI 级装载性证据。stdout 是 JSON Schema，其中 `x-cordis.entries[]` 每项带 `path` / `id` / `name` / `status`：
   - `status: "absent"` = 该行没有 Config schema（host-only 插件常见），**正常态**，不是加载失败；
   - `x-cordis.complete: false` = 有模块失败，配合 stderr 的 `[/<path>]` 与 entries 的 `path` 定位是哪一行。
 - `--dump-config-schema` 只 import、不 mount，`apply()` 的运行时行为仍要靠 §2.5。
@@ -91,7 +107,7 @@ docker exec dsh dsh --profile web --dump-config-schema > /tmp/schema.json 2> /tm
 cd ~/develop/docker && docker compose restart dsh
 ```
 
-浏览器半的 bundle 由宿主在启动图里提供，`dsh plugin add` 不会热替换；宿主半同样以 profile 装配当刻的构建运行（`plugins/session-tool-toggle/README.md:71`、dotfiles `dsh/README.md:40-43`）。重启后按插件贡献的面验证：
+浏览器半的 bundle 由宿主在启动图里提供，`dsh plugin add` 不会热替换；宿主半同样以 profile 装配当刻的构建运行（`plugins/session-tool-toggle/README.md`、dotfiles 的 `dsh/README.md`）。重启后按插件贡献的面验证：
 
 | 插件贡献 | 验证方式 |
 |---|---|
@@ -100,10 +116,10 @@ cd ~/develop/docker && docker compose restart dsh
 | MCP 服务器 / skill | `/inventory`（见下） |
 | 服务型、无会话面 | 只能靠启动日志与消费者验证；`/inventory` 证明不了它 |
 
-`/inventory` 是 `dsh-plugin-user-commands` 提供的宿主侧只读清单命令：不提交用户消息、不产生模型请求、零 token（`plugins/user-commands/README.md:83-89`）。口径是「此刻本会话实际可用」而不是配置台账：
+`/inventory` 是 `dsh-plugin-user-commands` 提供的宿主侧只读清单命令：不提交用户消息、不产生模型请求、零 token（见 `plugins/user-commands/README.md` 的 `/inventory` 节）。口径是「此刻本会话实际可用」而不是配置台账：
 
-- MCP 段取 `tools.schemas(agent)` 的可见工具名，因此天然反映 `mcp:<server>` 开关与工作区隔离之后的真实可见面（`:105`）。
-- Skill 段取 skill 注册表的会话目录，保留「模型可调用或 `/name` 可调用至少其一」的条目，并标出调用方式（`:106`）。
+- MCP 段取 `tools.schemas(agent)` 的可见工具名，因此天然反映 `mcp:<server>` 开关与工作区隔离之后的真实可见面。
+- Skill 段取 skill 注册表的会话目录，保留「模型可调用或 `/name` 可调用至少其一」的条目，并标出调用方式。
 
 profile 里没装 user-commands 时该命令不存在，改用插件自己的命令 / 面板。
 
@@ -143,7 +159,7 @@ diff /tmp/schema-before.err /tmp/schema-after.err
 
 ### 4.2 `--dump-config` 绿 ≠ 可加载
 
-`--dump-config` 报告的是配置出的组合，被拒绝的插件行仍会出现在里面；只有 `--dump-config-schema` 会 import 每个组合模块（`/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/README.zh.md:54`）。合成树有行但 schema dump 在你的行上报 import 失败时，按顺序查：
+`--dump-config` 报告的是配置出的组合，被拒绝的插件行仍会出现在里面；只有 `--dump-config-schema` 会 import 每个组合模块（`/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/README.zh.md`）。合成树有行但 schema dump 在你的行上报 import 失败时，按顺序查：
 
 1. `exports` 指向的产物在包里吗（`lib/index.js`、双端的 `lib/client.js`）；
 2. `files` 带上了产物与 `cordis.patch.yml` 吗（F2）；
@@ -159,7 +175,7 @@ diff /tmp/schema-before.err /tmp/schema-after.err
 2. `/inventory` 看**实际可见面**：被 `skill:<name>` 关掉的技能仍会以「仅 /name」出现；完全看不到才是没注册。
 3. 以上都正常，再去查文件位置、frontmatter、注册路径。
 
-`skill:<name>` 的语义要记准：只让技能对**模型**隐身（目录行消失、`skill` 工具拒调），`/<技能名>` 手动调用完整保留；它不是权限边界，也不改磁盘上的 `SKILL.md`（`plugins/session-tool-toggle/README.md:40`）。`mcp:<server>` 则连服务器指令段一起去掉。开关在下一次模型步骤生效；默认档只在会话创建时拍快照，改档不追溯（`:59`、`:61`）。
+`skill:<name>` 的语义要记准：只让技能对**模型**隐身（目录行消失、`skill` 工具拒调），`/<技能名>` 手动调用完整保留；它不是权限边界，也不改磁盘上的 `SKILL.md`（见 `plugins/session-tool-toggle/README.md` 的技能开关段）。`mcp:<server>` 则连服务器指令段一起去掉。开关在下一次模型步骤生效；默认档只在会话创建时拍快照，改档不追溯。
 
 ### 4.4 `Unsupported engine` 警告是既有噪音
 
@@ -182,13 +198,14 @@ diff /tmp/schema-before.err /tmp/schema-after.err
 
 | 要查什么 | 真源 |
 |---|---|
-| 仓库级命令与发布边界 | `AGENTS.md:42-77`（开发与验证命令、装入 profile）、`:78-80`（发布与版本） |
-| 安装 / 构建授权 / `link:` 姿势 | `README.md:36-56` |
-| 七条基线断言与 hard/soft 分流 | `scripts/check-dsh-baseline.mjs:1-18`（断言说明）、`:149-154`（hard/soft 分流）、`:153`（hard 恰一个） |
-| 基线唯一常量与软范围派生 | `scripts/dsh-baseline.mjs:12-32` |
-| `--dump-config` 与 `--dump-config-schema` 的语义差别 | `/usr/local/lib/node_modules/@deepseek-ai/dsh/README.zh.md:48`；`/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/README.zh.md:54` |
-| `/inventory` 的口径与降级 | `plugins/user-commands/README.md:83-110`；实现 `plugins/user-commands/src/host/inventory-command.ts`、`plugins/user-commands/src/host/index.ts:215-222` |
-| `skill:` 开关语义 | `plugins/session-tool-toggle/README.md:39-45`；`plugins/session-tool-toggle/src/host/skills-plan.ts:1-16`、`:92-99`；`plugins/session-tool-toggle/src/host/address.ts:106` |
-| 双端重启与入口排查 | `plugins/session-tool-toggle/README.md:71`、`:150-151` |
-| profile 挂载与重启 | dotfiles `dsh/README.md:14-43` |
+| 仓库级命令与发布边界 | `AGENTS.md`「开发与验证命令」「发布与版本」节 |
+| 安装 / 构建授权 / `link:` 姿势 | `README.md`「装入 profile」节 |
+| 三组门禁与 hard/soft 分流 | `scripts/dsh-check.mjs`；`scripts/check-dsh-baseline.mjs`、`scripts/check-architecture.mjs` |
+| 基线唯一常量与软范围派生 | `scripts/dsh-baseline.mjs` |
+| 新插件脚手架与生成物验证 | `scripts/gen-plugin.mjs`（`pnpm gen:plugin --help`）；`tooling/template/README.md` |
+| `--dump-config` 与 `--dump-config-schema` 的语义差别 | `/usr/local/lib/node_modules/@deepseek-ai/dsh/README.zh.md`；`/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/README.zh.md` |
+| `/inventory` 的口径与降级 | `plugins/user-commands/README.md`；实现 `plugins/user-commands/src/host/inventory-command.ts`、`plugins/user-commands/src/host/index.ts` |
+| `skill:` 开关语义 | `plugins/session-tool-toggle/README.md`；`plugins/session-tool-toggle/src/host/skills-plan.ts`、`plugins/session-tool-toggle/src/host/address.ts` |
+| 双端重启与入口排查 | `plugins/session-tool-toggle/README.md` |
+| profile 挂载与重启 | dotfiles `dsh/README.md` |
 | 构建授权卡点 | `plugins/multi-root-workspace/docs/troubleshooting/install-stops-at-build-approval.md` |
