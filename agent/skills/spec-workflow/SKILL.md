@@ -62,7 +62,7 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 
 1. 先重建进度：`openspec status --change <change> --json`（该版本 `status` 不接受位置参数；裸 `--json` 无效，用 `--all --json` 兜底）。
 2. 读 `tasks.md` 勾选态（`- [x]` = 完成）与 `git log --oneline` 的批次提交。
-3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。
+3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。**subagent 台账核对**：`/tmp/spec-flow/<change>/progress.md` 派发台账（见 spec-apply refs/execution.md）有在途任务且未勾选 → 先核预期落盘文件（=写范围）是否已出现 + `job_list` 判「在途/已丢」；在途等回执、已丢才重派，禁止盲目重派造成双写。
 4. **落档副本存在性检查**：`code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）须在变更目录——缺失且 `/tmp/spec-flow/<change>/` 原件在 → 从原件**补复制入变更目录并留痕**（随下次批次提交）；两者皆无 → 报告问用户，**不以 /tmp 幸存为默认**。
 5. **执行环境核对**：design.md 决策记录有执行环境块（隔离）时 → `git worktree list` 比对——worktree 在 → 续用（含装配核对，缺则补）；缺失但分支在 → 按 [worktree.md](refs/worktree.md) 重建+装配+三方对齐核对；均无 → 问用户。
 6. **判段路由**：重建进度后判定当前段——未落档 → 回规划（再加载 spec-plan 改工件）；已落档未完 → 路由 spec-apply（从最小编号未完成组继续）；已归档 → 路由 spec-done（收尾）。

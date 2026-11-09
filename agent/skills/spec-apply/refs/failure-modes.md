@@ -14,6 +14,8 @@
 | 需读图而路由不支持（`does not declare image input`） | 改用 `vision` 路由重新派发；能力事实，不重试原路由 |
 | 旧会话报 `child model selection is disabled` | 配置只对新会话生效：新建会话重试；不判定工具损坏 |
 | team 成员失败 / 上限达限（`Team member limit 8 reached`） | `interrupt_agent` 中断或重建；无法恢复降级 subagent，降级与原因写留痕 |
+| `send_message` 到 subagent id 报不可寻址 | 平台事实：子代理不是 teammate、不可消息寻址，回执只能等运行时完成通知；派发事实以 `/tmp/spec-flow/<change>/progress.md` 派发台账（execution.md）为准，不因此重复派发 |
+| 上下文压缩丢失派发记录/回执 | 按 spec-workflow 恢复协议 + 派发台账：文件系统核查预期落盘文件（=写范围）是否出现 + `job_list` 判「在途/已丢」；在途等回执、已丢才重派，防双写 |
 | 验证需真实密钥而凭据缺失 | 明确报错失败，不静默跳过、不伪造结果；密钥只经参数/环境变量传入 |
 | 需要宿主操作（装依赖、重启兜底） | 给确切命令交用户执行，不代劳 |
 | 执行环境块缺失或 worktree 异常 | 按 spec-workflow 恢复协议与其 refs/worktree.md「恢复核对」处置；脏 → 呈证问处置，不擅自清理 |
