@@ -4,13 +4,14 @@
 >
 > **为何自包含**：chrome-shared 浏览器在 dsh 容器内，容器里的 `localhost` 是容器自己；任何 http 资源在容器自检与宿主 `file://` 预览两头都不可靠，故**单文件、零外部请求**。
 
-## 施工顺序（五步）
+## 施工顺序（六步）
 
 1. **定档**：按 `SKILL.md`『产出分级』判 L1/L2/L3；命中取最高档（L2/L3 同中按 L3）。
 2. **取骨架**：抄 §1 整页，只改变更名、档位、生成时间与标题。
 3. **填模板**：按档接 §2 模板，对照 §3 元素表——**缺项即不合格**。
-4. **窄屏**：保留骨架窄屏片段，390×844 下核对不横向滚动。
-5. **自检**：按 §6 四步卡跑一遍，零 error 再交确认。
+4. **删冗**：删掉多余的标语、说明文字和次要标签；删完界面就看不懂 = 布局本身有问题，回第 3 步重新设计该区块，而不是把文案加回去（约束条与「示意数据」标注属演示机制，不删）。
+5. **窄屏**：保留骨架窄屏片段，390×844 下核对不横向滚动。
+6. **自检**：按 §6 四步卡跑一遍，零 error 再交确认。
 
 ## 1. 自包含骨架（可抄）
 
@@ -151,7 +152,7 @@
 
 ```
 1) new_page(url="file:///tmp/spec-flow/<change>/demos/<slug>.html")  # 必须新标签页
-2) take_screenshot(pageId, fullPage=true)  # 核对约束条在顶、无空白、无横向滚动
+2) take_screenshot(pageId, fullPage=true)  # 核对约束条在顶、无空白、无横向滚动、无多余标语/说明/次要标签
    resize_page(pageId, width=390, height=844) → take_screenshot(pageId)  # 窄屏只截图核对
 3) list_console_messages(pageId)  # 断言无 error、无 Failed to load resource（外链残留的硬信号）
 4) close_page(pageId)  # 用完即关
