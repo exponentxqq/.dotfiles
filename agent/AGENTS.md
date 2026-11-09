@@ -2,6 +2,10 @@
 
 - 请始终使用简体中文回复。所有解释、代码注释、对话都使用中文。
 
+# 修改原则
+
+- 每次修改都要兼顾用户体验、开发体验和 AI Agent 的使用体验。三个都要变好，而且不能破坏现有功能。
+
 # 代码检索
 
 - 检索代码时优先使用 codebase-memory-mcp 工具（search_graph / search_code / get_code_snippet / trace_path / query_graph 等），而非 grep/glob/手动读文件。
