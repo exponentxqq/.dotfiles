@@ -13,7 +13,6 @@
         "@zzerx/dsh-plugin-notes",
         "@linxin666/dsh-client-ui-task-board",
         "dsh-better-input",
-        "dsh-plugin-multi-root-workspace",
         "dsh-plugin-web-ux",
         "dsh-plugin-user-commands",
         "@tt-a1i/archify-dsh",
@@ -23,7 +22,8 @@
         "dsh-plugin-zcode-plan",
         "dsh-plugin-session-tool-toggle",
         "dsh-plugin-workspace-config",
-        "dsh-plugin-project-mcp"
+        "dsh-plugin-project-mcp",
+        "dsh-plugin-multi-root-workspace"
       ]
     }
   },
@@ -35,12 +35,12 @@
     "@zzerx/dsh-plugin-notes": "0.6.0",
     "dsh-better-input": "0.2.6",
     "dsh-context": "^0.82.0",
-    "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/multi-root-workspace",
-    "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/project-mcp",
-    "dsh-plugin-session-tool-toggle": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/session-tool-toggle",
+    "dsh-plugin-multi-root-workspace": "link:/home/xuqinqin/develop/person/dsh-plugins/.worktrees/2026-11-08-workspace-folders-picker/plugins/multi-root-workspace",
+    "dsh-plugin-project-mcp": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/project-mcp",
+    "dsh-plugin-session-tool-toggle": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/session-tool-toggle",
     "dsh-plugin-user-commands": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/user-commands",
-    "dsh-plugin-web-ux": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/web-ux",
-    "dsh-plugin-workspace-config": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/workspace-config",
+    "dsh-plugin-web-ux": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/web-ux",
+    "dsh-plugin-workspace-config": "link:/home/xuqinqin/develop/person/dsh-plugins/plugins/workspace-config",
     "dsh-plugin-zcode-plan": "github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/zcode-plan",
     "dsh-pocket": "^2.12.0",
     "dsh-prompt-history": "^1.11.2",
@@ -51,6 +51,9 @@
   "pnpm": {
     "overrides": {
       "chrome-devtools-mcp": "1.12.0"
+    },
+    "patchedDependencies": {
+      "dsh-pocket@2.12.0": "patches/dsh-pocket@2.12.0.patch"
     }
   }
 }
