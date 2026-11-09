@@ -29,8 +29,8 @@ models:
     model: deepseek-flash
     fallback: { provider: zcode-plan, model: glm-5.3 }
   apply:
-    provider: opencode-go
-    model: deepseek-v4.1-flash
+    provider: zcode-plan
+    model: glm-5.3-flash
     # fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
     fallback: { provider: zcode-plan, model: glm-5.3-flash }
   verify:
