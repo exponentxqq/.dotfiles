@@ -5,8 +5,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# If you come from bash you might have to change your $PATH.
-export PATH=$HOME/develop/docker/bin:$HOME/.bun/bin:$HOME/.local/bin:$HOME/develop/dotfiles/bin:/usr/local/bin:$PATH
+# PATH 已移至 ~/.zshenv：所有 zsh 调用（含非交互脚本、AI Agent）都能拿到
+# ~/develop/docker/bin 等包装脚本，而不只是交互式 shell。
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -26,9 +26,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+# Use hyphen-insensitive completion. Case-sensitive completion must be off.
+# _ 和 - 在补全时互换（大小写不敏感由 oh-my-zsh 默认提供）
+HYPHEN_INSENSITIVE="true"
 
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
@@ -67,7 +67,7 @@ ENABLE_CORRECTION="false"
 # "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
 # or set a custom format using the strftime function format specifications,
 # see 'man strftime' for details.
-# HIST_STAMPS="mm/dd/yyyy"
+HIST_STAMPS="yyyy-mm-dd"
 
 # Would you like to use another custom folder than $ZSH/custom?
 ZSH_CUSTOM=~/develop/dotfiles/zsh/custom
@@ -80,17 +80,19 @@ ZSH_CUSTOM=~/develop/dotfiles/zsh/custom
 plugins=(
   git
   z
-  zsh-syntax-highlighting
   zsh-autosuggestions
   zsh-interactive-cd
   aws
   command-not-found
   docker
-  docker-compose
   sudo
   vi-mode
   fzf
   tmux
+  extract
+  # zsh-syntax-highlighting 必须放在最后加载（官方要求，
+  # 否则其他插件/补全注册的 widget 会被它包裹前后的行为覆盖）
+  zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
