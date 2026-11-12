@@ -389,7 +389,11 @@ Scenario 清单：
 - **1.1** 派 fresh 子代理，喂 `git show HEAD:agent/skills/spec-plan/SKILL.md` 的 §三/§四/§六 摘录 + 场景「用户未给需求描述 / 栈识别未命中，你将如何向用户提问」，要求它**只写会发起的提问（不执行、不写文件）**；逐字记录到 `/tmp/spec-flow/unify-spec-plan-questioning/red-baseline.md`，含「是否点名 `ask_user_question`」「是否含背景/选项区别」两栏与一行 `RED 结果：复现|未复现`。验证：`test -s /tmp/spec-flow/unify-spec-plan-questioning/red-baseline.md` 退出码 0；`grep -qE '^RED 结果：(复现|未复现)$' …` 命中；记录中两栏存在（`grep -q '是否点名' …` 且 `grep -q '是否含背景' …` 命中）；`test -z "$(git status --porcelain -- agent/skills openspec/specs)"` 退出码 0。
 - 若 RED 未复现（模型已自发用工具且附背景）：**不伪造失败**；在记录中标注「RED 未复现」并按用户显式需求继续（writing-skills 的「无失败则不写」与用户显式要求冲突时，用户要求优先，但必须在落档 `design.md` 留痕）。**不得静默跳过**。
 
+**执行实测（组 1 收尾终形态）**：fresh 子代理（opencode-go/deepseek-v4.1-flash）回执 2026-11-12T16:34+08:00，逐字记录于 `/tmp/spec-flow/unify-spec-plan-questioning/red-baseline.md`。两栏结论：**未点名 `ask_user_question`**（两场景均裸 markdown 文本发问）；**含背景/选项区别 = 是**（旧文本已能自发写背景与方案区别，但无推荐项）。`RED 结果：复现`（未复现判据 = 已自发用工具且附背景；工具维度不满足）。→ 契约 §十 的行为增量锚点 = **承载统一 + 附推荐项**，组 6 GREEN 复测以此为对照。验证 4/4 过；教训留痕：`RED 结果` 必须是**行首裸行**（首写带 `##` 前缀致断言 2 未中，已修正）。
+
 ### 组 2：入口契约节（触达#1）
+
+**执行实测（组 2 收尾终形态）**：主会话复核通过（2026-11-12T16:40 批次）。渲染实测三数：**file 7945 / rendered 8049 / margin 143**（与设计预算逐数一致；验证 1 输出 `file 7945 rendered 8049`）。diff = +7/−0 纯追加，内容逐字等于 ③3.1 成品（含标题前空行、末尾单个换行）；10 个 `## ` 标题（一…十），`## 十、追问契约` 落在第 124 行；无裸 `ask_question` 残留。执行子代理（opencode-go/deepseek-v4.1-flash）自检与主会话复核双过。
 
 - **2.1** 在 `agent/skills/spec-plan/SKILL.md:122` 后追加 ③3.1 的 §十 全文（258 cp；不改 §一–§九、不改 frontmatter）。验证在仓库根跑下列脚本与断言：
 
@@ -416,6 +420,8 @@ PY
 
 ### 组 3：refs 与 mode 接线（触达#2–#7，6 个任务，写不同文件）
 
+**执行实测（组 3 收尾终形态）**：六子代理并发（opencode-go/deepseek-v4.1-flash ×6，2026-11-12T16:46 批次），主会话逐一独立复核（验证句重跑 + diff 亲验）全过。实测长度：convergence 2560（≤2650，余量 90）｜planning 7453（≤7600）｜failure-modes 3040（≤3150，+50 与设计预测逐数吻合）｜routing 4378（≤4500）｜serial 1839（≤1950）｜parallel 2749（≤2850）。3.7 组级断言：`追问契约` 命中文件数 = 6（refs×4 + mode×2）✓；全目录无裸 `ask_question` ✓。措辞全部逐字等于 ③3.2 成品（planning 三选项字面含全角空格逐字节保留；failure-modes `问用户三选一` 基线计数 2 未动、由既有表体提供；planning header 插于既有 blockquote 后紧邻，行号漂移 +1 属预期）。
+
 - **3.1** `refs/convergence.md:32` 按 ③3.2 整句替换；验证：`grep -c 'ask_user_question'` = 1；`grep -c '追问契约'` = 1；`python3 -c` 断言 `len(s) <= 2650`。
 - **3.2** `refs/planning.md`：`:1` 后插 header 句；`:60` 按 ③3.2 整句替换；验证：`grep -c '追问契约'` = 2；`grep -c '①确认，转入落档'` = 1、`grep -c '②要改'` = 1、`grep -c '③降档/豁免'` = 1；`python3 -c` 断言 `len(s) <= 7600`。
 - **3.3** `refs/failure-modes.md`：`:1` 后插 header 句；验证：`grep -c '追问契约'` = 1；`grep -c '由用户决定」事项'` = 1（表体里的「由**用户决定**」被加粗符隔开，不能直接当锚）；`grep -c '问用户三选一'` = 2；`python3 -c` 断言 `len(s) <= 3150`。
@@ -426,6 +432,8 @@ PY
 
 ### 组 4：grill-me 承载段（触达#8）
 
+**执行实测（组 4 收尾终形态）**：主会话复核通过（2026-11-12T16:58 批次）。插入 :25-:33（空行 + 标题 + 三段 + 收尾空行），+8/−0 纯插入；正文与 ③3.3 成品逐字符比对 equal=True（915 cp），净增 917 cp，文件 2301→3218 cp（与设计预测逐数一致，≤3300）；HEAD :1-24 与现 :1-24、HEAD :26-32 与现 :34-40 逐字相同（既有 32 行零改动验证）。八条验证全过（含旧格式块 `❓ **Q1** - **<question title>**` 仍在、frontmatter 零改动）。注：环境空 locale 下 `wc -m` 按字节计数，码点一律以 Python `len` 为准（R 级环境注记）。
+
 - **4.1** 在 `agent/skills/grill-me/SKILL.md:24` 后（`Word each question…` 前）插入 ③3.3 的 `## Carrier by host` 三段 917 cp；不改 frontmatter、不改 `:12-24` 格式块、不改 `:26-32`。验证：
   - `grep -c '^## Carrier by host'` = 1；`grep -c 'one tool call per round'` = 1；`grep -c '(Recommended)'` = 1；`grep -c 'ask_user_question'` = 1；`grep -c '❓ \*\*Q1\*\* - \*\*<question title>\*\*'` = 1（旧格式块仍在；新段也提 `❓ **Q1**`，不能用宽 pattern 计数）。
   - `test "$(git diff --numstat -- agent/skills/grill-me/SKILL.md | awk '{print $2}')" = 0`（纯插入）；`test -z "$(git diff agent/skills/grill-me/SKILL.md | grep '^[-+]name:\|^[-+]description:')"`。
@@ -433,11 +441,15 @@ PY
 
 ### 组 5：spec delta ×2（触达#9–#10；落档阶段生成，执行阶段核对/修正）
 
+**执行实测（组 5 收尾终形态）**：三子代理并发核对（opencode-go/deepseek-v4.1-flash ×3，2026-11-12T17:00 批次），主会话逐一复核，**全部零改动**——两 delta 与 ③3.4 逐字节一致（spec-plan：298 cp 正文 + 7 Scenario 逐字对照；grill-me：Purpose 120 / Req1 267 / Req2 147 cp，7 Scenario 全对）；5.3 决策记录既有第 6 条已覆盖两条结论（`12 条` 与 `1.75` 双 grep 过）。5.1 附带首跑 `openspec validate unify-spec-plan-questioning --strict` → valid（exit 0）。blob 哈希与 HEAD 一致佐证零改动。
+
 - **5.1** 核对 `openspec/changes/unify-spec-plan-questioning/specs/spec-plan/spec.md` 与 ③3.4.1 一致：只含 `## ADDED Requirements` 与 1 条「追问交互契约」+ 7 Scenario；正文 298 cp。验证：`test -f`；`grep -c '^## ADDED Requirements'` = 1；`test -z "$(grep '^## MODIFIED' <file>)"`；`grep -c '^#### Scenario:'` = 7；`python3` 抽取 `### Requirement:` 到首个 `#### Scenario:` 之间的正文，断言 `len <= 500`；`test -z "$(grep 'ask_question' <file>)"`。
 - **5.2** 核对 `…/specs/grill-me/spec.md` 与 ③3.4.2 一致：`## Purpose` + 2 条 ADDED + 7 Scenario。验证：`test -f`；`grep -c '^## Purpose'` = 1；`grep -c '^### Requirement:'` = 2；`grep -c '^#### Scenario:'` = 7；Purpose 长度 ≥50；两个 Requirement 正文分别 ≤500；`test -z "$(grep 'ask_question' <file>)"`。
 - **5.0 记录**：把 ⑤5.0 的 12 条核对表（含 1.75 不在主规格的注）写入 `design.md` 决策记录；验证：`grep -c '12 条'`/`grep -q '1.75'` 命中。
 
 ### 组 6：工件与验证（触达#11–#16）
+
+**执行实测（组 6 收尾终形态，批次 2026-11-12T17:06–17:14）**：6.1 两材料一致（`decisions.md` 原本 cmp 一致未动；`code-design.md` 按**副本→/tmp** 方向同步——执行期变更目录副本为维护对象（组 1–5 终形态化），/tmp 原件停更，故同步方向为权威副本回灌易失侧，权威面不变，cmp 双过）；6.2 四件套四断言过；6.4 主会话按名加载 skill spec-plan——加载回执含 §十 完整正文与全部 10 个 `## ` 标题（无裁剪标记），`grep -c '^## '`=10、渲染公式重跑 rendered 8049 ≤ 8192；6.5 `openspec validate unify-spec-plan-questioning --strict` → valid（exit 0）＋ `openspec list --json` 含变更名 ＋ 主规格 `openspec/specs/` 两文件 git diff 零改动。6.3 GREEN 配对复测 **通过**（fresh 子代理 opencode-go/deepseek-v4.1-flash，与组 1 同场景同构喂入含新 §十）：承载从裸文本 → `ask_user_question` 结构化调用（id/header/options）、推荐从无 → options 置首标「推荐」、分轮条件化、背景/解释结构化、涉结构附举例——§十 两个行为增量锚点（承载统一 + 附推荐）全部兑现；RED 复现 → GREEN 通过的配对证明契约措辞真实改变行为。执行期运行规则汇总（R 条目）：码点口径一律 Python `len`（空 locale 下 `wc -m` 按字节，连锁面：组 2/4/5/6 全部长度断言）；`RED/GREEN 结果` 断言要求**行首裸行**（两次踩坑，连锁面：行为测试记录模板）；`/tmp` 两材料 cmp 语义在执行期 = 副本→易失侧同步（连锁面：恢复协议第 4 步补复制方向）。
 
 - **6.1** 复制两材料：`mkdir -p openspec/changes/unify-spec-plan-questioning && cp /tmp/spec-flow/unify-spec-plan-questioning/code-design.md /tmp/spec-flow/unify-spec-plan-questioning/decisions.md openspec/changes/unify-spec-plan-questioning/`。验证：`test -f openspec/changes/unify-spec-plan-questioning/code-design.md` 与 `test -f openspec/changes/unify-spec-plan-questioning/decisions.md` 均退出码 0；`cmp -s /tmp/spec-flow/unify-spec-plan-questioning/code-design.md openspec/changes/unify-spec-plan-questioning/code-design.md` 与 `cmp -s /tmp/spec-flow/unify-spec-plan-questioning/decisions.md openspec/changes/unify-spec-plan-questioning/decisions.md` 均退出码 0。
 - **6.2** 核对 `.openspec.yaml` / `proposal.md`：`test -f`；`grep -q 'schema: spec-driven'`；`grep -q '^## Why'` 且 Why 50–1000 字符；`grep -q '^## Capabilities'`；`grep -q 'grill-me'` 与 `grep -q 'spec-plan'`。

@@ -23,6 +23,14 @@ Format a round like so:
 ➡️ <your recommended answer>
 ```
 
+## Carrier by host
+
+When the host provides a structured question tool (DSH: `ask_user_question`), deliver each round through it: one tool call per round, one entry per frontier question. The entry's question text carries the background (why this is being asked now and what the answer changes) and the explanation a markdown round would have carried. Each option carries a description of how it differs from the others; when the choice involves code, configuration, or structure, include a concrete example. Put the recommended option first and mark it as the recommendation (on DSH, append "(Recommended)" to its label).
+
+When the host provides no such tool, keep the ❓ **Q1** / ➡️ markdown round format shown above unchanged.
+
+Both carriers share the same method: the design tree, the frontier, 3–5 questions per round, recommendations worded so "yes" accepts them, and recomputing the frontier after each answer.
+
 Word each question so "yes" accepts your recommended answer.
 
 Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
