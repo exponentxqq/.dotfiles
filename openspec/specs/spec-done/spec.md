@@ -46,7 +46,7 @@ spec-done SHALL 承载终末半程:验证归档与收尾闭环一体化。入口
 
 ### Requirement: 收尾推送与合并确认
 
-push SHALL 先探测推送能力（fetch 成功/`ssh -T` 认证通过）：可行 SHALL 按用户指示代推 `git push -u origin feature/<change>`；被拒（远端主分支又前进）SHALL fetch+rebase 一次后重试、仍拒报告；不可行 SHALL 给宿主命令并等回告，SHALL NOT 绕行换协议硬闯。平台 codereview 与合并 SHALL 由用户完成，spec-done SHALL 等回告，SHALL NOT 代做合并决策。收尾 SHALL 以根仓主分支推送（探测代推同口径）+ 闭环汇报（各仓提交链、rebase 复验证据、合并点、清理结果、遗留待办终态）结束。
+push SHALL 先探测推送能力（fetch 成功/`ssh -T` 认证通过）：可行 SHALL 按用户指示代推 `git push -u origin feature/<change>`；被拒（远端主分支又前进）SHALL fetch+rebase 一次后重试、仍拒报告；不可行 SHALL 给宿主命令并等回告，SHALL NOT 绕行换协议硬闯。平台 codereview 与合并 SHALL 由用户完成，spec-done SHALL 等回告，SHALL NOT 代做合并决策。收尾 SHALL 以根仓主分支推送（探测代推同口径）+ 残留清理（收尾终点，按「收尾终点残留清理」）+ 闭环汇报（各仓提交链、rebase 复验证据、合并点、清理结果、残留清理终态、遗留待办终态）结束。
 
 #### Scenario: ssh 不可行回退宿主命令
 
@@ -88,12 +88,36 @@ push SHALL 先探测推送能力（fetch 成功/`ssh -T` 认证通过）：可�
 
 ### Requirement: 非隔离轻量收尾
 
-直用主工作区执行的变更，spec-done 收尾 SHALL 为：推送当前分支与根仓主分支（先探测，可行按用户指示代推；不可行给宿主命令等回告）+ 遗留待办复核（执行期临时偏离恢复点、预留编号——从归档 tasks/code-design 留痕汇总）呈报；SHALL 无 worktree 清理步骤。
+直用主工作区执行的变更，spec-done 收尾 SHALL 为：推送当前分支与根仓主分支（先探测，可行按用户指示代推；不可行给宿主命令等回告）+ 遗留待办复核（执行期临时偏离恢复点、预留编号——从归档 tasks/code-design 留痕汇总）+ 残留清理（仅 ②③ 类 /tmp 临时材料，按「收尾终点残留清理」执行）呈报；SHALL 无 worktree 清理步骤。
 
 #### Scenario: 非隔离收尾推送与呈报
 
 - **WHEN** 归档 design.md 执行环境为直用主工作区（或无执行环境块）
-- **THEN** 探测代推当前分支与根仓主分支（不可行给宿主命令），并汇总呈报遗留待办（临时偏离恢复点、预留编号）
+- **THEN** 探测代推当前分支与根仓主分支（不可行给宿主命令），汇总呈报遗留待办（临时偏离恢复点、预留编号），并执行残留清理（仅 /tmp 临时材料）
+
+### Requirement: 收尾终点残留清理
+
+收尾闭环终点（隔离第 8 步根仓推送后、非隔离轻量收尾推送呈报时；推送探测不可行给宿主命令亦算走到终点，不等推送回告），spec-done SHALL 清点并清理残留三源：①隔离环境物（执行环境块所列 worktree/分支/独立库/入库配置——隔离路径按既有 Requirement 处置，此处仅核对终态）；②`/tmp/spec-flow/<change>/` 整目录（规划原件、派发台账、RED-GREEN 证据）；③`/tmp/<触达项目>-evidence/` 证据目录。②SHALL 呈证即删（列清单→删→复核消失）；③SHALL 在同项目无其他活跃变更（该仓 `openspec list` 核对触达面）时才删，有并发 SHALL 保留并注明理由；SHALL 只删精确路径，SHALL NOT 按父目录通配删除；清理终态（已删/保留/失败项）SHALL 记入闭环汇报。
+
+#### Scenario: 非隔离收尾终点清临时材料
+
+- **WHEN** 非隔离轻量收尾走到推送呈报
+- **THEN** 呈证并删除 `/tmp/spec-flow/<change>/` 整目录（删后 `ls` 复核），证据目录按并发判定处理，清理终态入呈报
+
+#### Scenario: 隔离收尾终点核对环境物终态
+
+- **WHEN** 隔离闭环第 8 步根仓推送完成
+- **THEN** 核对 worktree/分支/独立库/入库配置处置终态后，呈证并删除 `/tmp/spec-flow/<change>/`，清理终态入闭环汇报
+
+#### Scenario: 并发活跃变更的证据目录保留
+
+- **WHEN** 残留清理时同项目存在其他活跃变更
+- **THEN** `/tmp/<项目>-evidence/` 保留并在闭环汇报注明理由，只删本变更精确路径
+
+#### Scenario: 清理终态入闭环汇报
+
+- **WHEN** 残留清理执行完毕（含删除失败项）
+- **THEN** 已删清单、保留项与理由、失败项逐条列入闭环汇报，不静默跳过
 
 ### Requirement: 收尾红线
 
@@ -130,7 +154,7 @@ spec-done SHALL NOT force push；SHALL NOT 在用户确认已推送+已合并前
 
 ### Requirement: 归档汇报与收尾停留
 
-归档提交完成后,spec-done SHALL 输出六要素汇报——工件路径、验证证据、归档位置与主规格、宿主操作清单、沉淀回流清单(执行期改动的工作流仓文件,已提交项标注去向、未提交项交用户决定)、遗留待办(worktree 闭环清单及 `/spec-done` 入口、执行期临时偏离恢复点、预留编号)——并 SHALL 停留等待用户决定收尾时机,SHALL NOT 自动进入推送、合并或清理;后续收尾(rebase、推送、合并确认、worktree 与分支清理)SHALL 按收尾既有 Requirement 推进。
+归档提交完成后,spec-done SHALL 输出六要素汇报——工件路径、验证证据、归档位置与主规格、宿主操作清单、沉淀回流清单(执行期改动的工作流仓文件,已提交项标注去向、未提交项交用户决定)、遗留待办(worktree 闭环清单及 `/spec-done` 入口、残留清理清单(收尾终点执行)、执行期临时偏离恢复点、预留编号)——并 SHALL 停留等待用户决定收尾时机,SHALL NOT 自动进入推送、合并或清理;后续收尾(rebase、推送、合并确认、worktree 与分支清理)SHALL 按收尾既有 Requirement 推进。
 
 #### Scenario: 六要素汇报后停留
 
@@ -145,4 +169,4 @@ spec-done SHALL NOT force push；SHALL NOT 在用户确认已推送+已合并前
 #### Scenario: 汇报遗留待办指明收尾入口
 
 - **WHEN** 归档汇报输出遗留待办
-- **THEN** 含 worktree 闭环清单(注明 `/spec-done <变更名>` 入口)、临时偏离恢复点、预留编号,交用户决定收尾时机
+- **THEN** 含 worktree 闭环清单(注明 `/spec-done <变更名>` 入口)、残留清理清单(收尾终点执行)、临时偏离恢复点、预留编号,交用户决定收尾时机
