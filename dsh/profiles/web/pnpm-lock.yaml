@@ -23,11 +23,11 @@ importers:
         specifier: 0.2.2-rc.1
         version: 0.2.2-rc.1(@deepseek-ai/dsh-browser-use@0.2.2-rc.1)
       '@linxin666/dsh-client-ui-task-board':
-        specifier: 0.4.15
-        version: 0.4.15
+        specifier: 0.4.16
+        version: 0.4.16
       '@tt-a1i/archify-dsh':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.1.0
+        version: 1.1.0
       '@zzerx/dsh-plugin-notes':
         specifier: 0.6.0
         version: 0.6.0
@@ -35,29 +35,29 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       dsh-context:
-        specifier: ^0.82.0
-        version: 0.82.0
+        specifier: ^0.83.1
+        version: 0.83.1
       dsh-plugin-multi-root-workspace:
-        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/.worktrees/2026-11-08-workspace-folders-picker/plugins/multi-root-workspace
-        version: link:../../../../xuqinqin/develop/person/dsh-plugins/.worktrees/2026-11-08-workspace-folders-picker/plugins/multi-root-workspace
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/multi-root-workspace
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/multi-root-workspace
       dsh-plugin-project-mcp:
-        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/project-mcp
-        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/project-mcp
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/project-mcp
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/project-mcp
       dsh-plugin-session-tool-toggle:
-        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/session-tool-toggle
-        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/session-tool-toggle
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/session-tool-toggle
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/session-tool-toggle
       dsh-plugin-user-commands:
-        specifier: github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/user-commands
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/user-commands
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/user-commands
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/user-commands
       dsh-plugin-web-ux:
-        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/web-ux
-        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/web-ux
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/web-ux
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/web-ux
       dsh-plugin-workspace-config:
-        specifier: link:/home/xuqinqin/develop/person/dsh-plugins/plugins/workspace-config
-        version: link:../../../../xuqinqin/develop/person/dsh-plugins/plugins/workspace-config
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/workspace-config
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/workspace-config
       dsh-plugin-zcode-plan:
-        specifier: github:exponentxqq/dsh-plugins#v1.5.0&path:plugins/zcode-plan
-        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/zcode-plan
+        specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/zcode-plan
+        version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/zcode-plan
       dsh-pocket:
         specifier: ^2.12.0
         version: 2.12.0(patch_hash=0ace7207bafe8eb99f77e4df99e8da73bdf12a17a12b13d3a479825400bff6b7)
@@ -65,19 +65,16 @@ importers:
         specifier: ^1.11.2
         version: 1.11.2
       dsh-remote:
-        specifier: 0.8.72
-        version: 0.8.72
+        specifier: 0.8.90
+        version: 0.8.90
       dsh-rewind-plugin:
-        specifier: ^0.21.0
-        version: 0.21.0
+        specifier: ^0.21.2
+        version: 0.21.2
       dshmarket:
-        specifier: ^1.73.12
-        version: 1.73.12
+        specifier: ^1.73.17
+        version: 1.73.17
 
 packages:
-
-  '@deepseek-ai/cosmokit@1.8.6':
-    resolution: {integrity: sha512-ZSD/fN52L498LBIOYwjIOlaLv5veY6ZEwI2yzvZUKQtctn0QAPqu8tKdJ+OF5+Tv6NBq1U+wJWH+QI6OGy5EvQ==}
 
   '@deepseek-ai/cosmokit@1.9.0':
     resolution: {integrity: sha512-5O1S53mZiJyZYcvxxD0Qv1EY7qFPSxbGyD8CbVK6gw7W9FvcXZj2YIX1ZkOqyQQ3Xt2rFkZDHJv0+V3Zmmp8CA==}
@@ -110,14 +107,139 @@ packages:
       '@deepseek-ai/dsh-tools': 0.2.2-rc.1
       '@deepseek-ai/dsh-working-directory': 0.2.2-rc.1
 
-  '@deepseek-ai/schemastery@3.18.5':
-    resolution: {integrity: sha512-Mnobvqf9rHsZYv4g5edj5ddxS1oF1kIdSlz0DunUgnY3LWG5F26MqvH3YOOsSaodCgyzJ16OMN9O99/s5Crtdw==}
+  '@deepseek-ai/node-addon-system-darwin-arm64@0.1.2':
+    resolution: {integrity: sha512-IR0cx8um19mLCZaJ+H5PLblKr6Eg3PWvVo8eTQBr/SwH2nh5tM9CD9/5fHweNS9Pjt15UdFlGqnvLSd/w+O6Rw==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@deepseek-ai/node-addon-system-darwin-x64@0.1.2':
+    resolution: {integrity: sha512-XDbmquNapk9aT28y4EKn9lbONVr9YNs1NM/GKH1Gi5gUhjOT9wgRaTv72FJdNaVIInbPAYbPoyn7/y+MzQMNNg==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@deepseek-ai/node-addon-system-linux-arm64@0.1.2':
+    resolution: {integrity: sha512-Z/DQtqgEYzjBzb2ocHGjMzx51W7xDILkJKKj89nyErr8gZMNiLs+JNL1uKzJqc3VLZB+vYCPaHGyQ3oX6EzEmA==}
+    engines: {node: '>=20'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@deepseek-ai/node-addon-system-linux-x64@0.1.2':
+    resolution: {integrity: sha512-S2aPVHvYCpNCppCFyNlooMYuTB7ucK5lvD9oXQQ42v5Z2s5AoaiCdjz9r2l+ED2rI5oS1x0cUZmKjJH2dxV0pg==}
+    engines: {node: '>=20'}
+    cpu: [x64]
+    os: [linux]
+
+  '@deepseek-ai/node-addon-system@0.1.2':
+    resolution: {integrity: sha512-EFn8K+mXIXiw6s3rxX+cgp2hZTEAQdVIsURhrXnBxycSXvtQ1EQpsSVzoNKtKAQI0I0VqkEcVEjHzS/PeaGsvw==}
+    engines: {node: '>=20'}
 
   '@deepseek-ai/schemastery@3.19.0':
     resolution: {integrity: sha512-bDXoYQa7ghAhmdYD5VPlzKxEzJV/aKkz5l4V5h1u06z8GAPN1ROewSjvR9WiXhpa52E9fng8lpH5QdCRIQgnyQ==}
 
-  '@linxin666/dsh-client-ui-task-board@0.4.15':
-    resolution: {integrity: sha512-bEBecylcWcL4oQuiQaJ4bBXGgiOGiZNI5wOH54v+Rcr6o1dTEbyl+R8COIY3CbWiTmSk2I1wzb/E0gnMh2IFTQ==}
+  '@koromix/koffi-android-arm64@3.3.7':
+    resolution: {integrity: sha512-330J8SnMF48DwADEbPYb5gAIM0mo3dZAsLUkuhyEPTPF49h73hRO7LMVXPkUmeXkK/J5Uvgsaem6Lx86Uev3GA==}
+    cpu: [arm64]
+    os: [android]
+
+  '@koromix/koffi-android-x64@3.3.7':
+    resolution: {integrity: sha512-CE1LEAsMyChQQNjGVDy56lBEdU70zOOD709mdKtxM6Rn2I7srT8Jyj66kSwnl4gO4+2BlTBXMyEIAEyYiNXNEA==}
+    cpu: [x64]
+    os: [android]
+
+  '@koromix/koffi-darwin-arm64@3.3.7':
+    resolution: {integrity: sha512-xg1nqqhHRo6QxxYZJtYhhEGAbkHCQxvjoId3BCkhIJhRLi7+dDBRpLEi8x/5xrhqjCp+c/XhMrkAvxWy0NEYBg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@koromix/koffi-darwin-x64@3.3.7':
+    resolution: {integrity: sha512-8KeSrHrxzj+SEvaSMc1ufpgn66AdtorKGGb8HNJN5A435stXZ35oxg2+rsAyhTduvEZ9DkCuU94A0crA8KQ0UA==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@koromix/koffi-freebsd-arm64@3.3.7':
+    resolution: {integrity: sha512-UTo2xw46ctQdcz55I3b5pP1Gs0mGcYZLGAJg7MpEdr8ZEMmmclTzU/WUwWw/lyj5x2Ld2fscjCt69elqfrUBOQ==}
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@koromix/koffi-freebsd-ia32@3.3.7':
+    resolution: {integrity: sha512-5vgirS+XISQHzXiad3KYhZYGvuSbAtyrIm2etO118IjpWi87wbKP8xEdf8s4F+vU0HxGs9hcx5a+blwFMe9TFA==}
+    cpu: [ia32]
+    os: [freebsd]
+
+  '@koromix/koffi-freebsd-x64@3.3.7':
+    resolution: {integrity: sha512-R2POCHtQ46cyhCFtYuq3Uo4MEiMstwLi49fwUgu6Vl38XvqKeje5up5e72LTCXf+ks/y3nua3TYM5oXTBqYAUA==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@koromix/koffi-linux-arm64@3.3.7':
+    resolution: {integrity: sha512-7ttM8GE2gowelTTyTY0+t79rWaoilZMmW4MYgrIXx5NNShLiHtUNfyGGaNzCd1MD+j+bnNZLJ2lh3lkBS9stfw==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@koromix/koffi-linux-arm@3.3.7':
+    resolution: {integrity: sha512-zUb+N1CvsRikXKs93jNdHTAVFt3Njr7ShIA8QwOh2IH/8aV8bkQnkt7AOJvOK/uP0CHd7bxn82YgGUAcZW/pVw==}
+    cpu: [arm]
+    os: [linux]
+
+  '@koromix/koffi-linux-ia32@3.3.7':
+    resolution: {integrity: sha512-hM6CtBgyWGkYzXIl+ciCWSCWnYh/6ft2FRi17aw345lK3Syl2OH06PPMxMd+AHkNrnYWT3nyrzl2Rcun9IeAiw==}
+    cpu: [ia32]
+    os: [linux]
+
+  '@koromix/koffi-linux-loong64@3.3.7':
+    resolution: {integrity: sha512-plmvZGrC2F02AIDNx3+QcjU39Y9XVgHAHMOM17HJCmxc3f5VpKO0d7aln3/Re6TchBW1h2ldFgI6pp/7vN7IQQ==}
+    cpu: [loong64]
+    os: [linux]
+
+  '@koromix/koffi-linux-ppc64@3.3.7':
+    resolution: {integrity: sha512-bmVe2k1v7tiOGcuX22+HIyOT39bRBrIJd2v6qzSN9Er/f7XI61cbJUnFYWdXpYecU2Ww1LDSkgIifcRyfpipqw==}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@koromix/koffi-linux-riscv64@3.3.7':
+    resolution: {integrity: sha512-IG1cp7agL1Od03NrKy8B0UGHomco0sygtWhWIXTTbjkJZkjE9Ic79IWzA5d16XbVtob+247XYBDcaeJJ644Xiw==}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@koromix/koffi-linux-x64@3.3.7':
+    resolution: {integrity: sha512-1cxuG2zsO71wB3RwYt6AjJD9xQW0lUVw4TX4e3Q2DeffEqrVtE3g4IbQsnijTcSeZmmec1kDuuk4CSHUfhAEJQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@koromix/koffi-openbsd-arm64@3.3.7':
+    resolution: {integrity: sha512-8qqafiMgdmOTEeZsLSnuKdg82Id8IwcxG8MowVtk0zJ4iNObmg2Ygd1dTtWRwpMBW0gfXoodwRdRqnUur3R/aA==}
+    cpu: [arm64]
+    os: [openbsd]
+
+  '@koromix/koffi-openbsd-ia32@3.3.7':
+    resolution: {integrity: sha512-ZG06vAX5YUyUGAg9brg4maex7uGj1fybhlMrWt5FlocMBlrY05pn84vlCKavHsCficecAVq7yEzU8f+4FC2T7A==}
+    cpu: [ia32]
+    os: [openbsd]
+
+  '@koromix/koffi-openbsd-x64@3.3.7':
+    resolution: {integrity: sha512-jnBD84VCXRmOeJniInO8g5xH2XwVnifp2w35+UbAx8coMIS99YAW9uDNg/U7ooJIyL9hfbatfeNkjNhYhhNpKw==}
+    cpu: [x64]
+    os: [openbsd]
+
+  '@koromix/koffi-win32-arm64@3.3.7':
+    resolution: {integrity: sha512-Sal267u6Mi+UK/Lbu5vECQDtvZCfK57BO1zmc+Tar7Kdy+hHZ8Eqx7SyxTP6js4ofavQ83pVp1SWQqK8XJVpcg==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@koromix/koffi-win32-ia32@3.3.7':
+    resolution: {integrity: sha512-kOPimggBxcLjHM/rHOWZp8fyxu+UjeEkWM26Gb9XCnirmM76xDu+GXCSDoBPPqF8s+XkY3NrhUdgfIXcwmWiPA==}
+    cpu: [ia32]
+    os: [win32]
+
+  '@koromix/koffi-win32-x64@3.3.7':
+    resolution: {integrity: sha512-yVrh4Yzyjm+fH7CGIa8Ts+DSGeU8QrwEtECXxNswh3i86hwZTOKkqojaDFAYJov0B3w4BFcjR4TOKkPOB0ZpZA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@linxin666/dsh-client-ui-task-board@0.4.16':
+    resolution: {integrity: sha512-rJ31/E/lrvQkP5c6fiPxDat9sE5g/HGsclELE5/yGcTuSt2l+2Z4P9ktCYVZOFmvue8eXt/KDi8XljA9fYdyIQ==}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.2-rc.1'
       react: ^18.2.0
@@ -207,8 +329,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tt-a1i/archify-dsh@1.0.0':
-    resolution: {integrity: sha512-ae5L+SyZngy3EzYnWHHfccAYJCZh5e9MTkEBh7mrwTMfpwpFtkIhiOg2vI5xnluCS8CSb+Ne1hi1kOWRQQtGBQ==}
+  '@tt-a1i/archify-dsh@1.1.0':
+    resolution: {integrity: sha512-UgC/xWfN9lh+ns0unXd5/+o5k9NdWGjar2stGtp4nPGdDw7eP1oiLqcLJusQhaaQKCqRyBvAn+HdKSsyR0zPWw==}
     engines: {node: ^22.19.0 || >=24.0.0}
 
   '@xmldom/xmldom@0.8.15':
@@ -382,8 +504,8 @@ packages:
       '@deepseek-ai/dsh-typert-protocol': '>=0.2.0-rc.2 <0.3.0-0'
       '@deepseek-ai/schemastery': ~3.18.4
 
-  dsh-context@0.82.0:
-    resolution: {integrity: sha512-PpFxdMc8WwM1K8Lebhcr/Sqj6kpdfb0YbAFczOAnc7H0YS3JFXQ/7vCsSO7Z2IUsM4QsfocwyafRJG7O1QxmZA==}
+  dsh-context@0.83.1:
+    resolution: {integrity: sha512-pOXRc1WwxTTJeKPIXXaBo0iKLyrZHzp7FIGCRpxQgsTpMlVvAOoJDYQtOOIJ3N/D7+P02DnsgOcIVT0j3WWuoQ==}
     engines: {dsh: '>=0.2.0-rc.2 || >=0.2.1-rc.2 || >=0.2.2-rc.1', node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.4 || >=4.0.6-alpha.2 <5.0.0
@@ -400,16 +522,114 @@ packages:
       react-dom:
         optional: true
 
-  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/user-commands:
-    resolution: {gitHosted: true, path: plugins/user-commands, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665}
-    version: 1.5.0
+  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/multi-root-workspace:
+    resolution: {gitHosted: true, path: plugins/multi-root-workspace, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/cordis': '>=4.0.1 <5.0.0'
+      '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-agent': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-agent-instructions': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-api-workspace-files': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-client-connection': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-commands': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-file-reference': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-file-reference-local': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-fs': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-fs-local': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-llm': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-lsp': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-lsp-stdio': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-sandbox': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-sandbox-local': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-sandbox-policy': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-sandbox-windows-acl': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-session': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-storage-domain': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-subprocess': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-system-prompt': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-typert-protocol': '>=0.2.2-rc.1 <0.3.0'
+    peerDependenciesMeta:
+      '@deepseek-ai/dsh-agent':
+        optional: true
+      '@deepseek-ai/dsh-agent-instructions':
+        optional: true
+      '@deepseek-ai/dsh-api-workspace-files':
+        optional: true
+      '@deepseek-ai/dsh-client-connection':
+        optional: true
+      '@deepseek-ai/dsh-commands':
+        optional: true
+      '@deepseek-ai/dsh-file-reference':
+        optional: true
+      '@deepseek-ai/dsh-file-reference-local':
+        optional: true
+      '@deepseek-ai/dsh-llm':
+        optional: true
+      '@deepseek-ai/dsh-lsp':
+        optional: true
+      '@deepseek-ai/dsh-lsp-stdio':
+        optional: true
+      '@deepseek-ai/dsh-sandbox-windows-acl':
+        optional: true
+      '@deepseek-ai/dsh-session':
+        optional: true
+      '@deepseek-ai/dsh-subprocess':
+        optional: true
+      '@deepseek-ai/dsh-system-prompt':
+        optional: true
+      '@deepseek-ai/dsh-typert-protocol':
+        optional: true
+
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/project-mcp:
+    resolution: {gitHosted: true, path: plugins/project-mcp, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
 
-  dsh-plugin-zcode-plan@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/zcode-plan:
-    resolution: {gitHosted: true, path: plugins/zcode-plan, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665}
-    version: 1.5.0
+  dsh-plugin-session-tool-toggle@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/session-tool-toggle:
+    resolution: {gitHosted: true, path: plugins/session-tool-toggle, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
+      react: ^18.2.0
+
+  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/user-commands:
+    resolution: {gitHosted: true, path: plugins/user-commands, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
+
+  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/web-ux:
+    resolution: {gitHosted: true, path: plugins/web-ux, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-session-persistence': '>=0.2.2-rc.1 <0.3.0'
+      '@deepseek-ai/dsh-workspace': '>=0.2.2-rc.1 <0.3.0'
+      react: ^18.2.0
+    peerDependenciesMeta:
+      '@deepseek-ai/dsh-session-persistence':
+        optional: true
+      '@deepseek-ai/dsh-workspace':
+        optional: true
+
+  dsh-plugin-workspace-config@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/workspace-config:
+    resolution: {gitHosted: true, path: plugins/workspace-config, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
+    engines: {node: ^22.19.0 || >=24.0.0}
+    peerDependencies:
+      '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
+      react: ^18.2.0
+
+  dsh-plugin-zcode-plan@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/zcode-plan:
+    resolution: {gitHosted: true, path: plugins/zcode-plan, tarball: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a}
+    version: 1.6.0
     engines: {node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/dsh': '>=0.2.2-rc.1 <0.3.0'
@@ -435,10 +655,10 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
 
-  dsh-remote@0.8.72:
-    resolution: {integrity: sha512-lHxPHcbCRPFxbvkPjjYLI2oTYRe8KTZfuaxfkaq7CQofs9sH/gXJ6IrQleHIX5O6SwwHAX0ThtAqycaAOZhqyw==}
+  dsh-remote@0.8.90:
+    resolution: {integrity: sha512-MQudrTJQ6+RqnZoyVVMHVq6Wy96iR0zCti2bVfqNP14JHcsuIbmzUmsZetmDG6w1lCEERzPRckJO9SuFHvD/vQ==}
     peerDependencies:
-      '@deepseek-ai/cordis': ^4.0.1
+      '@deepseek-ai/cordis': ^4.0.5
       '@deepseek-ai/dsh-client-connection': '>=0.1.2-rc.1 <0.3.0'
       '@deepseek-ai/dsh-client-locale': '>=0.1.2-rc.1 <0.3.0'
       '@deepseek-ai/dsh-client-ui-renderer': '>=0.1.2-rc.1 <0.3.0'
@@ -457,8 +677,8 @@ packages:
       - bcrypt-pbkdf
       - tweetnacl
 
-  dsh-rewind-plugin@0.21.0:
-    resolution: {integrity: sha512-s5s41yXMxENxM0ZXQdfB73cClQ4i4JljdtC/uw5ZCQg0z5CPlrfWDZy3HPnBDJAePNn8hwF2Wp/bB9VPAXto3A==}
+  dsh-rewind-plugin@0.21.2:
+    resolution: {integrity: sha512-VT9RVo8hDdvrPoFK2QgSlFKtiYHK1VfCOS1YDMRsK5g2ap7iSDjJbpJr5I7Qi/VSETo8GNZqm2M/Ll5rKj8BpQ==}
     engines: {dsh: '>=0.2.2-rc.1 <0.3.0-0', node: '>=24.9.0'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.1.0
@@ -517,8 +737,8 @@ packages:
       '@deepseek-ai/schemastery':
         optional: true
 
-  dshmarket@1.73.12:
-    resolution: {integrity: sha512-Us3qHfp3FLMvMyLvj+VYdA3K90DGGXikwODQheSC00BCWIxLIYBjA9ZCknWhxgUwT5L9N3Nf3ndKit0QUECO6Q==}
+  dshmarket@1.73.17:
+    resolution: {integrity: sha512-yISchdb/p4pDMTvsEyPtX60oTlv3FlyiSzcSI07dShf9WBuM12yyj5WSVTSJb3ZA7cgniyArAJEwBIi3eZVrww==}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
       '@deepseek-ai/dsh-settings': ^0.1.0-rc.7 || ^0.1.1-rc.2 || ^0.1.2-alpha.2 || ^0.2.0-rc.1 || ^0.2.1-alpha.3 || ^0.2.1-rc.1
@@ -574,8 +794,8 @@ packages:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
     engines: {node: '>= 6'}
 
-  iconv-lite@0.6.3:
-    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
+  iconv-lite@0.7.3:
+    resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
 
   immediate@3.0.6:
@@ -601,6 +821,9 @@ packages:
 
   jszip@3.10.2:
     resolution: {integrity: sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==}
+
+  koffi@3.3.7:
+    resolution: {integrity: sha512-Vrq4UwAE19HPLMou8m7HGCELiTE3l9D+r1nA7XwVHUTNaRdymPM+kzkkD2VGxlyjI2qZTb9tMDaFn7kfZ72v3Q==}
 
   lie@3.3.0:
     resolution: {integrity: sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ==}
@@ -895,8 +1118,6 @@ packages:
 
 snapshots:
 
-  '@deepseek-ai/cosmokit@1.8.6': {}
-
   '@deepseek-ai/cosmokit@1.9.0': {}
 
   '@deepseek-ai/dsh-browser-use@0.2.2-rc.1': {}
@@ -917,17 +1138,91 @@ snapshots:
       '@deepseek-ai/dsh-browser-use': 0.2.2-rc.1
       '@deepseek-ai/schemastery': 3.19.0
 
-  '@deepseek-ai/schemastery@3.18.5':
-    dependencies:
-      '@deepseek-ai/cosmokit': 1.8.6
-      '@standard-schema/spec': 1.1.0
+  '@deepseek-ai/node-addon-system-darwin-arm64@0.1.2':
+    optional: true
+
+  '@deepseek-ai/node-addon-system-darwin-x64@0.1.2':
+    optional: true
+
+  '@deepseek-ai/node-addon-system-linux-arm64@0.1.2':
+    optional: true
+
+  '@deepseek-ai/node-addon-system-linux-x64@0.1.2':
+    optional: true
+
+  '@deepseek-ai/node-addon-system@0.1.2':
+    optionalDependencies:
+      '@deepseek-ai/node-addon-system-darwin-arm64': 0.1.2
+      '@deepseek-ai/node-addon-system-darwin-x64': 0.1.2
+      '@deepseek-ai/node-addon-system-linux-arm64': 0.1.2
+      '@deepseek-ai/node-addon-system-linux-x64': 0.1.2
 
   '@deepseek-ai/schemastery@3.19.0':
     dependencies:
       '@deepseek-ai/cosmokit': 1.9.0
       '@standard-schema/spec': 1.1.0
 
-  '@linxin666/dsh-client-ui-task-board@0.4.15':
+  '@koromix/koffi-android-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-android-x64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-darwin-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-darwin-x64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-freebsd-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-freebsd-ia32@3.3.7':
+    optional: true
+
+  '@koromix/koffi-freebsd-x64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-arm@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-ia32@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-loong64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-ppc64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-riscv64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-linux-x64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-openbsd-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-openbsd-ia32@3.3.7':
+    optional: true
+
+  '@koromix/koffi-openbsd-x64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-win32-arm64@3.3.7':
+    optional: true
+
+  '@koromix/koffi-win32-ia32@3.3.7':
+    optional: true
+
+  '@koromix/koffi-win32-x64@3.3.7':
+    optional: true
+
+  '@linxin666/dsh-client-ui-task-board@0.4.16':
     dependencies:
       '@deepseek-ai/schemastery': 3.19.0
       marked: 18.1.0
@@ -999,7 +1294,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tt-a1i/archify-dsh@1.0.0': {}
+  '@tt-a1i/archify-dsh@1.1.0': {}
 
   '@xmldom/xmldom@0.8.15': {}
 
@@ -1135,15 +1430,33 @@ snapshots:
       - encoding
       - supports-color
 
-  dsh-context@0.82.0:
+  dsh-context@0.83.1:
     dependencies:
       zod: 4.4.3
 
-  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/user-commands:
+  dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/multi-root-workspace:
+    dependencies:
+      '@deepseek-ai/node-addon-system': 0.1.2
+      koffi: 3.3.7
+      zod: 4.4.3
+
+  dsh-plugin-project-mcp@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/project-mcp:
     dependencies:
       yaml: 2.9.1
 
-  dsh-plugin-zcode-plan@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/9a34d5e756dc3e4f372ea5ff3e522a8e6ce7a665#path:plugins/zcode-plan: {}
+  dsh-plugin-session-tool-toggle@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/session-tool-toggle:
+    dependencies:
+      zod: 4.4.3
+
+  dsh-plugin-user-commands@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/user-commands:
+    dependencies:
+      yaml: 2.9.1
+
+  dsh-plugin-web-ux@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/web-ux: {}
+
+  dsh-plugin-workspace-config@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/workspace-config: {}
+
+  dsh-plugin-zcode-plan@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/zcode-plan: {}
 
   dsh-pocket@2.12.0(patch_hash=0ace7207bafe8eb99f77e4df99e8da73bdf12a17a12b13d3a479825400bff6b7):
     dependencies:
@@ -1152,14 +1465,14 @@ snapshots:
 
   dsh-prompt-history@1.11.2: {}
 
-  dsh-remote@0.8.72:
+  dsh-remote@0.8.90:
     dependencies:
-      '@deepseek-ai/schemastery': 3.18.5
-      iconv-lite: 0.6.3
+      '@deepseek-ai/schemastery': 3.19.0
+      iconv-lite: 0.7.3
 
-  dsh-rewind-plugin@0.21.0: {}
+  dsh-rewind-plugin@0.21.2: {}
 
-  dshmarket@1.73.12:
+  dshmarket@1.73.17:
     dependencies:
       js-yaml: 4.3.2
       undici: 7.30.0
@@ -1225,7 +1538,7 @@ snapshots:
       - supports-color
     optional: true
 
-  iconv-lite@0.6.3:
+  iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
 
@@ -1253,6 +1566,29 @@ snapshots:
       pako: 1.0.11
       readable-stream: 2.3.8
       setimmediate: 1.0.5
+
+  koffi@3.3.7:
+    optionalDependencies:
+      '@koromix/koffi-android-arm64': 3.3.7
+      '@koromix/koffi-android-x64': 3.3.7
+      '@koromix/koffi-darwin-arm64': 3.3.7
+      '@koromix/koffi-darwin-x64': 3.3.7
+      '@koromix/koffi-freebsd-arm64': 3.3.7
+      '@koromix/koffi-freebsd-ia32': 3.3.7
+      '@koromix/koffi-freebsd-x64': 3.3.7
+      '@koromix/koffi-linux-arm': 3.3.7
+      '@koromix/koffi-linux-arm64': 3.3.7
+      '@koromix/koffi-linux-ia32': 3.3.7
+      '@koromix/koffi-linux-loong64': 3.3.7
+      '@koromix/koffi-linux-ppc64': 3.3.7
+      '@koromix/koffi-linux-riscv64': 3.3.7
+      '@koromix/koffi-linux-x64': 3.3.7
+      '@koromix/koffi-openbsd-arm64': 3.3.7
+      '@koromix/koffi-openbsd-ia32': 3.3.7
+      '@koromix/koffi-openbsd-x64': 3.3.7
+      '@koromix/koffi-win32-arm64': 3.3.7
+      '@koromix/koffi-win32-ia32': 3.3.7
+      '@koromix/koffi-win32-x64': 3.3.7
 
   lie@3.3.0:
     dependencies:
