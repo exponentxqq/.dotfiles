@@ -13,24 +13,24 @@
 models:
   # 高：规划三线 + 设计线 → 1017（质量锚点；原生支持读图，无需改道 vision）
   lineA:
-    provider: deepseek-official
-    model: deepseek-flash
+    provider: zcode-plan
+    model: glm-5.3
     fallback: { provider: zcode-plan, model: glm-5.3 } # 异家兜底（GLM Coding Plan 套餐；纯文本）
   lineB:
-    provider: deepseek-official
-    model: deepseek-flash
+    provider: zcode-plan
+    model: glm-5.3
     fallback: { provider: zcode-plan, model: glm-5.3 }
   panel:
-    provider: deepseek-official
-    model: deepseek-flash
+    provider: zcode-plan
+    model: glm-5.3
     fallback: { provider: zcode-plan, model: glm-5.3 }
   design:
     provider: deepseek-official
     model: deepseek-flash
     fallback: { provider: zcode-plan, model: glm-5.3 }
   apply:
-    provider: zcode-plan
-    model: glm-5.3-flash
+    provider: opencode-go
+    model: deepseek-v4.1-flash
     # fallback: { provider: opencode-go, model: deepseek-v4.1-flash }
     fallback: { provider: zcode-plan, model: glm-5.3-flash }
   verify:
