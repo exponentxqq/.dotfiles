@@ -407,6 +407,8 @@ openspec/changes/improve-smoke-skill-codepoint-slim/
 4. **1.4 模板 §3 行**：在 ``| 库名 | 例：`opc` |`` 之后插入字符集行。**完成判据**：V5。
 5. **1.5 SKILL 阶段 4 指路**：在阶段 4 末条（`- 数据带可检索前缀…记录全部主键与外部对象 key`）之后追加 1 条。**完成判据**：V6 末两条（阶段 4 bullet = 6；`reference §3.7` 存在）+ V1（L1–60 冻结）。
 
+> **【执行终形态 · tasks 1.1/1.2/1.3 · 2026-11-19】** 组 1 已完成（映射见 tasks.md R1）。实测：§3.7 块 @reference L175–184（含尾空行 +11）、§5.2 长度边界行 @L321、#24/#25 @L582/583、SKILL 指路句 @L125、模板字符集行 @L42；行数 reference 598 / SKILL 200 / 模板 95；V1a'/V1b/V1d/V2a'/V2b/V2c/V3/V4 全绿，冻结区逐字节未动。此后行号整体漂移，编辑一律锚点字符串。
+
 ### 组 2　瘦身六处（2.1–2.6；先 reference 后 SKILL，组内自下而上以免内部行号漂移影响人工核对）
 
 1. **2.1 S5 §9**：整块替换 L571–584 为 ③3.3 的 3 行；节标题 `## 9. 项目画像字段` 原样保留。**完成判据**：V7（§9 段 3 行、无表格、模板链接在）。
@@ -418,6 +420,8 @@ openspec/changes/improve-smoke-skill-codepoint-slim/
 
 > 组 2 全部完成后行数应为 SKILL 188 / reference 583（③3.1）；若偏差 >2 行，说明定稿块被改写，按 tasks 附录留痕并回查 ③。
 
+> **【执行终形态 · tasks 2.1/2.2 · 2026-11-19】** 组 2 已完成。实测：SKILL 188（S4@L174 公式句+删 L190、S3@L142 并 1 行、S2@L126 4 行、S1@L61–69 九行）；reference 583（S6-a §6.4 14 行形态、S6-b §7.2 4 行、S5 §9 3 行）；冻结区 V1a'/V1b/V1d/V2b 每处编辑后复跑全绿；定稿块逐字节回验一致、偏差 0 行。阶段 5 bullet 断言收口口径见 tasks.md R2。
+
 ### 组 3　全量断言（3.1–3.5）
 
 1. **3.1 冻结区**：V1 + V2（pin BASE）；显式覆盖 `SKILL.md:30-34`、`reference.md:19`。
@@ -425,6 +429,8 @@ openspec/changes/improve-smoke-skill-codepoint-slim/
 3. **3.3 瘦身**：V6（SKILL 五处）、V7（§9）、V8（S6）。
 4. **3.4 行为零变更**：V10（关键字清单）+ V12（交叉引用无悬空）+ V9b（Top 12 逐字节）。
 5. **3.5 零触达与卫生**：V9a（脚本）、V11（表格 pipe 一致）、V13（`openspec validate` 定向，**不得用 `--all --strict`**——基线已有 `spec/spec-plan` 长文本警告导致 exit 1，见 ⑥A6）、V15（`git status` 范围）。
+
+> **【执行终形态 · tasks 3.1/3.2/3.3 · 2026-11-19】** 组 3 全量断言 PASS（三只读任务并行，无写操作）：V1a'/V1b/V1c/V1d/V2a'/V2b/V2c 七条冻结断言全绿（sha256 双证）；V3–V12 全绿（含 V9b Top 12 逐字节、V10 关键字 7/7、V12 交叉引用 miss=0、V11 pipe 检测器自检防假绿）；V13a 定向 validate exit=0、V15 越界 0 行、V9a 脚本零改动；行数对账 SKILL 188 / reference 583 / 模板 95 零偏差。
 
 ### 组 4　sync 与归档（4.1–4.4）
 

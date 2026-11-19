@@ -39,6 +39,7 @@
 | --- | --- |
 | dbx 连接名 | 例：`localhost@mysql5.7` |
 | 库名 | 例：`opc` |
+| 字符集 / 排序规则 | 例：`utf8mb4_general_ci`（可存 emoji/生僻字）；若为 `utf8`（= utf8mb3），4 字节字符用例预期受限（技能 reference §3.7） |
 | 关键表 | 例：`demands`（状态机 `status`、`published_at`）、`demand_attachments` |
 | 基线查询 | 例：`select count(*) from demands;` |
 | 列名陷阱 | 例：`deadline` 不是 `response_deadline`；附件表是 `size` 不是 `file_size` |

@@ -172,6 +172,17 @@ select target, code, expires_at, used_at from <验证码表> order by id desc li
 2. 只读验证优先；写操作前明确影响面与回滚方式
 3. 落库核验要查**状态机字段 + 时间戳**（如 `status`、`published_at`），不要只看行数
 
+### 3.7 多字节字符与码点口径
+
+中文/emoji/生僻字在三层各有计数单位，先分清「环境限制」与「功能缺陷」：
+
+| 检查点 | 怎么查 | 判据 / 处置 |
+| --- | --- | --- |
+| DB 字符集 | `show create table <表>;` 看 `CHARSET`（MySQL）；`utf8` 即 utf8mb3 | utf8mb3 遇 4 字节字符报错或静默截断（视 sql_mode）→ 判环境限制、记观察项，非功能缺陷 |
+| 计数单位 | 前端/Java 的 `length` 为 UTF-16 code unit（emoji 计 2）；DB `VARCHAR(n)`/`char_length` 为码点；索引与报文按 UTF-8 字节 | 边界用例按**被测校验层**单位取上限 / 上限+1，断言同单位；单位不明先查校验代码 |
+| 落库完整性 | dbx 查回原值逐字符比对，`char_length` 与 `length` 并看 | 变 `???`、空串或尾部乱码 → 先查字符集，不要先判业务缺陷 |
+| 截断显示 | 看 UI 回显与导出的截断边界 | 半个字符的乱码尾巴 → 按缺陷记（渲染/导出按字节截断） |
+
 ## 4. 浏览器操作配方
 
 ### 4.1 快照优先，DOM 兜底
@@ -307,6 +318,7 @@ curl -s -X POST "http://127.0.0.1:<端口>/api/v1/<资源>/<动作>" \
 | 数量超限 | 列表 +1 | 业务错误码 |
 | 区间倒置 | min > max | 业务错误码 |
 | 边界值 | 截止时间 = 当天 | 业务错误码 |
+| 长度边界 | 按被测层计数单位取上限 / 上限+1（前端 code unit、DB 码点、字节上限） | 业务错误码 |
 | 层级/枚举非法 | 传子级码 / 伪码 | 参数错误码 |
 | 状态非法 | 重复执行已完成的动作 | 状态错误码 |
 | 越权/不存在 | 他方 id / 不存在 id | 权限/不存在错误码 |
@@ -472,9 +484,9 @@ smoke/
 入库与忽略：
 
 - `cases.md`、`record.md`、`report.md`、`smoke/.gitignore` **入库**。
-- 截图/大文件直接放运行目录根（单层 glob 可忽略），由 `smoke/.gitignore` 忽略：
+- 截图/大文件直接放运行目录根（单层 glob 可忽略），由 `smoke/.gitignore`（模式相对 `smoke/` 解析）忽略，**不修改项目根 `.gitignore`**：
 
-```
+```text
 runs/*/*.png
 runs/*/*.jpg
 runs/*/*.jpeg
@@ -483,9 +495,6 @@ runs/*/*.gif
 runs/*/*.webm
 runs/*/*.har
 ```
-
-- 忽略规则写 `smoke/.gitignore`（模式相对 `smoke/` 解析），**不修改项目根 `.gitignore`**。
-- `report.md` 复用 §7.1 骨架，落盘在本次运行目录根（§7.2）。
 
 ### 6.5 逐项执行纪律
 
@@ -512,9 +521,8 @@ runs/*/*.har
 
 ### 7.2 归档位置
 
-- **默认：运行目录收纳**——每次运行一个目录 `smoke/runs/<YYYY-MM-DD>-<full|任务号>/`，`record.md`（逐项结果）、`report.md`（§7.1 骨架）、截图/网络导出都放该目录；`*.md` 入库，图片等二进制由 `smoke/.gitignore` 忽略（§6.4）。
-- **画像 §9 覆盖**——项目画像 §9 若写明其他路径或忽略规则，以画像为准；本节只提供默认值。
-- **存量约定（覆盖示例）**——仍沿用 openspec 归档的项目：浏览器报告 + 截图 → `openspec/changes/<change>/artifacts/`（**gitignore 忽略，不入库**）、纯接口/构建类记录 → `<change>/smoke-record.md`（入库）；无 openspec 的项目放约定的 `docs/` 或 `artifacts/` 并在画像写明。以上都属于画像 §9 的覆盖示例，不是默认。
+- **默认：运行目录收纳**——每次运行一个目录 `smoke/runs/<YYYY-MM-DD>-<full|任务号>/`，`record.md`（逐项结果）、`report.md`（§7.1 骨架）、截图/网络导出都放该目录；入库与忽略口径见 §6.4。
+- **画像 §9 覆盖**——项目画像 §9 若写明其他路径或忽略规则，以画像为准，本节只提供默认值；仍沿用 openspec 归档的项目属覆盖示例（浏览器报告 + 截图 → `openspec/changes/<change>/artifacts/`，gitignore 忽略；纯接口/构建类记录 → `<change>/smoke-record.md`，入库；无 openspec 的项目放约定的 `docs/` 或 `artifacts/` 并在画像写明）。
 
 ### 7.3 清理清单
 
@@ -567,18 +575,9 @@ cd <子仓2> && git status --short
 | 21 | 端口排查命令 not found | 容器内无 ss/netstat/lsof | 用 `ps aux \| grep <进程>` |
 | 22 | 用例只写在报告或记忆里，未进 `smoke/cases.md` | 没有稳定编号可供复用与复测 | 先落库取编号再执行（§6.3） |
 | 23 | 单任务新用例测完未回写用例库 | 下次复测漏测、编号断档 | 收尾把新用例回写 `cases.md`（§6.5） |
+| 24 | 中文/emoji 落库变 `???`、空串或尾部乱码 | 表/库字符集为 utf8mb3（`utf8`），4 字节字符报错或静默截断 | 先 `show create table` 看 `CHARSET`，判环境限制而非功能缺陷（§3.7） |
+| 25 | 「限 50 字」长度边界负例全不生效 | 校验层计数单位错配（前端 UTF-16 code unit / DB 码点 / 字节） | 按被测层单位构造上限 / 上限+1（§3.7、§5.2） |
 
 ## 9. 项目画像字段
 
-见 [project-profile-template.md](project-profile-template.md)。字段与采集方式对应关系：
-
-| 画像字段 | 采集方式（§1.2） |
-| --- | --- |
-| 业务时区（时间断言基准） | 项目架构决策文档 / 契约 desc |
-| 服务清单（端口/启动方式/健康路径/日志归属） | `recon.sh` + 项目 README/AGENTS.md |
-| 前端接入（dev 端口/apiBase/CORS） | `nuxt.config.ts`、`.env`、后端安全配置 |
-| 数据存储（连接/库/关键表） | dbx `list_connections`、`describe_table` |
-| 外部组件（真实/MOCK/开关） | 共享配置 grep |
-| 账号与凭据、认证头、凭据存储键 | 项目 AGENTS.md / 前端请求层代码 / 本次准备 |
-| 已知坑 | 历次冒烟报告的观察项 |
-| 用例库与运行目录（smoke/ 路径与忽略规则） | 项目画像 §7/§9；首次建库时确定 |
+字段定义与逐项取值见 [project-profile-template.md](project-profile-template.md)；采集方式对应 §1.2，「账号与凭据」另见项目 AGENTS.md 或前端请求层代码，「已知坑」来自历次冒烟报告的观察项。
