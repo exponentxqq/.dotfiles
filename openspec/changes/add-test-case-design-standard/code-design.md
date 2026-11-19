@@ -710,6 +710,8 @@ git commit -m "docs(openspec): 归档 add-test-case-design-standard"
 - 1.2 先 `git mv` 两文档入 `refs/`（纯移动，迁移即验证 diff 为空 ×2）；再按 ③3.3.0 锚点编辑 SKILL.md 授权三行（每处先 `grep -cF` 唯一）。自检：SKILL.md 仍 188 行 + 授权行外 L1–60 逐字节一致。
 - 1.1 与 1.2 无文件交集可并行；本组不提交（提交在 2.2 合并）。
 
+> **执行终态（2026-11-19，组段终形态化）**：1.1 = 102 行（区间 100–140 内）、V3 全量断言绿（子代理 + 主会话双跑）、六节 H2 无 §7；write 工具新建默认 600 权限，已 `chmod 644` 对齐仓内惯例（→R1）。1.2 = git mv 被 git 识别为 **R（rename）×2**（A13 满足）、纯移动 diff 空 ×2、SKILL.md 188 行、L1–60 授权行外逐字节一致；编辑后无残留裸链接（`](reference.md)`=0、`](project-profile-template.md)`=0）。执行期复核两项：SKILL.md L69 锚点无漂移（同行替换不增删行）；头部句「执行期纪律仍见 reference.md §6.4/§6.5」维持定稿（§6.4 运行目录 + §6.5 逐项执行纪律共同构成执行期操作纪律，语义成立，不改设计工件）。
+
 ### 5.2 组 2 · 接线 + 断言（2.1 → 2.2）
 
 - 2.1 三处指路，建议顺序：refs/reference.md → SKILL.md → refs/project-profile-template.md（互不依赖；先改 reference 可立即跑 V1/V2）。
@@ -720,6 +722,8 @@ git commit -m "docs(openspec): 归档 add-test-case-design-standard"
 - 2.2 断言：V1–V5 + V9 全绿 → 勾 1.1/1.2/2.1/2.2 → 提交 ②（skill 整目录 + tasks.md；add 前核对目录内无外来改动）。
 - 注意：V4 用 `grep -c`（按行），不要用 `-o | wc -l`；链接文本+URL 同行计 1。
 - V9 产物在 `/tmp`，不提交；tasks 附录留痕「执行者/是否子代理/断言结果」。
+
+> **执行终态（2026-11-19，组段终形态化）**：三处编辑落点 = SKILL.md L108（188 不变）/ refs/reference.md L387 blockquote（583→584，fence L385 与 §6.3 标题 L388 相邻，无空行）/ 模板 L79（95 不变，纯文本 `refs/` 前缀）。V1/V2/V4（子代理 + 主会话双跑）、V5（主会话）全绿；V2 计数 H2=9、H3=38。渲染实测裁定：本地无渲染器，按 CommonMark 语义 ATX 标题不构成 blockquote lazy continuation、引用块自行闭合，无异常证据不触发 fallback（改普通段落预案未启用）。V9 = fresh 子代理（未参与写作）按固定样例独立应用，V9-OK 双跑，并上浮 P1–P4 可用性观察（裁定均维持定稿，详见 tasks 附录；P4 留作后续演化建议）。提交②按 R2 延后至统一审提点。
 
 ### 5.3 组 3 · D6 自检修复（3.1 → 3.2）
 

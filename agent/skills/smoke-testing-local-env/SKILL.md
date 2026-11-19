@@ -16,8 +16,8 @@ description: Use when 需要在本机 docker 化开发环境里对任意项目�
 
 | 文件 | 用途 |
 | --- | --- |
-| [reference.md](reference.md) | 完整操作手册：命令模板、浏览器配方、陷阱全表 |
-| [project-profile-template.md](project-profile-template.md) | 项目画像模板（复制到各项目仓填写） |
+| [reference.md](refs/reference.md) | 完整操作手册：命令模板、浏览器配方、陷阱全表 |
+| [project-profile-template.md](refs/project-profile-template.md) | 项目画像模板（复制到各项目仓填写） |
 | [scripts/recon.sh](scripts/recon.sh) | 环境侦察：宿主服务可达性三态判定 |
 | [scripts/tcp-bridge.mjs](scripts/tcp-bridge.mjs) | 跨容器 TCP 桥接（浏览器在容器、服务在宿主时） |
 
@@ -54,7 +54,7 @@ description: Use when 需要在本机 docker 化开发环境里对任意项目�
 **通用规程在技能里，项目专属事实在项目仓的项目画像里。** 开始前先找项目仓的 `docs/smoke-test-profile.md`：
 
 - 有 → 按画像里的端口、入口、账号、MOCK 开关执行
-- 无 → 用 `scripts/recon.sh` 采集事实现场补齐，并建议落盘到项目仓（模板见 [project-profile-template.md](project-profile-template.md)）
+- 无 → 用 `scripts/recon.sh` 采集事实现场补齐，并建议落盘到项目仓（模板见 [project-profile-template.md](refs/project-profile-template.md)）
 
 **不要把项目专属事实写进本技能**，否则技能会随项目漂移、多处维护。
 
@@ -105,7 +105,7 @@ description: Use when 需要在本机 docker 化开发环境里对任意项目�
 **目标**：先有可判定的用例，再谈执行。
 
 1. 判模式：按「两种冒烟模式」小节判定全量还是单任务；话术有歧义先问用户
-2. 读库或建库：有 `smoke/cases.md` 直接读在用条目；无则按 reference §6.2 的能力组 A–G 建库，表头七列固定（reference §6.3）
+2. 读库或建库：有 `smoke/cases.md` 直接读在用条目；无则按 reference §6.2 的能力组 A–G 建库，表头七列固定（reference §6.3）；测试点提炼与用例设计方法见 [test-case-design.md](refs/test-case-design.md)
 3. 单任务补新用例：本任务的新场景先按编号续接落库，不允许只写在脑子里或报告里
 4. 编号集落记录：把本次所选用例编号集写进 `smoke/runs/<YYYY-MM-DD>-<full|任务号>/record.md`（骨架见 reference §6.4），结果列留空作执行清单
 5. 建库时一并创建 `smoke/.gitignore`（只忽略运行目录里的图片/大文件，见 reference §6.4），不改项目根 `.gitignore`
