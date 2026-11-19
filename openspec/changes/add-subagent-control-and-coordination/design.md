@@ -63,6 +63,10 @@ spec-apply subagent 引擎现状为「派发后等回执」开环（`agent/skill
 - **⑤ 逐任务组要点**：6 组 15 任务与 tasks.md 分组一一对齐（见 tasks.md；组 1 RED 基线 → 组 6 GREEN 配对为 writing-skills Iron Law 的 RED→GREEN 落地；4.6 = P1 的 spec-workflow:65 单行改写）。
 - **⑥ 假设与未决项**：A1–A6 假设 + U1–U3 未决见 `code-design.md` ⑥（含降级路径）；本次无阻塞未决。
 
+## 执行环境
+
+- 执行环境：直用主工作区。布局：dotfiles 根仓主检出 @ master（唯一触达仓 = 工件仓，按 refs/worktree.md「根仓（工件仓）不建 worktree」规则不隔离，用户裁决 2026-11-19）；装配：无（skill 经 `~/.agents/skills` symlink 即时生效，无构建/依赖步骤）；环境错开：无（主检出无关脏改动 `dsh/profiles/web/package.json`、`dsh/profiles/web/pnpm-lock.yaml` 不在本变更触达面，不混入提交面）；创建于 2026-11-19
+
 ## Open Questions
 
 无（P1/P2/P3 已由用户拍板：a/a/a；U1 降级预案已在决策 D8/U1 中预置，属执行期按需触发）。

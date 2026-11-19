@@ -79,6 +79,8 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 **两条禁令**：**不得把待决项静默变成假设**；**不得让子代理为等答复而阻塞或轮询**。
 
+**上行通道**（并行规划线/设计线）：subagent 可 `send_message` 直报主会话，仅待决/异常、单发不候复、无租约无前奏、不改提问节奏；见 coordination.md §7。
+
 派发细节（team 成员规约与 5 条回退判据、subagent 并行模板、回执核对）见 [parallel.md](mode/parallel.md)；串行探索契约与收敛接线见 [serial.md](mode/serial.md)。
 
 ## 五、收敛与分歧复算（阶段 1.5）

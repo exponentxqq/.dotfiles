@@ -300,11 +300,13 @@ stalled --重派---------------------> 新行 T<n.m>@r2（原行留存，state �
 
 - 1.1（触达 #1 前置）派 1 个 fresh 子代理，喂三样：`git show HEAD:agent/skills/spec-apply/refs/execution.md` 的 `:8` 台账段原文（旧文本）＋ 场景「你与另一个子代理同批执行、写范围都含 `agent/skills/spec-apply/SKILL.md`，你的提示里没有任何协调指令」＋ 只回答「开工第一件事做什么 / 发现写范围重叠怎么办 / 会不会通知主会话」三问（不执行、不写文件）。逐字记入 `/tmp/spec-flow/add-subagent-control-and-coordination/red-baseline.md`，含「是否提及读 progress.md」「是否让路」「是否提及上行」三栏与一行 `RED 结果：复现|未复现`；未复现如实标注不伪造。
   - 验证：`test -s /tmp/spec-flow/add-subagent-control-and-coordination/red-baseline.md` 退出码 0，且 `grep -qE '^RED 结果：(复现|未复现)$' …` 命中，且上面三栏关键字（`progress.md` / `让路` / `上行`）各至少出现一次作为栏目标题，且 `test -z "$(git status --porcelain -- agent/skills openspec/specs)"` 退出码 0（本组零落盘）。
+  - **终形态（执行期实测 2026-11-19）**：**RED 复现**——探针三问（fresh 子代理 `opencode-go/deepseek-v4.1-flash`）证实旧协议下子代理三栏全否：不读 progress.md（视为「派发方登记动作，不是给我的执行指令」）、不让路（「没有任何协调指令，所以我按自己的任务继续写自己那份」）、不主动上行（仅真冲突时最终回执被动说明）。记录在 `/tmp/spec-flow/<change>/red-baseline.md`（易失），结论留痕于此。执行裁定：提示中 writer skill 加载指令与探针纯净纪律冲突 → 探针纪律优先跳过加载（tasks.md 附录 R1）。
 
 **组 2｜协议权威源（1 任务，新建 #1）**
 
 - 2.1 按 ③3.1–3.7 逐字创建 `agent/skills/spec-apply/refs/coordination.md`（10 节；注入段连 `coord-inject` 标记一起；§7 = spec-plan 精简段；§9 = 升级判据）。不写项目文件、不改任何既有文件。
   - 验证：`test -f agent/skills/spec-apply/refs/coordination.md` 且 `python3 -c "s=open('agent/skills/spec-apply/refs/coordination.md',encoding='utf-8').read();assert 3800<=len(s)<=5000,len(s)"` 退出码 0；注入段行数 `awk '/<!-- coord-inject:start -->/,/<!-- coord-inject:end -->/' agent/skills/spec-apply/refs/coordination.md | sed '1d;$d' | wc -l` 落在 **7–15**；`grep -c 'active→done|void|stalled' …` = 1；`grep -c '写者 SHALL 仅为主会话' …` ≥1；节标题 `grep -c '^## §' …` = **10**；`grep -c 'spec-plan' …` ≥1（§7 存在）。
+  - **终形态（执行期实测 2026-11-19）**：134 行 / len=4996 cp，全部验证句过（注入段 8 行、`^## §`=10、常量计数全中）。③3.1–3.7 原文约 5733 cp 超长度门 → 按 **R2 裁定**（验证句优先）压缩表格冗长解释，关键逐字串与协议语义全保留（注入段连标记、三示例、§7 代码块与 3.2/3.3/3.7 脚本比对逐字一致）。§2 省略示例登记簿代码块、schema 表去「必填」列；§7 删 `parallel.md:27` file:line。详见 tasks.md 附录 R2。
 
 **组 3｜spec-apply 接线（3 任务，写 #2/#3/#4 三个不同文件）**
 
@@ -314,6 +316,7 @@ stalled --重派---------------------> 新行 T<n.m>@r2（原行留存，state �
   - 验证：`python3 -c "import re;s=open('agent/skills/spec-apply/SKILL.md',encoding='utf-8').read();fm=re.match(r'^---\n.*?\n---\n\n',s,re.S).group(0);r=len(s)-len(fm)+343;print(len(s),r);assert r<=8192 and 3600<=len(s)<=3800"` 退出码 0；`grep -c 'refs/coordination.md' …` = 1；`grep -c '协调纪律' …` = 1；`grep -c '上行通道' …` = 1；`test -z "$(git diff -- agent/skills/spec-apply/SKILL.md | grep '^[-+]description:\|^[-+]name:')"`；`grep -c '^## ' …` = 7（一…七，未新增节）。
 - 3.3（#4）`failure-modes.md`：`:17` 拆方向重写、`:18` 作废 `job_list` 判据、新增 2 行（③3.4/3.3 的失败面）。
   - 验证：`test -z "$(grep '子代理不是 teammate、不可消息寻址' agent/skills/spec-apply/refs/failure-modes.md)"`（矛盾句消失）；`test -z "$(grep 'job_list' agent/skills/spec-apply/refs/failure-modes.md | grep -v '不得作为在途判据')"`；`grep -c '上行' …` ≥2；`grep -c 'VOIDED' …` = 1；`python3 -c "s=open(...).read();assert 2100<=len(s)<=2350,len(s)"` 退出码 0；表格行数 `grep -c '^|' …` 由 17 → 19。
+  - **终形态（执行期实测 2026-11-19，三任务并行、写不同文件零冲突）**：3.1 len=5458（基线 4955，Δ+503；硬区间 5250–5500，余量 42）——v2 登记簿四处接线全过，`:5` 封闭枚举零改动；3.2 len=3707 / 渲染 3825≤8192（Δ+436 vs 预算 423，两道硬门均过；`:37`/`:43` 用裸 `coordination.md §N`、完整路径 `refs/coordination.md` 仅 :39 路由行一处——grep 常量 =1 所致，裁定接受）；3.3 len=2200（Δ+606 vs 预算 +590，区间内；拆方向两行 + 新增 2 行，表格恰 17→19）。三文件 grep 常量全中，与 coordination.md 语义一致。
 
 **组 4｜spec-plan 接线（5 任务，写 #5–#9 五个不同文件）**
 
@@ -327,6 +330,7 @@ stalled --重派---------------------> 新行 T<n.m>@r2（原行留存，state �
   - 验证：`grep -c '无租约、无检查点' agent/skills/spec-plan/refs/convergence.md` = 1；`python3 -c "s=...;assert 2560<=len(s)<=2650,len(s)"` 退出码 0。
 - 4.5（#9）`refs/failure-modes.md`：表末新增 1 行。
   - 验证：`grep -c '降级为回执上浮' agent/skills/spec-plan/refs/failure-modes.md` = 1；`python3 -c "s=open('agent/skills/spec-plan/refs/failure-modes.md',encoding='utf-8').read();assert 3080<=len(s)<=3160,len(s)"` 退出码 0；表格行数 `grep -c '^|' …` 由 **16 → 17**。
+  - **终形态（执行期实测 2026-11-19，六任务并行、写不同文件零冲突；tasks.md 组 4 实为 6 任务，本节 ⑤ 未单列 4.6）**：4.1 render=8151/余量 41（硬门 ≥40 过；新句 100 cp 在入口硬上限 100 cp 内——**基线漂移实测事实：spec-plan 入口渲染基线 8049/余量 143，非落档期 8146/46 口径，系 dd8f00b 之后已归档的 skill 瘦身变更使入口变短，97→100 cp 方案照常适用**）；4.2 len=3085、四钉串各恰 1 行（B 线用指回式等形，避免完整串重复致 grep 行数>1）；4.3 len=7645（Δ=192≤300 硬门，钉串在格式示例中自然出现）；4.4 len=2634（单行原地改写 Δ+74；任务原文「上行同学」系笔误按「上行按 §四」落笔）；4.5 len=3145、表格恰 16→17；4.6 render=6806（「subagent 登记簿核对」术语归一，保留段逐字，`job_list` 仅存于「不得作为在途判据」语境）。引用写法两种并存（裸 `coordination.md §7` 有 spec-workflow/refs/failure-modes.md:9 先例；显式「spec-apply 的 refs/coordination.md §7」用于跨 skill refs 语境），裁定均接受。**范围外发现（不扩 scope，终检披露）**：`spec-done/SKILL.md:49` 仍写「progress 派发台账」旧术语，不在触达面 13 条内。
 
 **组 5｜spec delta 核对（2 任务，只读 #10/#11——delta 由落档生成，本组不写工件）**
 
@@ -335,6 +339,7 @@ stalled --重派---------------------> 新行 T<n.m>@r2（原行留存，state �
 - 5.2 同法核 `specs/spec-plan/spec.md`：`## MODIFIED Requirements` ×1、1 条 Requirement、5 个 Scenario、正文 422±20 cp。
   - 验证：`grep -c '^## ADDED Requirements' …` = 0；`grep -c '^### Requirement:' …` = 1；`grep -c '^#### Scenario:' …` = 5；`python3 -c "…assert 400<=len(m.group(1).strip())<=500"` 退出码 0。
 - 组级门：`openspec validate add-subagent-control-and-coordination --strict` 退出码 0（**不得用 `--all --strict`**——`openspec validate spec-plan --strict` 当前基线已 exit 1，见 ⑥A5）。
+  - **终形态（执行期实测 2026-11-19）**：5.3 exit=0（输出仅「is valid」，无 warning）；5.1 全断言过（ADDED 正文 429 cp ≤500、16 场景、无 ask_question）、5.2 全断言过（正文 423 cp ∈ [400,500]、5 场景）。③3.8 内容级逐字符比对：3/4 正文逐字节一致；plan MODIFIED 423 vs 3.8 声明 422 差 1 cp（delta 多一「以」——**忠实继承主规格基线用字，3.8 系引用漏字，裁定保留 delta**）；ADDED 标题与 2 个场景名括号半角 vs 3.8 全角（各条目跟随各自基线/兄弟标题风格，裁定不改）；plan 正文 15 处标点半角化系 3.8 引用即半角（外观级，语义零差，归档后主规格以 delta 为准，披露不阻断）。5.2 验证句「grep -c '^## ADDED Requirements' =0」实测数值 0 成立但 grep exit=1（无匹配语义），记录时以数值为准。
 
 **组 6｜GREEN 配对复测与无裁剪终检（2 任务）**
 
@@ -342,6 +347,7 @@ stalled --重派---------------------> 新行 T<n.m>@r2（原行留存，state �
   - 验证：`grep -q 'send_message(agent_id' green-check.md` 且 `grep -q 'VOIDED' green-check.md` 且 `grep -qE '^GREEN 结果：(通过|摇摆)$' green-check.md` 均命中；`grep -q 'RED' green-check.md`（对比结论在）。
 - 6.2 无裁剪终检：主会话按名加载 `skill spec-plan` 与 `skill spec-apply`，断言返回正文含新增句、且**不含** `[... tool result middle pruned ...]`。
   - 验证：加载回执含 `上行通道`（spec-plan）与 `协调纪律`（spec-apply）；`grep -c '^## ' agent/skills/spec-plan/SKILL.md` = 10（未新增节）；重跑 4.1 的渲染公式（渲染 ≤8192、余量 ≥40）。
+  - **终形态（执行期实测 2026-11-19）**：**RED→GREEN 配对成立**——GREEN 探针三栏全「是」（第一动作读登记簿全表并落实三检查点、交集路径让路+不可避让上行「决」、`send_message(agent_id=父id)` 按五段式上行单发不候复+失败降级+VOIDED 复述完整），且**行为级**执行了注入段第 1 条（真实读 progress.md 确认自己条目在途）；4 条 grep 验证全过、零代码落盘。6.2：两 skill 按名加载回执均含新增句、全文完整渲染无中段裁剪标记，spec-plan `^##`=10、spec-apply `^##`=7、渲染 8151/余量 41。组 1/组 6 配对（R1 裁定省略 writer skill 加载）完成 writing-skills Iron Law 证据链。
 
 ## ⑥ 设计假设与未决项
 

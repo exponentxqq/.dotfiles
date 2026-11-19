@@ -14,10 +14,12 @@
 | 需读图而路由不支持（`does not declare image input`） | 改用 `vision` 路由重新派发；能力事实，不重试原路由 |
 | 旧会话报 `child model selection is disabled` | 配置只对新会话生效：新建会话重试；不判定工具损坏 |
 | team 成员失败 / 上限达限（`Team member limit 8 reached`） | `interrupt_agent` 中断或重建；无法恢复降级 subagent，降级与原因写留痕 |
-| `send_message` 到 subagent id 报不可寻址 | 平台事实：子代理不是 teammate、不可消息寻址，回执只能等运行时完成通知；派发事实以 `/tmp/spec-flow/<change>/progress.md` 派发台账（execution.md）为准，不因此重复派发 |
-| 上下文压缩丢失派发记录/回执 | 按 spec-workflow 恢复协议 + 派发台账：文件系统核查预期落盘文件（=写范围）是否出现 + `job_list` 判「在途/已丢」；在途等回执、已丢才重派，防双写 |
+| `send_message` 到 subagent id 报不可寻址（下行）/ 子代理直报主会话（上行） | 按方向分别处置：**下行**（lead→subagent）平台不可达——`send_message` 对 subagent id 报 not found，无法向已派发子代理发通知或中断；控制只有软废止令（登记簿该条目改 `state=void` + `reason`，仅检查点生效），需检查点之间即时叫停则在派发前按判据切 `--engine team`（已派发中无硬中断）。**上行**（subagent→lead）可用——子代理 `send_message(agent_id=<父会话 id，见 runtime context>)` 直报主会话，单发不候复，事件限决/异/成三类；派发事实以 `/tmp/spec-flow/<change>/progress.md` 登记簿为准，不因此重复派发 |
+| 上下文压缩丢失派发记录/回执 | 按 spec-workflow 恢复协议 + 登记簿：以登记簿条目状态 + 写范围落盘事实判定——`state=active` 且写范围内预期文件已出现=在途（等回执，不重派、不轮询）；零落盘且无上行无回执=stalled（先对现存 diff 跑验证句：过则补勾 `done`，未过才重派 `@r2`，原行留存，恢复后不新建重复行）。`job_list` 不得作为在途判据（不含 subagent，真实运行中实测为空），防误判「已丢」造成双写 |
 | 验证需真实密钥而凭据缺失 | 明确报错失败，不静默跳过、不伪造结果；密钥只经参数/环境变量传入 |
 | 需要宿主操作（装依赖、重启兜底） | 给确切命令交用户执行，不代劳 |
 | 执行环境块缺失或 worktree 异常 | 按 spec-workflow 恢复协议与其 refs/worktree.md「恢复核对」处置；脏 → 呈证问处置，不擅自清理 |
+| 检查点读到自己的条目 `state=void`/`stalled` | 停手：不再改动、不 `git` 操作（`git status --porcelain` 只读核对）；回执首行写 `VOIDED`（停滞写 `STALLED`）并列已改文件，产出交主会话裁决 |
+| 上行发送失败（`send_message` 报错 / 父 agent id 缺失） | 不重试、不阻塞：事件改写进回执并注明降级原因，主会话据回执代问或重派 |
 
 > 注：红线级条目（审核确认前不提交、不提交未过验证内容、auto 硬停四条件、真实密钥只经参数、分仓提交、不静默假设待决项）留在 SKILL.md 第七节。

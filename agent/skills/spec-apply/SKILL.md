@@ -36,11 +36,13 @@ while 存在未勾选任务:
 
 **共同纪律**：主会话必须自己按**验证句 + diff** 核对，**核对通过才勾选**；**验收须干净窗口**（无并发构建、验证任务真实 executed 无 SKIPPED——展开见 [execution.md](refs/execution.md)）。
 
-展开内容按消费时机外移 **refs/**：**派发前（两引擎）读 [execution.md](refs/execution.md)**（编排、模式与提交、干净窗口、留痕、提示模板、回执格式）；**仅 subagent 派发前读 [routing.md](refs/routing.md)**（执行键路由、三档回退、白名单、读图、自检）；**异常先读 [failure-modes.md](refs/failure-modes.md)**。
+**协调纪律（仅 subagent 引擎）**：派发前读登记簿全表——他人 `state=active` 的写范围与升级判据（coordination.md §9：同任务审核被拒 ≥2 次/需检查点间即时叫停/任务间多轮互商/预计 >2 轮澄清 → 提示用户建议 `--engine team`，只提示不自动切）；组内并发派发前先登记全批条目并回填会话 id；每个 fresh 子代理的提示须粘贴 coordination.md §4 注入段全文。
+
+展开内容按消费时机外移 **refs/**：**派发前（两引擎）读 [execution.md](refs/execution.md)**（编排、模式与提交、干净窗口、留痕、提示模板、回执格式）；**仅 subagent 派发前读 [routing.md](refs/routing.md)**（执行键路由、三档回退、白名单、读图、自检）；**仅 subagent 引擎派发前另读 [coordination.md](refs/coordination.md)**（登记簿、检查点、上行格式、注入段与升级判据）；**异常先读 [failure-modes.md](refs/failure-modes.md)**。
 
 ## 四、执行期待决中转
 
-执行子代理**不能直接向用户提问**（`DELEGATED_CALLER`，平台设计不是故障）——它在产物与回执**上浮**待决项 → 主会话**当批次即时代问**（≤5 问/轮附推荐）→ **subagent** 以上轮回执摘要+答复**接续重派**；**team** 用 `send_message` 回**同一成员**。**不得把待决项静默变成假设**，不得为等答复阻塞轮询。展开见 [execution.md](refs/execution.md)。
+执行子代理**不能直接向用户提问**（`DELEGATED_CALLER`，平台设计不是故障）——它在产物与回执**上浮**待决项 → 主会话**当批次即时代问**（≤5 问/轮附推荐）→ **subagent** 以上轮回执摘要+答复**接续重派**；**team** 用 `send_message` 回**同一成员**。**不得把待决项静默变成假设**，不得为等答复阻塞轮询。展开见 [execution.md](refs/execution.md)。**上行通道**：subagent 引擎下子代理可 `send_message(agent_id=父会话 id)` 直报主会话（单发不候复，决/异/成三类，格式见 coordination.md §5），与回执上浮并行——上行不替代回执、不候答复。
 
 ## 五、模型路由（执行侧）
 

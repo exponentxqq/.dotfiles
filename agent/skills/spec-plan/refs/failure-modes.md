@@ -18,5 +18,6 @@
 | 旧会话报 `child model selection is disabled for this tool instance` | 该会话在**组合期**未读到开关与白名单（配置改动只对新会话生效）：**新建会话**重试，必要时重启 dsh 兜底；**不要判定工具损坏** |
 | 用户中断（说停、切换话题、新指令） | 立即停在安全检查点；未落盘材料与未提交工件保持原状并汇报位置（`/tmp/spec-flow/<change>/` 有哪些、四件套到哪一步），不擅自 stash / revert / 补提交；重进按入口「压缩后恢复速查」重建——**按现存文件名辨编排与阶段**（`explore.md`/`decisions.md`=串行，`line-*.md`=并行），落档后 `code-design.md`/`diff-matrix.md`/`decisions.md` 从变更目录取（落档副本为权威） |
 | 需要宿主操作（重启容器兜底、skctl、推送） | 给出确切命令交给用户执行，**本 skill 不代劳** |
+| 上行发送失败（`send_message` 报错 / 父 agent id 缺失） | **不重试、不阻塞**：事件降级为回执上浮——改写进产物「待决问题」节与回执 TOP，主会话照常代问，不另开通道 |
 
 > 注：红线级条目（绝不副作用创建 `openspec/`、不静默把待决项变假设、`DELEGATED_CALLER` 是平台设计不是故障、工件未过 `--strict` 校验不提交）留在 SKILL.md 第九节，不在此文件。
