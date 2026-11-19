@@ -26,7 +26,7 @@
 
 ## 5. 归档（单任务组，依赖组 4）
 
-- [ ] 5.1 归档与归档提交：核对 delta 与最终文档一致、tasks 无 `- [ ]` → `openspec archive improve-smoke-skill-codepoint-slim --yes`（自动 sync 主规格第 8 条 + 日期前缀移动）→ V14 断言（`grep -c '^### Requirement:' openspec/specs/smoke-testing-local-env/spec.md` = 8、`grep -c '^#### Scenario:'` = 14、`git diff --numstat $BASE -- openspec/specs/smoke-testing-local-env/spec.md` 删除列 = 0、archive 目录在且活跃目录已移走）→ `git add -A openspec && git commit -m "docs(openspec): 归档 improve-smoke-skill-codepoint-slim"`；验证：`openspec validate smoke-testing-local-env --type spec --strict` 退出码 0 且 V14 各断言通过、`git log --oneline -2` 含归档提交
+- [x] 5.1 归档与归档提交：核对 delta 与最终文档一致、tasks 无 `- [ ]` → `openspec archive improve-smoke-skill-codepoint-slim --yes`（自动 sync 主规格第 8 条 + 日期前缀移动）→ V14 断言（`grep -c '^### Requirement:' openspec/specs/smoke-testing-local-env/spec.md` = 8、`grep -c '^#### Scenario:'` = 14、`git diff --numstat $BASE -- openspec/specs/smoke-testing-local-env/spec.md` 删除列 = 0、archive 目录在且活跃目录已移走）→ `git add -A openspec && git commit -m "docs(openspec): 归档 improve-smoke-skill-codepoint-slim"`；验证：`openspec validate smoke-testing-local-env --type spec --strict` 退出码 0 且 V14 各断言通过、`git log --oneline -2` 含归档提交
 
 ---
 
