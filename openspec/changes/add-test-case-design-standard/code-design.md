@@ -732,6 +732,8 @@ git commit -m "docs(openspec): 归档 add-test-case-design-standard"
 - 勾 3.1/3.2 → 提交 ③（routing.md + tasks.md）。
 - 失败处理：若白名单不是 8（例如他会话改了 `allowedModels`），停止并复核该文件 diff；不要为凑 8 改断言。
 
+> **执行终态（2026-11-19，组段终形态化）**：3.1 = L49 替换 -1/+4 逐字（diff 核对一致），V8 静态四断言双跑绿，70 行。3.2 = V8b-OK 双跑（恰 2 项、注释行不入选）；V8 动态按 R3 口径满足——`sed 42,57p | bash` 整块原样执行：白名单 8（zai/zai-coding-cn/zcode-plan/opencode-go/deepseek-official 各 2，block 形态）/ 映射 13 / `OK 全部路由 ⊆ 白名单` / rc=0，与旧脚本实测（白名单 0、13 条全误报、exit 1）对照即 D6 修复生效铁证。awk 抽取缺陷（收尾引号与 console.log 同行 → 断层）为落档断言固有、非 T3.1 引入，用户裁决按实质通过记录（R3），routing.md 不动。提交③已随 R2 统一审提补交。
+
 ### 5.4 组 4 · 归档（4.1）
 
 1. 干净窗口：`git status --short` 只允许外部在途 7 项（Q1 的 coordination.md 待确认）；出现本变更残留即停。可照抄：

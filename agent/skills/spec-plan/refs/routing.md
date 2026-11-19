@@ -46,7 +46,10 @@ const cands=["yaml","/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/y
 let YAML=null;for(const c of cands){try{YAML=require(c);break}catch{}}
 if(!YAML){console.log("缺 yaml 依赖：路由自检跳过（未校验，不等于通过）");process.exit(0)}
 const m=YAML.parse(fs.readFileSync(d+"spec-workflow.yaml","utf8"));
-const wl=[...fs.readFileSync(d+"profiles/web/cordis.patch.yml","utf8").matchAll(/-\s*\{\s*provider:\s*([\w.\-]+),\s*model:\s*([\w.\-]+)\s*\}/g)].map(x=>x[1]+"/"+x[2]);
+const src=fs.readFileSync(d+"profiles/web/cordis.patch.yml","utf8");
+const flow=/^[ \t]*-[ \t]*\{[ \t]*provider:[ \t]*([\w.\-]+)[ \t]*,[ \t]*model:[ \t]*([\w.\-]+)[ \t]*\}/gm;
+const block=/^[ \t]*-[ \t]*provider:[ \t]*([\w.\-]+)[ \t]*\r?\n[ \t]*model:[ \t]*([\w.\-]+)/gm;
+const wl=[...new Set([...src.matchAll(flow),...src.matchAll(block)].map(x=>x[1]+"/"+x[2]))];
 const rs=Object.entries(m.models||{}).flatMap(([k,v])=>[[k,v.provider+"/"+v.model],...(v.fallback?[[k+".fallback",v.fallback.provider+"/"+v.fallback.model]]:[])]);
 const bad=rs.filter(([,r])=>!wl.includes(r));
 console.log("白名单:",wl.join(" "));console.log("映射:",rs.map(([k,r])=>k+"="+r).join(" "));

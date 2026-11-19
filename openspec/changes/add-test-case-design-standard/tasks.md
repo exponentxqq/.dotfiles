@@ -14,8 +14,8 @@
 
 ## 3. D6 自检修复（2 任务，串行）
 
-- [ ] 3.1 `agent/skills/spec-plan/refs/routing.md` L49 单行锚点替换为 4 行双形态正则（触达 #5；before/after 逐字见 code-design ③3.4，新增行不含单引号，先 `grep -cF` 旧行唯一 =1）；验证：code-design ③3.7 V8 静态四断言（`const flow=`/`const block=`/`const wl=` 各 =1 且旧串 =0）
-- [ ] 3.2 真实文件动态验证与混合样例后勾选并提交 ③（从 routing.md 抽取脚本原样执行：白名单 8 项、映射 13 条、`OK 全部路由 ⊆ 白名单`、退出码 0；routing.md 67→70 行记入附录）；验证：V8 动态三断言 + V8b 混合样例（恰解析 2 项且注释行不入选）退出码 0 + 提交 ③ `fix(skills): 修正 spec-plan 路由自检白名单解析`（routing.md + tasks.md 精确路径）
+- [x] 3.1 `agent/skills/spec-plan/refs/routing.md` L49 单行锚点替换为 4 行双形态正则（触达 #5；before/after 逐字见 code-design ③3.4，新增行不含单引号，先 `grep -cF` 旧行唯一 =1）；验证：code-design ③3.7 V8 静态四断言（`const flow=`/`const block=`/`const wl=` 各 =1 且旧串 =0）
+- [x] 3.2 真实文件动态验证与混合样例后勾选并提交 ③（从 routing.md 抽取脚本原样执行：白名单 8 项、映射 13 条、`OK 全部路由 ⊆ 白名单`、退出码 0；routing.md 67→70 行记入附录）；验证：V8 动态三断言 + V8b 混合样例（恰解析 2 项且注释行不入选）退出码 0 + 提交 ③ `fix(skills): 修正 spec-plan 路由自检白名单解析`（routing.md + tasks.md 精确路径）
 
 ## 4. 归档（单任务）
 
@@ -23,9 +23,10 @@
 
 ## 附录：执行留痕（执行期回填，落档时留空）
 
-- 行数台账：SKILL.md 188 / refs/reference.md 584 / refs/project-profile-template.md 95 / refs/test-case-design.md 102 / routing.md ____（组 3 后回填）
+- 行数台账：SKILL.md 188 / refs/reference.md 584 / refs/project-profile-template.md 95 / refs/test-case-design.md 102 / routing.md 70（原 67，+3 净增）
 - V9 执行者与方式：fresh 子代理 session-c79b2853（未参与写作，无自证局限）；V9-OK 子代理 + 主会话双跑；演练稿 /tmp/test-case-design-drill.md 202 行（26 TP / 28 TC / §5.1–5.3 齐备，sha256 前缀 1bb2ab3e8d172a80，不入库）
 - V9 观察与裁定（P1–P4，2026-11-19，审提点呈报）：P1 类型枚举写法——§3 规则行已声明「可多值（用『/』连接）」，「异常/空值」系多值组合、「空值」为「空值与非法值」简称，维持定稿；P2 A–G vs A–F——G 为 reference §6.2「补充」组（L384）不在附加覆盖典型落点，组定义外置系 writing-skills 重参考外移设计，维持定稿；P3 直接交付前置——§6 映射明确限于入库去向，直接交付不入库（§1.1）不触发 §6，自包含前置符合设计意图；P4 TP↔TC 硬追溯——现设计经「对应需求/规则 ↔ 覆盖需求/规则」间接对齐，升格属标准内容变更 = 规划外，不改动、留作后续演化建议。
 - Q1 裁决回填：已决（落档期 2026-11-19）——`coordination.md` 按外部在途处理，干净窗口白名单第 7 项，台账 6→7
 - R1（执行期运行规则，2026-11-19 组 1）：write 工具新建文件默认权限 600，本仓 Markdown 惯例 644——新建入库文件后需 `chmod 644` 对齐。依据：T1.1 实测（`refs/test-case-design.md` 初建 600，同目录既有文件 644）。适用范围：本仓「新建文件」类执行任务。连锁面：无断言涉及文件权限；组 2/3 均为编辑既有文件，无后续动作。
 - R2（执行期裁决，2026-11-19 用户）：auto 提交口径 = 任务 2.2/3.2/4.1 明文的提交步骤**不在组内实施**，统一延后至全部批次完成后的审核点；用户确认后按 code-design ③3.8 序列与提交信息原样补交（② skill 整目录 + tasks 勾 1.1–2.2 → ③ routing.md + tasks 勾 3.1/3.2 → ④ `openspec archive` + V6b/V7 + 勾 4.1 + 提交④）。2.2/3.2 勾选口径 = 除提交步骤外验收全绿；**openspec archive 随提交④序列在审提点后执行**（归档移动目录后旧路径 tasks.md 不可再供②③ add，故 4.1 审提前仅完成干净窗口复核 + V6a 复跑）。依据：execution.md「提交一律在用户审核确认后」与 tasks 验收句「提交在顶」冲突，用户选严格审核口径。适用范围：本变更执行期全部提交。连锁面：2.2/3.2/4.1 验收句中提交相关项延后满足；spec-done 六要素汇报的提交历史要素在补交完成后读出。
+- R3（执行期裁决，2026-11-19 组 3 用户）：V8 动态断言的 awk 抽取命令假设 `node -e '…'` 收尾引号独占一行，与 routing.md 末行形态（`console.log("OK 全部路由 ⊆ 白名单");'` 引号与代码同行）不兼容 → 抽取缺末行、OK 断言原文不可满足；该缺陷 HEAD 67 行版即存在，**非 T3.1 引入**（落档断言自带）。验收口径改为 `sed 42,57p | bash` 整块原样执行，实质验证全绿：白名单 8 / 映射 13 / `OK 全部路由 ⊆ 白名单` 在 / rc=0（T3.2 子代理与主会话双跑一致；主会话曾误报全绿——GREP-OK 实际未出现，经 T3.2 揭穿后纠正）。routing.md 不为此改动（70 行维持）。适用范围：本变更 V8 动态验收；后续抽取该脚本一律沿用整块执行口径。连锁面：tasks 3.2 验收句 OK 断言以本口径满足；code-design ③3.7 V8 段执行注记；无文件改动。
