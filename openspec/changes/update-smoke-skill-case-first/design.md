@@ -54,6 +54,7 @@
 - **D8** §7.4 增「预期入库改动」白名单（cases.md 修订、runs/**/*.md、首次建库 .gitignore）——否则「禁止任何入库改动」与「必须回写用例库」直接矛盾。
 - **D9** 冻结区验证按行区间拆分（L1–2/L4–10/L12–60 逐字节 + L3/L11 同行替换断言 + 行数 60）——全量 diff 必然败于授权变更行。（落档分歧点 Q1 已确认放行 L11 同行替换。）
 - **D10 栈识别结论**：writer skill 未命中——全仓无 `pom.xml`/`build.gradle(.kts)`/`nuxt.config.*`/`settings.gradle*`（find 实测无输出）；仓根无 package.json，全仓 5 个 package.json 均无 nuxt 依赖；spring-writer/nuxt-writer/dsh-plugin-writer 触发面（各自 SKILL.md:3-4）均未命中。**用户已确认本次豁免 writer 加载（仅本次有效）**，设计不受 writer 硬约束；结论随工件传递，执行侧不再依赖会话记忆。
+- **执行环境**：直用主工作区。布局：dotfiles → 主检出 `/home/xuqinqin/develop/dotfiles` @ master；装配：无（纯 markdown 规程改动，`~/.agents/skills/smoke-testing-local-env` symlink 指向主检出实体，改动即时生效，无构建/依赖安装）；环境错开：无（不涉端口/数据库/不入库本地配置；主检出既有无关脏改动 `dsh/profiles/web/` 与本变更触达面 `agent/skills/` 零重叠，已向用户披露并经确认直用）；装载指纹：不适用（不改导出符号）；创建于 2026-11-19
 
 ## 逐任务组实现要点（⑤）
 

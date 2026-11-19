@@ -75,6 +75,8 @@
 | --- | --- | --- |
 | 例：需求发布 | 登录 → `/account` → "去需求广场发布" | 已完善企业资料的账号 |
 
+> 本表是用例库的输入：编写 / 补充 `smoke/cases.md` 时，按「功能 → 入口路径 → 前置数据」逐行转成用例（格式见技能 reference §6.3）。
+
 ## 8. 已知坑（项目专属）
 
 | # | 现象 | 说明 |
@@ -85,7 +87,8 @@
 
 | 项 | 值 |
 | --- | --- |
-| 报告路径 | 例：`openspec/changes/<change>/artifacts/browser-smoke-<date>.md`（gitignore） |
-| 接口冒烟记录 | 例：`<change>/smoke-record.md`（入库） |
-| 截图目录 | 例：`openspec/changes/<change>/artifacts/` |
+| 用例库 | 默认 `smoke/cases.md`（入库；定义只增不删、结果不回填本文件，格式见技能 reference §6.3） |
+| 运行目录 | 默认 `smoke/runs/<YYYY-MM-DD>-<full\|任务号>/`：一次运行一个目录，`record.md`（逐项结果）与 `report.md`（结论报告）入库（见技能 reference §6.4） |
+| 截图忽略 | 截图/大文件放运行目录根，由首次建库时一并新建的 `smoke/.gitignore` 按单层 glob（`runs/*/*.png` 等）忽略；不改项目根 `.gitignore` |
+| 本画像覆盖 | 留空 = 默认 `smoke/` 约定；项目另定用例库 / 运行目录 / 忽略规则时写在此处，以本画像为准（见技能 reference §7.2） |
 | 测试数据清理 | 默认保留痕迹，报告"测试数据"节列明 |

@@ -357,6 +357,8 @@ runs/*/*.har
 
 **完成判据**（命令见 ⑤ 验证映射 V4–V7、V9）。
 
+> **终形态（组 1 完成 · 2026-11-19，主会话核对通过）**：实测 584 行（量级「约 550」为近似值，超出部分来自 ③ 强制的完整 record.md 骨架与 smoke/.gitignore 忽略清单，不影响契约）；A–G 块逐字节保留于新 L366–372（HEAD L341–347 diff 无差异）；V4/V5 全绿（主会话复跑 exit=0）、V6/V8 自检 0 行、L1–18 冻结 diff 无差异。偏差留痕三项：①§7.1「五、证据文件」同步改为「截图清单（相对链接）」（③3.5 对齐——⑤保留清单未含「五」，如需旧文案可单行回退）；②§8 第 22/23 行文案自拟（蓝图未给逐字），与组 2 拟增陷阱同义（未落库即测 / 单任务未回写）；③§6.4 标题含 `<YYYY-MM-DD>` 原始字面（3.7 契约字面），CommonMark 渲染器可能吞段（raw/agent 读取不受影响）——待决已上浮，裁决记 R1。
+
 ### 组 2　SKILL.md 规程改造
 
 **输入锚点**：L3、L60/L61、L63–68、L70、L91/L92、L100、L109、L121、L128–141、L143–148、L150–156；条件锚点 L11。
@@ -376,10 +378,14 @@ runs/*/*.har
 7. 收尾清单：按 ③ 增补为 7 项（record 全回填、用例已回写）。
 8. **条件步骤**：待决 #1 若放行，再做 L11 同行替换为七阶段（1 行→1 行）；未放行则跳过并保留待决。
 
+> **终形态（组 2 完成 · 2026-11-19，主会话核对通过）**：实测 199 行（蓝图估「约 200」）；V1/V2/V3 全绿（主会话复跑复核：分区间冻结 diff 无输出、L30–34 无输出、L1–60 行数 60、两种冒烟模式恰 L61、七阶段标题序列全等、复选框 7、陷阱数据行 12）。落地口径三项：①阶段 7 保留原「报告 + 截图归档到项目约定位置」条目不动，其后追加运行目录归档、用例回写 2 条（与 reference §7.2 新口径并存不冲突）；②阶段 5 四条纪律由 §6.5 六条合并而来（「顺序执行」与「即时回填」合 1 条，「收尾回写与全量核对」落阶段 7 与验收口径）；③主会话定稿措辞范围 = 核心原则 3、阶段 3 五步与卡点句、模式表 4 行精简文案、陷阱 11/12、验收 +2、收尾 +2（详版权威仍在 reference §6.1）。**V2 断言口径修正见 R2**（⑤ V2 命令已就地改为分区间版）。
+
 ### 组 3　project-profile-template.md
 
 1. §7 表（L74–76）后加 blockquote：`> 本表是用例库的输入：编写 / 补充 smoke/cases.md 时，按「功能 → 入口路径 → 前置数据」逐行转成用例（格式见技能 reference §6.3）。`
 2. §9 表（L86–91）重写为 5 数据行（用例库 / 运行目录 / 截图 / 本画像覆盖 / 测试数据清理），内容见 ③；「本画像覆盖」行明确「留空 = 默认 smoke/ 约定」。
+
+> **终形态（组 3 完成 · 2026-11-19，主会话核对通过）**：实测 94 行（蓝图「约 96」为估算）；V7/V8 全绿（主会话复跑复核：§0–§9 标题集合 diff 无输出、§9 表格行 7、blockquote 关键句在）。落地口径两项：①blockquote 采用 ⑤组 3 逐字句（`smoke/cases.md` 加反引号属行文风格，语义与 tasks.md 括注一致）；②§9「运行目录」行单元格内联竖线按 GFM 转义为 `\|`（`<full\|任务号>`——否则破坏列数并触发 V8 pipe-lint；渲染后仍显示 `full|任务号`，`<>` 路径已按 R1 在 code span 内）。§9 五行文案为主会话子代理按 ③ 契约自拟（蓝图只给 5 行主题）。
 
 ### 组 4　一致性核验（不新增文件，只跑断言）
 
@@ -391,6 +397,8 @@ runs/*/*.har
 6. **交叉引用**：SKILL.md 中每个 `§N` 都能在 reference.md（或 §0 → 模板）找到同名标题，无悬空。
 7. **Markdown 表格**：三文件 pipe 计数一致（L410 转义后应为 0 报错）。
 8. **工作区**：`git status --short` 仅 3 个目标 md 变化 + 既有脏改动 `dsh/profiles/web/` 三文件；symlink 指向不变；skctl 仍能解析 frontmatter（可选）。
+
+> **终形态（组 4 完成 · 2026-11-19，执行半程收口）**：V1–V9 全部 exit=0（verify 子代理逐字跑 + 主会话按 ⑤ 原文口径复核 V6/V8/V9a 一致）；V10 可选经容器适配通过（`node tools/skctl/src/cli.ts --store ~/.agents list --all --desc` exit=0 且解析出新 description 单行含 4 触发词；原命令依赖宿主 skctl store，容器内无该路径）。V9a 实测口径：`git status --short` 排除 `dsh/profiles/web/` 后为 6 行 = 3 目标 md + 3 变更目录工件（design/code-design/tasks，tracked-modified 属执行期工件维护预期，无 untracked）——⑤ 原命令排除规则已按 R3 就地修正。**勾选时序留痕**：tasks.md 4.1 勾选发生于 13:53 主会话 R1 附录编辑（误先行），组 4 实际核验完成于 14:07、主会话 14:10 补复核成立，勾选保留。补充交叉证据：三文件共用关键路径（cases.md/runs/.gitignore）齐备；reference 与模板内部 § 引用全可解析；R1 复核三文件围栏外 0 裸 `<>` 日期路径（模板 L1 `<项目名>` 为 HEAD 既有非日期路径）。
 
 ### 验证映射（需求/不变量 → 具体命令或断言）
 
@@ -412,8 +420,10 @@ done
 
 ```bash
 cd /home/xuqinqin/develop/dotfiles
-diff <(git show HEAD:agent/skills/smoke-testing-local-env/SKILL.md | sed -n '1,2p;4,60p') \
-     <(sed -n '1,2p;4,60p' agent/skills/smoke-testing-local-env/SKILL.md)          # 期望：无输出
+# R2 修正（组 2 实测回写）：原字面版 `1,2p;4,60p` 必然败于 L11 授权替换（Q1/D9 裁决口径），
+# 按裁决改为分区间逐字节断言（L11 允许变更，行数守恒另断言）。
+diff <(git show HEAD:agent/skills/smoke-testing-local-env/SKILL.md | sed -n '1,2p;4,10p;12,60p') \
+     <(sed -n '1,2p;4,10p;12,60p' agent/skills/smoke-testing-local-env/SKILL.md)      # 期望：无输出
 diff <(git show HEAD:agent/skills/smoke-testing-local-env/SKILL.md | sed -n '30,34p') \
      <(sed -n '30,34p' agent/skills/smoke-testing-local-env/SKILL.md)              # 期望：无输出
 test "$(sed -n '1,60p' agent/skills/smoke-testing-local-env/SKILL.md | wc -l)" = 60
@@ -507,7 +517,7 @@ awk -f /tmp/pipe-lint.awk SKILL.md reference.md project-profile-template.md   # 
 
 ```bash
 cd /home/xuqinqin/develop/dotfiles
-git status --short | grep -v '^ M dsh/profiles/web/'   # 期望：恰好 3 行（三份 md）
+git status --short | grep -v -e '^ M dsh/profiles/web/' -e 'openspec/changes/update-smoke-skill-case-first/'   # 期望：恰好 3 行（三份 md；R3：工件目录前缀一并排除——工件维护随批次提交属预期）
 git diff --stat -- agent/skills/smoke-testing-local-env   # 期望：3 files changed
 readlink -f ~/.agents/skills/smoke-testing-local-env       # 期望：<dotfiles>/agent/skills/smoke-testing-local-env
 ```
