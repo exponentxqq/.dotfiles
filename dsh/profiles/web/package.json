@@ -34,7 +34,7 @@
     "@tt-a1i/archify-dsh": "1.1.0",
     "@zzerx/dsh-plugin-notes": "0.6.0",
     "dsh-better-input": "0.2.6",
-    "dsh-context": "^0.83.1",
+    "dsh-context": "^0.85.1",
     "dsh-plugin-multi-root-workspace": "github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/multi-root-workspace",
     "dsh-plugin-project-mcp": "github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/project-mcp",
     "dsh-plugin-session-tool-toggle": "github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/session-tool-toggle",
@@ -43,10 +43,10 @@
     "dsh-plugin-workspace-config": "github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/workspace-config",
     "dsh-plugin-zcode-plan": "github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/zcode-plan",
     "dsh-pocket": "^2.12.0",
-    "dsh-prompt-history": "^1.11.2",
-    "dsh-remote": "0.8.90",
-    "dsh-rewind-plugin": "^0.21.2",
-    "dshmarket": "^1.73.17"
+    "dsh-prompt-history": "^1.13.2",
+    "dsh-remote": "1.2.0",
+    "dsh-rewind-plugin": "^0.22.2",
+    "dshmarket": "^1.73.20"
   },
   "pnpm": {
     "overrides": {

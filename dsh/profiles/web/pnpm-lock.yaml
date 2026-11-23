@@ -35,8 +35,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       dsh-context:
-        specifier: ^0.83.1
-        version: 0.83.1
+        specifier: ^0.85.1
+        version: 0.85.1
       dsh-plugin-multi-root-workspace:
         specifier: github:exponentxqq/dsh-plugins#v1.6.0&path:plugins/multi-root-workspace
         version: https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/multi-root-workspace
@@ -62,17 +62,17 @@ importers:
         specifier: ^2.12.0
         version: 2.12.0(patch_hash=0ace7207bafe8eb99f77e4df99e8da73bdf12a17a12b13d3a479825400bff6b7)
       dsh-prompt-history:
-        specifier: ^1.11.2
-        version: 1.11.2
+        specifier: ^1.13.2
+        version: 1.13.2
       dsh-remote:
-        specifier: 0.8.90
-        version: 0.8.90
+        specifier: 1.2.0
+        version: 1.2.0
       dsh-rewind-plugin:
-        specifier: ^0.21.2
-        version: 0.21.2
+        specifier: ^0.22.2
+        version: 0.22.2
       dshmarket:
-        specifier: ^1.73.17
-        version: 1.73.17
+        specifier: ^1.73.20
+        version: 1.73.20
 
 packages:
 
@@ -504,8 +504,8 @@ packages:
       '@deepseek-ai/dsh-typert-protocol': '>=0.2.0-rc.2 <0.3.0-0'
       '@deepseek-ai/schemastery': ~3.18.4
 
-  dsh-context@0.83.1:
-    resolution: {integrity: sha512-pOXRc1WwxTTJeKPIXXaBo0iKLyrZHzp7FIGCRpxQgsTpMlVvAOoJDYQtOOIJ3N/D7+P02DnsgOcIVT0j3WWuoQ==}
+  dsh-context@0.85.1:
+    resolution: {integrity: sha512-M0Ycbx86SQF19HYRe7zlfsvagtkVGInFUDSZ9je8ti1aSQbxwoECKk0xDd5YcbUCgJLZXMWAgEx61tE0tCkSPA==}
     engines: {dsh: '>=0.2.0-rc.2 || >=0.2.1-rc.2 || >=0.2.2-rc.1', node: ^22.19.0 || >=24.0.0}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.4 || >=4.0.6-alpha.2 <5.0.0
@@ -641,8 +641,8 @@ packages:
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
 
-  dsh-prompt-history@1.11.2:
-    resolution: {integrity: sha512-oLVexdO7RmjMPMlBq2UkPmE0UC7TCwYaWB2h9lLlr2zGyqEI9/QzTZupY6188ejP4O5/Y4vZeKrC3FLLzvoC2A==}
+  dsh-prompt-history@1.13.2:
+    resolution: {integrity: sha512-2QyXubdnFjjXPnkIBH9y5/XCLcpfT3SqXR292TDR0vOMWuHyLtEzsC9bgAI7gOJHv9n4mhT3oZvYtKsOFU5nyQ==}
     engines: {node: '>=20'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
@@ -655,17 +655,17 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
 
-  dsh-remote@0.8.90:
-    resolution: {integrity: sha512-MQudrTJQ6+RqnZoyVVMHVq6Wy96iR0zCti2bVfqNP14JHcsuIbmzUmsZetmDG6w1lCEERzPRckJO9SuFHvD/vQ==}
+  dsh-remote@1.2.0:
+    resolution: {integrity: sha512-tQm4Psjb6QEukOA/XfYVX7mP8JRHWTmjVER8O3voDXVXL+5YAeVSWwI3eGll1OAQQ/c2kv2SIonAOApllo3g5Q==}
     peerDependencies:
-      '@deepseek-ai/cordis': ^4.0.5
-      '@deepseek-ai/dsh-client-connection': '>=0.1.2-rc.1 <0.3.0'
-      '@deepseek-ai/dsh-client-locale': '>=0.1.2-rc.1 <0.3.0'
-      '@deepseek-ai/dsh-client-ui-renderer': '>=0.1.2-rc.1 <0.3.0'
-      '@deepseek-ai/dsh-commands': '>=0.1.0-rc.6 <0.3.0'
-      '@deepseek-ai/dsh-host-webserver': '>=0.1.0-rc.6 <0.3.0'
-      '@deepseek-ai/dsh-system-prompt': '>=0.1.0-rc.6 <0.3.0'
-      '@deepseek-ai/dsh-tools': '>=0.1.0-rc.6 <0.3.0'
+      '@deepseek-ai/cordis': ^4.0.4
+      '@deepseek-ai/dsh-client-connection': '>=0.1.2-rc.1 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-client-locale': '>=0.1.2-rc.1 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-client-ui-renderer': '>=0.1.2-rc.1 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-commands': '>=0.1.0-rc.6 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-host-webserver': '>=0.1.0-rc.6 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-system-prompt': '>=0.1.0-rc.6 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
+      '@deepseek-ai/dsh-tools': '>=0.1.0-rc.6 <0.3.0 || >=0.1.5-0 <0.1.6 || >=0.1.7-0 <0.1.8 || >=0.2.0-0 <0.2.1 || >=0.2.1-0 <0.2.2 || >=0.2.2-0 <0.2.3'
     peerDependenciesMeta:
       '@deepseek-ai/dsh-client-connection':
         optional: true
@@ -677,8 +677,8 @@ packages:
       - bcrypt-pbkdf
       - tweetnacl
 
-  dsh-rewind-plugin@0.21.2:
-    resolution: {integrity: sha512-VT9RVo8hDdvrPoFK2QgSlFKtiYHK1VfCOS1YDMRsK5g2ap7iSDjJbpJr5I7Qi/VSETo8GNZqm2M/Ll5rKj8BpQ==}
+  dsh-rewind-plugin@0.22.2:
+    resolution: {integrity: sha512-yXh48ZtottyQTH7J1DC6PaTA0gRIbL+kYi8czqE5weOdQe9v5GcnIrrbibjrqdI3An0mGJyUNM44yz33xsUo6g==}
     engines: {dsh: '>=0.2.2-rc.1 <0.3.0-0', node: '>=24.9.0'}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.1.0
@@ -737,8 +737,8 @@ packages:
       '@deepseek-ai/schemastery':
         optional: true
 
-  dshmarket@1.73.17:
-    resolution: {integrity: sha512-yISchdb/p4pDMTvsEyPtX60oTlv3FlyiSzcSI07dShf9WBuM12yyj5WSVTSJb3ZA7cgniyArAJEwBIi3eZVrww==}
+  dshmarket@1.73.20:
+    resolution: {integrity: sha512-rK5vfarRJa4hRoU4TiDkX8Wdr36Miu5WVrM8yQxV4uA+uogyKn1o7/PGSsxxEFFQCx5PARWmvrotRX3HEuVwJw==}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
       '@deepseek-ai/dsh-settings': ^0.1.0-rc.7 || ^0.1.1-rc.2 || ^0.1.2-alpha.2 || ^0.2.0-rc.1 || ^0.2.1-alpha.3 || ^0.2.1-rc.1
@@ -1116,6 +1116,9 @@ packages:
   zod@4.6.5:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
 snapshots:
 
   '@deepseek-ai/cosmokit@1.9.0': {}
@@ -1430,9 +1433,9 @@ snapshots:
       - encoding
       - supports-color
 
-  dsh-context@0.83.1:
+  dsh-context@0.85.1:
     dependencies:
-      zod: 4.4.3
+      zod: 4.6.7
 
   dsh-plugin-multi-root-workspace@https://codeload.github.com/exponentxqq/dsh-plugins/tar.gz/60ecf2b931f0ab956200e10717bbf9f24dcbe67a#path:plugins/multi-root-workspace:
     dependencies:
@@ -1463,16 +1466,17 @@ snapshots:
       qrcode: 1.5.4
       qrcode-terminal: 0.12.0
 
-  dsh-prompt-history@1.11.2: {}
+  dsh-prompt-history@1.13.2: {}
 
-  dsh-remote@0.8.90:
+  dsh-remote@1.2.0:
     dependencies:
       '@deepseek-ai/schemastery': 3.19.0
       iconv-lite: 0.7.3
+      yaml: 2.9.1
 
-  dsh-rewind-plugin@0.21.2: {}
+  dsh-rewind-plugin@0.22.2: {}
 
-  dshmarket@1.73.17:
+  dshmarket@1.73.20:
     dependencies:
       js-yaml: 4.3.2
       undici: 7.30.0
@@ -1899,3 +1903,5 @@ snapshots:
   zod@4.4.3: {}
 
   zod@4.6.5: {}
+
+  zod@4.6.7: {}
