@@ -26,7 +26,7 @@
 
 - [x] 5.1 发现与加载（口径按 R5 勘误：聚合层 symlink 存在 + 按名加载完整 + 可经磁盘枚举发现）：新开会话（或本会话重扫）后目录含 `ui-demo` 条目且 `skill ui-demo` 返回完整正文；验证：目录消息含 `ui-demo` 一行、加载正文首部含 `# 界面演示` 且尾部含 `## 按需读取`（无 `[... pruned ...]` 裁剪标记）
 - [x] 5.2 触发路由三句（软接线唯一可测面）：①「给订单列表页加个筛选面板，我没设计稿」→ 命中；②「给后端加一个导出接口」→ 不命中；③「走 /plan 规划一个新的仪表盘页面，没有 UI 图」→ 命中；各附 1 份子代理回执（结论 + 引用的 description 命中词）；验证：三条回执记录落 `/tmp/spec-flow/add-ui-demo-gate/trigger-routes.md` 且结论与预期一致，任一摇摆加测 5 轮微测并记录
-- [ ] 5.3 行为演练至 1.75（需用户在场）：在本仓对一个小界面需求跑 spec-plan 至 1.75，核对加载 ui-demo、产出 `demos/<slug>.html`、chrome-shared 自检执行、三选一确认问法出现、`code-design.md` 有「阶段 1.75」附录、未确认前未落档；验证：该演练变更 `/tmp/spec-flow/<演练change>/demos/` 非空且 `code-design.md` 含 `## 附：阶段 1.75 界面演示`，演练产物与回执零落库（`git status --short -- openspec agent` 干净或仅含预期演示入库文件）
+- [x] 5.3 行为演练至 1.75（需用户在场）——**2026-11-23 用户回告已在其他会话完成真实场景演练，证据随 /tmp 易失未留痕，按口述勾选**：在本仓对一个小界面需求跑 spec-plan 至 1.75，核对加载 ui-demo、产出 `demos/<slug>.html`、chrome-shared 自检执行、三选一确认问法出现、`code-design.md` 有「阶段 1.75」附录、未确认前未落档；验证：该演练变更 `/tmp/spec-flow/<演练change>/demos/` 非空且 `code-design.md` 含 `## 附：阶段 1.75 界面演示`，演练产物与回执零落库（`git status --short -- openspec agent` 干净或仅含预期演示入库文件）
 
 ## 附录：执行期运行规则留痕（R<n>）
 
@@ -35,6 +35,7 @@
 - **R3 skctl 写操作环境**（2026-11-05 组 4 实证）：dsh 容器内**无法执行 skctl 写操作**——宿主 `~/.local/share/agent-skills` 未挂载进 dsh（容器内 `/home/xuqinqin/.local/share` 为 root 属主 stub），直跑 install 报 `EACCES ... mkdir`；写操作须经 **node 容器**（`${HOST_HOME}:${HOST_HOME}` identity 挂载、uid 1000）或宿主执行；dsh 内 `skctl list` 对缺失 store **静默空表（exit 0）不报错**，不得据此判定未安装。聚合层 `skills/` 子目录以 ro 挂到 dsh `/home/docker/.agents/skills`，宿主写入**实时可见**（无需重启）。连锁面：组 5.1 发现验证、未来变更的登记任务、spec-done 收尾复验同口径。
 - **R4 delta 正文口径**（2026-11-05 组 4 实证）：「ADDED requirement 正文 ≤500 字符」按 **openspec 1.16.0 `extractRequirementBody`（陈述段，不含 `#### Scenario:` 块）**量取——与 `validate --strict` 权威实现一致（`validator.js:272` + `constants.js:9`）；MODIFIED 不受 500 限制（源码注释：its text is the existing requirement）；主规格 2 条既存超长（518/502）只影响 `--all --strict`。连锁面：`assert-delta.py` 口径、未来 delta 撰写与断言、spec-done 归档前校验。
 - **R5 skills 目录信封不下发（部署级事实）**（2026-11-05 组 5 实证）：当前 profile/部署下 `<available_skills>` 目录信封**对全部 26 个 skill 均不下发**（25-skill 时代即如此，父会话 984 条记录 0 特征串命中）——非本变更引入。**实际发现通道 = 子代理自发磁盘枚举** `~/.agents/skills/*/SKILL.md` 的 description 逐条比对（5.2②③ 实证有效）；按名加载完整无损。tasks.md 5.1 验证句「目录消息含 ui-demo 一行」按 R2 口径勘误为可测三项（symlink 存在 / 加载完整 / 枚举可发现），全过。子代理机制假设待排查：tool-skill pre-step 在 skill 工具被包裹或 snapshot 不完整时静默跳过（lib/index.js:931-941）或渲染裁剪线；修复涉及 dsh 行为，属本变更 scope 外（已上报用户）。连带实操注记：共享浏览器被占用时 `resize_page` 可能不改变 innerWidth，窄屏自检可用 `emulate` viewport 替代（5.2① 实证）。连锁面：5.3 演练、ui-demo 软接线的实际命中通道、未来 skill 类变更的发现/加载验证同口径。
+- **R6 归档期口径漂移与处置**（2026-11-23 归档前实证）：①openspec CLI 1.16.0→2.1.1 后 `validate --strict` 对 **MODIFIED** requirement 陈述段也执行 >500 检查（`constants.js:9 MAX_REQUIREMENT_TEXT_LENGTH`、`validator.js:681`）——本变更 spec-plan delta「落档工件与执行批次契约」执行期（R4 口径 MODIFIED 豁免）全绿，归档前重跑转红；处置 = 陈述段示例性细节下沉既有 scenario（逐条语义核对无损，scenario 原文未动），623→437。②三个 skill 文件码点超本变更断言线（spec-plan SKILL 8047>7800、spec-workflow SKILL 6681>6600、html-recipe 7106>7000）——均为后续已归档变更增长所致（unify-spec-plan-questioning、add-subagent-control-and-coordination、ui-demo 删冗增补等），非本变更回归；处置 = 删冗回线，涉及文件的各归档变更断言锚点（grep 计数与渲染公式）逐一复验未破。连锁面：未来归档前校验按 CLI 2.1.1 口径（MODIFIED 计入长度线）；码点断言线是写入时点快照，跨变更漂移照本例处置（回线，不 topology 改写）。
 
 ## 附录：沉淀回流清单（执行期改动的工作流仓文件；spec-done 六要素汇报从本清单读）
 
@@ -54,4 +55,4 @@
 
 **易失（/tmp，不入库不提交）**：`/tmp/spec-flow/add-ui-demo-gate/` 下 materials.md、red-baseline.md、trigger-routes.md、discovery.md、assert-delta.py、progress.md、red-sandbox/、sandbox-order/、sandbox-backend/、sandbox-empty/。
 
-**未决移交**：任务 5.3 行为演练——用户裁定新开会话真实场景演练（见 code-design.md ⑤ 组 5 终形态）；归档链（spec-done）待 5.3 完成后发起。
+**未决移交**：任务 5.3 已按用户回告勾选（2026-11-23，见 5.3 行注记与 R6）；归档链（spec-done）已于同日发起。

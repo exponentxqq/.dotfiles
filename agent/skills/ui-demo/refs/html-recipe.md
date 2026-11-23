@@ -1,15 +1,15 @@
 # 演示页 HTML 配方（ui-demo · refs）
 
-> **消费时机**：判定命中、动手写演示页之前读；主会话 inline 执行。本文件与 `SKILL.md` 正文同等权威——`SKILL.md` 管判定、分级、接线与纪律，本文件只管页面形状：骨架、模板、清单、卡。
+> **消费时机**：判定命中后、写页前读；主会话 inline 执行。本文件与 `SKILL.md` 正文同等权威——`SKILL.md` 管判定/分级/接线/纪律，本文件只管页面形状。
 >
-> **为何自包含**：chrome-shared 浏览器在 dsh 容器内，容器里的 `localhost` 是容器自己；任何 http 资源在容器自检与宿主 `file://` 预览两头都不可靠，故**单文件、零外部请求**。
+> **为何自包含**：chrome-shared 浏览器在 dsh 容器内，容器 `localhost` 是容器自己；http 资源在容器自检与宿主 `file://` 预览两头不可靠，故**单文件、零外部请求**。
 
 ## 施工顺序（六步）
 
 1. **定档**：按 `SKILL.md`『产出分级』判 L1/L2/L3；命中取最高档（L2/L3 同中按 L3）。
 2. **取骨架**：抄 §1 整页，只改变更名、档位、生成时间与标题。
 3. **填模板**：按档接 §2 模板，对照 §3 元素表——**缺项即不合格**。
-4. **删冗**：删掉多余的标语、说明文字和次要标签；删完界面就看不懂 = 布局本身有问题，回第 3 步重新设计该区块，而不是把文案加回去（约束条与「示意数据」标注属演示机制，不删）。
+4. **删冗**：删掉多余的标语、说明文字和次要标签；删完就看不懂 = 布局本身有问题，回第 3 步重设计该区块，而不是把文案加回去（约束条与「示意数据」标注属演示机制，不删）。
 5. **窄屏**：保留骨架窄屏片段，390×844 下核对不横向滚动。
 6. **自检**：按 §6 四步卡跑一遍，零 error 再交确认。
 
@@ -24,9 +24,7 @@
 <title>变更名 · L1 · 界面演示</title>
 <style>
   :root{
-    /* 配色 */
     --brand:#2563eb; --accent:#0d9488; --danger:#dc2626; --ink:#111827; --ink2:#4b5563; --line:#e5e7eb; --bg:#f8fafc; --card:#fff;
-    /* 基调 */
     --fs1:22px; --fs2:16px; --fs3:13px; --sp:8px; --sp2:16px; --sp3:24px; --r:10px;
   }
   *{box-sizing:border-box}
@@ -57,7 +55,7 @@
 <!-- 演示约束条 -->
 <header class="bar">
   <p>变更名 <b>add-xxx</b> · 分档 <b>L1</b> · 生成 <b>2026-11-05 21:50</b> · <b>界面演示，非最终实现</b></p>
-  <p class="bar-note">示意数据：本页条目、数字、图表均为虚构，仅用于确认布局与视觉。</p>
+  <p class="bar-note">示意数据：本页条目、数字、图表均为虚构，仅确认布局与视觉。</p>
 </header>
 <main class="wrap">
   <!-- §2 模板 -->
@@ -80,7 +78,7 @@
     <div class="card"><h2>区域三 · 侧栏</h2><p class="muted">辅助信息与筛选位</p></div>
   </div>
   <h2>配色与基调</h2>
-  <div class="row">主色 #2563eb · 辅色 #0d9488 · 中性阶 #f8fafc→#111827 · 字号 22/16/13 · 间距 8/16/24 · 圆角 10</div>
+  <div class="row">主色 #2563eb · 辅色 #0d9488 · 中性 #f8fafc→#111827 · 22/16/13 · 8/16/24 · 圆角 10</div>
   <h2>空态</h2>
   <div class="card"><p class="muted">图标位 + 一句引导 + 主按钮</p></div>
 </section>
@@ -104,7 +102,7 @@
 ```html
 <section id="l3">
   <h1>方向选择</h1>
-  <p class="muted">先选方向，再细化到 L1/L2——每方向按 L2 深度出小样。</p>
+  <p class="muted">先选方向，每方向按 L2 深度出小样。</p>
   <div class="dirs">
     <article class="card"><h2>方向 A · 数据优先</h2><p class="muted">意图：一屏看尽指标。取舍：首屏密度高，窄屏需折叠。</p></article>
     <article class="card"><h2>方向 B · 流程优先</h2><p class="muted">意图：按步骤引导。取舍：首屏信息少，需多一步。</p></article>
@@ -138,7 +136,7 @@
 
 ## 5. 零外链清单（交用户前核对）
 
-- [ ] 无 `src` / `href` 指向 http(s) URL：禁 CDN、webfont、远程图。
+- [ ] 无 `src`/`href` 指向 http(s)：禁 CDN、webfont、远程图。
 - [ ] 无外链 `<link rel="stylesheet">` 与 `<script src=…>`；样式只在页内。
 - [ ] 无 CSS 导入语句（`@` + `import` 写法）。
 - [ ] 图标用 inline SVG 或 Unicode 字符；装饰用 CSS 形状/SVG。
@@ -162,7 +160,7 @@
 
 | 缺失 | 降级方式 | 证据缺口 |
 | --- | --- | --- |
-| chrome-shared MCP | 把宿主 `file:///data/tmp/...` 路径给用户，请其打开并截图回传 | UI 自检证据缺失 |
+| chrome-shared MCP | 把宿主 `file:///data/tmp/…` 给用户，请其打开并截图回传 | UI 自检证据缺失 |
 
 降级结论须标注「未做渲染自检」，**不得**称通过。
 
@@ -173,8 +171,8 @@
 | spec-plan 1.75 生成期 | `/tmp/spec-flow/<change>/demos/<slug>.html` |
 | 宿主预览 | `file:///data/tmp/spec-flow/<change>/demos/<slug>.html` |
 | 落档 | `openspec/changes/<change>/demos/<slug>.html` |
-| `/plan` 场景 | `/tmp/ui-demos/<change>/<slug>.html`（易失即弃；宿主 `file:///data/tmp/ui-demos/...`） |
+| `/plan` 场景 | `/tmp/ui-demos/<change>/<slug>.html`（易失即弃；宿主路径按 `/tmp` ≡ `/data/tmp` 换算） |
 
-`slug` 用 kebab-case（如 `login-captcha-l1.html`）；多档多文件加 `-l1/-l2/-l3`。截图不落库，HTML 落库。
+`slug` 用 kebab-case；多档多文件加 `-l1/-l2/-l3`。截图不落库，HTML 落库。
 
 落档后预览：`file:///home/xuqinqin/develop/<repo>/` + 上表落档路径。

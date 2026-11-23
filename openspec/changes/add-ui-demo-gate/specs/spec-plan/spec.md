@@ -30,7 +30,7 @@
 
 ### Requirement: 落档工件与执行批次契约
 
-spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design、tasks 四件套）；落档输入 SHALL 含代码设计草案（第 5 材料）；design SHALL 继承其深度并逐项断言核对通过；tasks SHALL 按编号分组表达执行批次——组即执行审核批次，组内单任务是合法常态，分组 SHALL 兼顾用户审核节奏；每任务 SHALL 携带可核验验证说明并引用代码设计触达面条目编号；落档 SHALL 校验通过后才交付执行。落档时 SHALL 把 `code-design.md` 与 `diff-matrix.md`（串行：`decisions.md`）复制入变更目录随工件提交；落档校验 SHALL 含两份材料副本存在性的机械断言（`test -f` 逐文件），任一缺失 SHALL 回到复制步补齐后再跑 `openspec validate <change> --strict`；落档副本 SHALL 为执行期维护与接续恢复的权威，`/tmp` 侧原件自此不再维护。落档展示摘要 SHALL 含触达仓清单（根仓工件与各代码子仓），作为执行侧执行环境决策与多仓分立提交的输入。若阶段 1.75 界面演示已触发，落档 SHALL 同时把演示产物从易失区整目录复制入变更目录 `demos/`，其存在性断言（目录存在且非空）并入同一机械校验；未触发 SHALL 在代码设计草案留未触发判定。
+spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design、tasks 四件套）；落档输入 SHALL 含代码设计草案（第 5 材料）；design SHALL 继承其深度并逐项断言核对通过；tasks SHALL 按编号分组表达执行批次——组即执行审核批次，分组 SHALL 兼顾用户审核节奏；每任务 SHALL 携带可核验验证说明并引用代码设计触达面条目编号；落档 SHALL 校验通过后才交付执行。落档 SHALL 把规划材料副本（code-design、diff-matrix；串行为 decisions）复制入变更目录随工件提交，并执行含副本存在性的机械校验；落档副本 SHALL 为执行期维护与接续恢复的权威。落档展示摘要 SHALL 含触达仓清单。阶段 1.75 界面演示已触发 SHALL 同时整目录复制演示产物入变更目录 `demos/` 并入机械校验，未触发 SHALL 在代码设计草案留未触发判定。
 
 #### Scenario: 分组内任务并行执行
 
