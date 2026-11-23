@@ -1,28 +1,61 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "xiaomi-token-plan-cn/mimo-v2.5-pro",
-  "permission": "allow",
-  "agent": {
-    "plan": {
-      "model": "zhipuai-coding-plan/glm-5.3",
-      "temperature": 1.0,
-      "permission": {
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
+  // 全局放行所有操作（V2 有序规则数组，等价于旧 V1 的 "permission": "allow"）
+  "permissions": [
+    { "action": "*", "resource": "*", "effect": "allow" },
+  ],
+  // V2 中 temperature 不再挂在 agent 上（agent request.body 不会发给模型），
+  // 正规途径是设在 provider 的 model 层或 model variant 层
+  "providers": {
+    "zhipuai-coding-plan": {
+      "models": {
+        // plan agent
+        "glm-5.3": {
+          "body": { "temperature": 1.0 },
+        },
+        // vision agent 通过自定义 variant #t01 使用（与内置 #max 等推理档叠加，互不覆盖）
+        "glm-5.3-flash": {
+          "variants": [
+            { "id": "t01", "body": { "temperature": 0.1 } },
+          ],
+        },
       },
     },
+    // general agent
+    "opencode-go": {
+      "models": {
+        "deepseek-v4.1-flash": {
+          "body": { "temperature": 0.1 },
+        },
+      },
+    },
+    // code-reviewer / explore agent（compaction 同模型，会带上 0.1，≈默认值，无感）
+    "deepseek": {
+      "models": {
+        "deepseek-flash": {
+          "body": { "temperature": 0.1 },
+        },
+      },
+    },
+  },
+  "agents": {
+    "plan": {
+      "model": "zhipuai-coding-plan/glm-5.3",
+      "permissions": [
+        { "action": "read", "resource": "*", "effect": "allow" },
+        { "action": "glob", "resource": "*", "effect": "allow" },
+        { "action": "grep", "resource": "*", "effect": "allow" },
+        { "action": "list", "resource": "*", "effect": "allow" },
+      ],
+    },
+    // V2 的 model 引用只能带一个 #variant；max 推理档影响大于 temperature，
+    // 因此保留 #max、放弃原 V1 的 temperature: 0.0
     "build": {
-      // "model": "zhipuai-coding-plan/glm-5.3-flash",
-      "model": "zhipuai-coding-plan/glm-5.3-flash",
-      "temperature": 0.0,
-      "variant": "max",
+      "model": "zhipuai-coding-plan/glm-5.3-flash#max",
     },
     "general": {
       "model": "opencode-go/deepseek-v4.1-flash",
-      // "model": "deepseek/deepseek-v4-flash",
-      "temperature": 0.1,
     },
     "title": {
       "model": "opencode-go/minimax-m3",
@@ -34,38 +67,18 @@
       "model": "xiaomi-token-plan-cn/mimo-v2.5-pro",
     },
   },
-  "lsp": {
-    "gopls": {
-      "command": ["/home/xuqinqin/develop/docker/bin/gopls"],
-    },
-    "rust": {
-      "command": ["/home/xuqinqin/develop/docker/bin/rust-analyzer"],
-    },
-    "pyright": {
-      "disabled": true,
-    },
-    "jdtls": {
-      "command": [
-        "/home/xuqinqin/.local/share/nvim/mason/packages/jdtls/bin/jdtls",
-        "--jvm-arg=-Xmx1g",
-        "--jvm-arg=-XX:MaxMetaspaceSize=384m",
-        "--jvm-arg=-XX:+UseG1GC",
-      ],
-      "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-21-openjdk",
-      },
-    },
-  },
   "mcp": {
-    "codebase-memory-mcp": {
-      "type": "local",
-      "command": ["codebase-memory-mcp"],
-    },
-    "dbx-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@dbx-app/mcp-server"],
-      "environment": {
-        "DBX_WEB_URL": "http://localhost:4224",
+    "servers": {
+      "codebase-memory-mcp": {
+        "type": "local",
+        "command": ["codebase-memory-mcp"],
+      },
+      "dbx-mcp": {
+        "type": "local",
+        "command": ["npx", "-y", "@dbx-app/mcp-server"],
+        "environment": {
+          "DBX_WEB_URL": "http://localhost:4224",
+        },
       },
     },
   },

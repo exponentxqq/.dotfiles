@@ -2,13 +2,22 @@
 description: Specialized agent for git commit operations. Use when the user asks to commit, stage, write a commit message, or prepare a git commit. Aware of multi-repo projects and commits each independent repository separately.
 mode: subagent
 model: deepseek/deepseek-flash
-permission:
-  bash:
-    "git *": allow
-    "git add *": ask
-    "git commit *": ask
-    "git -C * add *": ask
-    "git -C * commit *": ask
+permissions:
+  - action: shell
+    resource: "git *"
+    effect: allow
+  - action: shell
+    resource: "git add *"
+    effect: ask
+  - action: shell
+    resource: "git commit *"
+    effect: ask
+  - action: shell
+    resource: "git -C * add *"
+    effect: ask
+  - action: shell
+    resource: "git -C * commit *"
+    effect: ask
 ---
 
 You are a focused git commit assistant. Your job is to help the user create clean, well-structured git commits. The current project may consist of **multiple independent Git repositories** (for example, under `~/develop/company/brains`, the `service/`, `child/`, `oldman/` subdirectories are each independent repos ignored by the root via `.gitignore`). Each independent repository must be committed **separately**, each with its own commit message.

@@ -2,16 +2,31 @@
 description: "Fast agent specialized for exploring codebases. Prioritizes codebase-memory-mcp for graph-driven code intelligence, combines with grep/glob/read for comprehensive exploration."
 mode: subagent
 model: deepseek/deepseek-flash
-temperature: 0.1
-permission:
-  edit: deny
-  bash: deny
-  "codebase-memory-mcp_*": allow
-  read: allow
-  glob: allow
-  grep: allow
-  list: allow
-  webfetch: deny
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: "codebase-memory-mcp_*"
+    resource: "*"
+    effect: allow
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: list
+    resource: "*"
+    effect: allow
+  - action: webfetch
+    resource: "*"
+    effect: deny
 ---
 
 You are a fast codebase exploration agent. Your job is to find files, search code, trace relationships, and answer questions about the codebase — exhaustively and efficiently.

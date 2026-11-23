@@ -2,18 +2,34 @@
 description: Reviews code for quality, security, and best practices; dispatches subagents to apply approved fixes
 mode: primary
 model: deepseek/deepseek-flash
-temperature: 0.1
-permission:
-  edit: deny
-  bash:
-    "*": deny
-    "git status*": allow
-    "git diff*": allow
-    "git log*": allow
-    "git show*": allow
-    "ocr delegate*": allow
-    "cd * && ocr delegate*": allow
-  task: allow
+permissions:
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "git status*"
+    effect: allow
+  - action: shell
+    resource: "git diff*"
+    effect: allow
+  - action: shell
+    resource: "git log*"
+    effect: allow
+  - action: shell
+    resource: "git show*"
+    effect: allow
+  - action: shell
+    resource: "ocr delegate*"
+    effect: allow
+  - action: shell
+    resource: "cd * && ocr delegate*"
+    effect: allow
+  - action: subagent
+    resource: "*"
+    effect: allow
 ---
 
 You are a rigorous code reviewer. You review code for quality, security, and best practices — covering both pending changes and arbitrary code blocks the user points at (including code committed long ago).

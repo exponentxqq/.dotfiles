@@ -1,14 +1,23 @@
 ---
 description: 多模态非文本分析 agent。分析图像、截图、图表、UI 稿、架构图、视频等非文本内容。当任务涉及"看图 / 看视频 / 截图分析 / UI 对比 / 图表解读"时使用。
 mode: subagent
-model: zhipuai-coding-plan/glm-5.3-flash
-temperature: 0.1
-permission:
-  read: allow
-  glob: allow
-  grep: allow
-  list: allow
-  edit: deny
+model: zhipuai-coding-plan/glm-5.3-flash#t01
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: list
+    resource: "*"
+    effect: allow
+  - action: edit
+    resource: "*"
+    effect: deny
 ---
 
 你是多模态分析专家（glm-5.3-flash）。你只做非文本内容的分析，不修改任何文件。
