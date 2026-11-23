@@ -31,3 +31,4 @@ sh $BASEDIR/opencode/install.sh
 sh $BASEDIR/codex/install.sh
 sh $BASEDIR/dsh/install.sh
 sh $BASEDIR/grub/install.sh
+sh $BASEDIR/system/linux/install.sh
