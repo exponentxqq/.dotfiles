@@ -7,9 +7,8 @@
 | `/spec-plan` 命令或 `spec-plan` skill 不可见 | **通常无需重启**——聚合层（宿主 `/home/xuqinqin/.local/share/agent-skills/skills`）是容器内 `/home/docker/.agents/skills` 的**只读 bind mount 实时视图**，宿主侧新增/更新条目立即可见，运行中的会话即可按名加载 skill；命令侧由插件热加载（监听用户级命令目录 + 事件防抖重扫）。处置顺序：①**核对登记**：命令 symlink 应为 `~/.dsh/commands/spec-plan.md` 指向 `dsh/commands/spec-plan.md`，缺失则容器内 `mkdir -p ~/.dsh/commands && ln -sfn /home/xuqinqin/develop/dotfiles/dsh/commands/spec-plan.md ~/.dsh/commands/spec-plan.md`；skctl 登记则须确认聚合层含该条目——**skctl 聚合层在 dsh 容器内不可见**，`node /home/xuqinqin/develop/dotfiles/tools/skctl/src/cli.ts install /home/xuqinqin/develop/dotfiles/agent/skills/spec-plan` 须在宿主或经 node 容器执行（宿主操作，由用户执行）；②在会话内执行内置 **`/commands-reload`** 手动重扫；③仍不可见才兜底 `cd ~/develop/docker && docker compose restart dsh`（宿主操作，由用户执行） |
 | `openspec-propose` skill 加载失败 | 同上核对聚合层；先 `/commands-reload`，重启兜底；本 skill 不代替 `openspec-propose` 的落档行为 |
 | `grill-me` skill 不可加载（阶段 1.5 问答环节） | 报告并**降级为普通按轮提问**（仍守「只问前置已定项、每轮 ≤5 问、每题附推荐答案、事实自行查证」），同时**如实告知用户已降级**；随后按上一行**先核对聚合层与 `/commands-reload`，重启兜底** |
-| 某条规划线失败（产物缺失 / 为空 / 答非所问 / 与另一线雷同） | **重派一次**——team 成员用 `send_message` 同成员补正（保留上下文），subagent 以上轮回执摘要+答复接续重派；仍失败**如实报告**，由**用户决定**是否改派 subagent 重做该线或降级为串行重做（**不得静默降级**）；**设计线（阶段 1.7）同构处置**：产物缺失 / 字段残缺 / 答非所问 → **重派一次** → 仍失败**如实报告**由用户裁决 |
-| Agent Teams 未挂载 / `spawn_teammate` 失败或成员 provisioning `failed` / 成员上限达限（`Team member limit 8 reached`） | **该线回退 subagent** 派发（按 [routing.md](routing.md) 应用其路由），阶段摘要留痕原因；**不反复重试成员创建**（mode/parallel.md 判据①②③） |
-| team 成员卡死（长时间无回合进展） | `interrupt_agent` 中断后**重建一次**；仍不可用 → 该线回退 subagent；正常完成的成员**不 interrupt**（mode/parallel.md 判据④） |
+| 某条规划线失败（产物缺失 / 为空 / 答非所问 / 与另一线雷同） | **补正一次**——`send_message(agent="plan-a")` 回送**同一实例**补正（保留其上下文）；实例不可恢复才冷兜底以上轮回执摘要 + 答复重派 `-r2`（新名）；仍失败**如实报告**，由**用户决定**是否再派新线或降级为串行重做（**不得静默降级**）；**设计线（阶段 1.7）同构处置**：产物缺失 / 字段残缺 / 答非所问 → 同实例补正一次 → 仍失败**如实报告**由用户裁决 |
+| 具名派发失败（重名 / 工具报错）或线卡死（长时间无回执） | **派发失败** → 按命名规约追加变更短码重试一次（工具报错同样只重试一次）→ 仍失败上行 `异`（不循环重试）；**卡死无回执** → 登记簿判 `stalled`（零落盘 + 无上行 + 无回执）→ 先对已有产出跑验证/补正，未过才重派新名 `-r2`；**无硬中断**（本配置 `interrupt_agent` 未挂载）：控制手段 = 软废止令（登记簿条目 `state=void` + `reason`）+ `send_message` 下行催办 |
 | `openspec-explore` 不可加载（串行阶段 1 / 并行阶段 1.5 第 4 步审视；「必须」级） | 按 `grill-me` 行同款顺序修复（聚合层与登记核对 → `/commands-reload` → 重启兜底）；仍失败**问用户三选一**（降级裸调研 / 改并行 / 终止），**不静默降级**（mode/serial.md） |
 | 栈识别未命中 writer skill（阶段 1.7 派发前） | **问用户三选一**：①指认现有 writer skill（可点名任一聚合层 skill）／②明确豁免本次加载并**如实标注**（仅本次有效）／③终止流程；**不静默跳过**、不自行假设 |
 | 栈对应 writer skill 加载失败（派发前核对或子代理回执） | 按 `openspec-propose` 加载失败同款顺序修复（核对聚合层与登记 → `/commands-reload` → 重启兜底），仍失败则**报告问用户**；**不静默降级**（「必须」级，区别于 `grill-me` 降级） |
@@ -18,6 +17,6 @@
 | 旧会话报 `child model selection is disabled for this tool instance` | 该会话在**组合期**未读到开关与白名单（配置改动只对新会话生效）：**新建会话**重试，必要时重启 dsh 兜底；**不要判定工具损坏** |
 | 用户中断（说停、切换话题、新指令） | 立即停在安全检查点；未落盘材料与未提交工件保持原状并汇报位置（`/tmp/spec-flow/<change>/` 有哪些、四件套到哪一步），不擅自 stash / revert / 补提交；重进按入口「压缩后恢复速查」重建——**按现存文件名辨编排与阶段**（`explore.md`/`decisions.md`=串行，`line-*.md`=并行），落档后 `code-design.md`/`diff-matrix.md`/`decisions.md` 从变更目录取（落档副本为权威） |
 | 需要宿主操作（重启容器兜底、skctl、推送） | 给出确切命令交给用户执行，**本 skill 不代劳** |
-| 上行发送失败（`send_message` 报错 / 父 agent id 缺失） | **不重试、不阻塞**：事件降级为回执上浮——改写进产物「待决问题」节与回执 TOP，主会话照常代问，不另开通道 |
+| 上行发送失败（`send_message` 报错 / 父名不可解析 `AGENT_NAME_NOT_FOUND`） | **不重试、不阻塞**：事件降级为回执上浮——改写进产物「待决问题」节与回执 TOP 并注明降级原因，主会话照常代问，不另开通道 |
 
 > 注：红线级条目（绝不副作用创建 `openspec/`、不静默把待决项变假设、`DELEGATED_CALLER` 是平台设计不是故障、工件未过 `--strict` 校验不提交）留在 SKILL.md 第九节，不在此文件。

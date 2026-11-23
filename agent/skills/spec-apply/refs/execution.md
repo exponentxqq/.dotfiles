@@ -2,25 +2,31 @@
 
 **subagent 引擎（默认）**：
 
-- 每个任务一个 **fresh** 子代理（不要用继承上下文的 fork；只有 fresh 支持模型选择）。
-- 提示自包含（缺一不可）：**项目根绝对路径**（隔离执行时 = worktree 路径，见 spec-workflow 的 refs/worktree.md（唯一权威源））、**任务原文（含编号）**、**design.md 中该任务所属组的实现要点逐字引用**（不得转述）、验收标准=**验证句原文**、写范围（允许改的文件/目录，须含该任务触达面条目所列文件）、禁止事项（不 `git add`/`git commit`、不改 `tasks.md` 勾选、不改写范围外文件、不跑破坏性或不可逆命令）、**栈对应 writer skill 加载指令**——**从落档 `design.md` 决策记录读取**栈识别结论后点名 skill 名（豁免时注明依据；**记录无从取得则重识别一次**并更新落档记录——加载失败按待决问题上浮，不静默跳过）。
-- 组内并发派发、**组间串行**；并行上限取映射文件 `parallelism`（默认 3）。
-- **派发台账（防压缩丢失，v2 登记簿）**：subagent 的「已派发」事实与回执都只在对话里——上下文压缩会一并丢掉，表现为子代理 id 不可寻址、无法区分在途/已丢。登记簿 `/tmp/spec-flow/<change>/progress.md` 为**单源**（派发台账+租约+废止令）：写者仅主会话，子代理**只读**；条目含 `T`/`scope`/`agent`/`state`/`at`/`src`/`reason`，状态机 `active→done|void|stalled`，**先登记全批再并发派发**，更新一律 `Edit` 定点改、**禁止 `Write` 整文件覆盖**。schema 全表与派发序见 [coordination.md](coordination.md) §2/§3；`state=active` 一读即得，恢复协议与 failure-modes 据此核查。
-- **协调注入（仅 subagent 引擎）**：每个 fresh 子代理提示粘该文件 §4 注入段**全文**（连 `coord-inject` 标记）——三处检查点（动手前/每次写文件前/跑验证句前）、上行格式与「sibling 互不可达、冲突经主会话裁决」平台事实都在段内，不摘要、不转述。
-- 回执格式要求：改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按 [routing.md](routing.md) 给任务子代理应用 `apply` 路由（任务需读图时改用 `vision` 路由）。**检查点命中废止/停滞时回执首行 `VOIDED`/`STALLED`**。
-- **待决问题中转**（第四节协议）：子代理遇需用户拍板的决策不得自行假设，在产物与回执中上浮 → 主会话**立即代问用户**（≤5 问/轮）→ 把**上一轮回执摘要 + 用户答复**并入新提示**接续重派**（上下文重建，非同一实例）。**这正是让 subagent 事实上能与用户交互的机制**：子代理自身不能提问（`DELEGATED_CALLER`），问题与答复经主会话中转。
+- **具名派发（fresh）**：每任务一个 fresh 子代理——`subagent(name="apply-<组>-<任务>", description=…, prompt=…)`，`name` 按 [coordination.md](coordination.md) §2 命名规约在派发前即可推导。调用**立即返回名**，回执文本 `started subagent <name>` 与 `name` 核对一致才算已派发；不用 fork（继承上下文且不支持模型选择）；派发只走 `name`/`description`/`prompt`（可选 `cwd`）与路由字段，无后台运行参数。
+- **完成通知自动递送**：子代理结束时父级在线即自动收到通知（含最终回答，除非它结束前刚发过消息）——据此推进，**不轮询** `list_agents`：其 running/inactive「不表示任务完成、成功或失败」，也不落盘，替代不了登记簿。
+- 提示自包含（缺一不可）：**项目根绝对路径**（隔离执行时 = worktree 路径，见 spec-workflow 的 refs/worktree.md（唯一权威源））、**任务原文（含编号）**、**design.md 中该任务所属组的实现要点逐字引用**（不得转述）、验收标准=**验证句原文**、写范围（允许改的文件/目录，须含该任务触达面条目所列文件）、禁止事项（不 `git add`/`git commit`、不改 `tasks.md` 勾选、不改写范围外文件、不跑破坏性或不可逆命令）、**栈对应 writer skill 加载指令**——**从落档 `design.md` 决策记录读取**栈识别结论后点名 skill 名（豁免时注明依据；**记录无从取得则重识别一次**并更新落档记录——加载失败按待决问题上浮，不静默跳过）。**受控嵌套并入本项**：本 profile `maxDepth: 2` 使孙代理可达 → 只许派**只读孙代理**（检索/分析/复核），不得派可写子代理；孙代理提示同样自包含、写明「**只读：不写文件、不 git**」并转述本任务的硬约束，产出由派发者核对。
+- 组内并发派发、**组间串行**；并行上限以映射文件 `parallelism` 为准（键缺失按 3）。
+- **派发台账（防压缩丢失，v3 登记簿）**：完成通知与回执都只在对话里，压缩会一并丢掉。登记簿 `/tmp/spec-flow/<change>/progress.md` 为**单源**（派发台账+租约+废止令）：写者仅主会话，子代理**只读**；条目含 `T`/`scope`/`agent`/`state`/`at`/`src`/`reason`，状态机 `active→done|void|stalled`，**先登记全批再并发派发**，更新一律 `Edit` 定点改、**禁止 `Write` 整文件覆盖**。v3 的 `agent` 记 **name**——name 是派发即得、模型面可寻址的唯一稳定身份（Session id 仍是执行身份）；`list_agents` 的 running/inactive 不含完成语义、树枚举随会话存活，**不能替代落盘台账**。schema 全表与派发序见 [coordination.md](coordination.md) §2/§3，恢复协议与 failure-modes 据此核查。
+- **协调注入（仅 subagent 引擎）**：每个 fresh 子代理提示粘该文件 §4 注入段**全文**（连 `coord-inject` 标记）——三处检查点（动手前/每次写文件前/跑验证句前）、上行格式与冲突裁决纪律都在段内，不摘要、不转述。
+- 回执格式要求：改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按 [routing.md](routing.md) 给任务子代理应用 `apply` 路由（**两引擎通用**；任务需读图时改用 `vision`）。**检查点命中废止/停滞时回执首行 `VOIDED`/`STALLED`**。
+- **待决问题中转**（第四节协议）：子代理遇需用户拍板的决策不得自行假设，在产物与回执中上浮 → 主会话**立即代问用户**（≤5 问/轮）→ **同实例续话优先**：`send_message(agent="<name>")` 把「上一轮回执摘要 + 用户答复」回给同一实例续轮（闲置即起轮、运行中在步骤边界收 steer，上下文保留）。这是让 subagent 事实上能与用户交互的机制（子代理自身不能提问，`DELEGATED_CALLER`）。
+- **冷兜底重派**：仅当目标已不可恢复（实例丢失/路由失败）才新派——新名追 `-r2`，提示并入上一轮回执摘要 + 用户答复；**任务失败重试同样派 fresh**（同一提示 + 上次失败输出摘要），不复用实例补跑。
+- **上行直报**：紧急项可 `send_message(agent="lead")`（根名寻址，单发不候复，决/异两类，格式见 [coordination.md](coordination.md) §5）；发送失败即降级为回执上浮，不重试、不阻塞。
 - 核对不通过：auto 模式 → 派发修复子代理（附失败输出）后重新核对；step 模式 → 向用户呈现问题与证据等裁决（见 [failure-modes.md](failure-modes.md)「审核被拒」）。
 
-**team 引擎（可选，实验性 Agent Teams）**：
+**team 引擎（可选，Team 模式）**：
 
-- 仅 `--engine team` 或映射文件显式启用时使用；否则不启用。成员创建失败或不可用时按 design「风险与回退」**降级为 subagent** 完成该任务；**成员上限达限（`Team member limit 8 reached`）同此处置**并在留痕中记录。
-- 主会话作为 Lead：用任务板工具（挂载 Agent Teams 时 Lead 可见 `team_task_create` / `team_task_list` / `team_task_get` / `team_task_update`，以当前会话实际挂载的工具名为准）把组内每个任务发布到**共享任务板**，卡片含任务原文、**验证句**、写范围、产出要求，以及**与 subagent 引擎同款的栈对应 writer skill 加载指令**（从落档 design.md 决策记录点名 skill 名）。
-- `spawn_teammate` 创建具名 implementer，**成员数 ≤ 组内任务数**（并受 `parallelism` 封顶），成员按卡片 `owner` 认领执行；用 `list_agents` / `wait_agent` 观察。
-- **审核反馈走消息**：`send_message` 把修改要求发给负责该任务的成员，由其在同一上下文内修复（保留其上下文，不重派新成员）。
-- **待决问题中转**（第四节协议）：成员上浮的待决项由 Lead **立即代问用户**，再用 `send_message` 把答复**回送同一成员**（上下文保留、可多轮往返澄清）——与「审核反馈走消息」同一条通道。**这是让被拥有的 teammate 事实上能与用户交互的机制**（成员自身同样不能直接提问）。
-- 成员卡死或创建失败：`interrupt_agent` 中断后重建；无法恢复则降级 subagent 完成该任务。
-- 该引擎**忽略 `apply` 路由键，阶段级模型路由整体不适用**（teammate 创建工具无模型参数，fork teammate 锁定 Lead 模型）。
-- **team 引擎不注入协调段**：team 已有 `send_message`/`interrupt_agent` 控制面，登记簿仅记 team 批次条目与终态供恢复核对（设计 D13）。
+- **前置检查（缺一不可）**：①`--engine team` 或映射文件 `engine` 显式启用；②**根会话菜单已开启 Team 模式**（模型不能自开）——工具面自检 = 当前会话可见 `team_task_*` 任务板工具。任一不满足 → **不启用 team**，回退 subagent 完成该任务，并把「未开启/不可用 + 退因 + 实际引擎」写入留痕；该不该升级见 [coordination.md](coordination.md) §9（单条判据，只提示不自动切——并发量不构成理由，两引擎同受在线上限）。
+- 主会话作为 Lead：`team_task_create(subject, description, blocked_by[], write_scopes[])` 把组内每个任务发布到**共享任务板**（表挂 subagent 树的根 Session）——卡片含任务原文、**验证句原文**、写范围、产出要求，以及**与 subagent 引擎同款的栈对应 writer skill 加载指令**（从落档 design.md 决策记录点名 skill 名）。
+- `blocked_by` 填组内依赖任务 id（就绪性由任务板判定）；`write_scopes` 填仓内相对路径前缀（写范围重叠由任务板告警）——两者与登记簿 `scope` 同源，不另造口径。
+- **具名 implementer**：以同名 `subagent(name="apply-<组>-<任务>", …)` 派发（立即返回名），成员数与任务数同阶，不再另建成员。
+- **CAS 认领**：implementer 先 `team_task_get` 取最新 `revision`，再 `team_task_update(task_id, action="claim", expected_revision=<rev>)` 认领——**CAS 失败即重读 revision 重试，不硬写**；认领后 owner 即其 name，按卡片执行。
+- **审核反馈回同一 implementer**：`send_message` 把修改要求发给负责该任务的 implementer，由其在同一上下文内修复（反馈不重派新成员）。
+- **待决问题中转**（第四节协议）：implementer 上浮的待决项由 Lead **立即代问用户**，再用 `send_message` 把答复**回送同一 implementer**（上下文保留、可多轮往返澄清）——与审核反馈同一条通道，也是被拥有的 implementer 与用户交互的唯一通路（成员同样不能直接提问）。
+- **无成员上限假设**：本配置不设成员数上限，任务数不封顶 implementer 数；在线并发受 `maxActiveSubagents`（默认 8，两引擎同池）与映射 `parallelism` 共同约束。
+- **卡死/失败处置**：本配置无硬中断（`interrupt_agent` 未挂载，见 [coordination.md](coordination.md) §1）——不用「中断后重建」；先 `send_message` 续话重试 → 冷兜底重派（新名 `-r2`）→ 仍不可用则**降级 subagent** 完成该任务并留痕。
+- **路由适用**：`apply` 键**两引擎均应用**——implementer 即具名 fresh 子代理，路由字段随 preset 启用；会话未生效时派发报 `child model selection is disabled…`，那是「该会话未生效」而不是工具损坏，**报错不硬闯**，按 [routing.md](routing.md) 三档回退处置。
+- 该引擎**不注入协调段**：team 以共享任务板 + `send_message` 为控制面，登记簿仅记 team 批次条目与终态供恢复核对。
 
 **引擎可批次间切换**：任一批次开始前可按用户指示切换引擎（含 team↔subagent），自该批次起生效；**切换与原因写入留痕**（执行期留痕，见下）。
 

@@ -1,6 +1,6 @@
 ---
 name: spec-plan
-description: spec 驱动工作流的规划半程——并行双线（team 驱动）或串行单线（openspec-explore + grill-me）规划、差异收敛、代码设计、OpenSpec 落档提交一体化，到落档即止不动手实现。Use when 用户只要规划/落档、调用 /spec-plan，或被 spec-workflow 编排委托其阶段 1→2；落档提交后告知 /spec-flow continue 接续执行。
+description: spec 驱动工作流的规划半程——并行双线或串行单线（openspec-explore + grill-me）规划、差异收敛、代码设计、OpenSpec 落档提交一体化，到落档即止不动手实现。Use when 用户只要规划/落档、调用 /spec-plan，或被 spec-workflow 编排委托其阶段 1→2；落档提交后告知 /spec-flow continue 接续执行。
 ---
 
 # spec-plan 规划半程
@@ -13,8 +13,8 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ```
 阶段1 规划编排 → 阶段1.5 收敛 → 阶段1.7 代码设计 → 阶段1.75 界面演示（条件） → 阶段2 落档（终于落档提交）
-并行=双线（team 驱动）  并行=七步（含审视）   code-design.md      演示 HTML+确认      四件套+两材料+demos/
-串行=单线（explore）    串行=grill-me 直收
+并行=独立双线（具名 fresh 子代理）  并行=七步（含审视）   code-design.md      演示 HTML+确认      四件套+两材料+demos/
+串行=单线（explore）                串行=grill-me 直收
 ```
 
 **本流程到落档提交为止**：不写项目代码、不涉及执行模式、不派执行子代理；收尾固定告知 `/spec-flow continue <变更名>` 接续执行（委托场景由 spec-workflow 衔接 spec-apply，模式/引擎由其承接）。
@@ -28,14 +28,14 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 | 参数 | 取值与缺省（含询问时机） |
 | --- | --- |
 | `<需求描述>` | 需求原文；为空则问「要做什么」 |
-| `--parallel` | 并行编排：双线各自独立完成——默认 **team 驱动**（每线一个具名成员，`send_message` 同实例多轮澄清），不可行时**按线回退 subagent**（判据见 mode/parallel.md）；缺省**串行**（单线探索），阶段 1 前未给则问 |
-| `--model <阶段>=<provider>/<模型>` | 规划键（lineA/lineB/panel/design）模型覆盖，**仅 subagent 派发时应用**；缺省读映射文件（第八节） |
+| `--parallel` | 并行编排：双线各自独立完成——每线一个具名 fresh 子代理，同一条消息并发 `subagent(name="plan-a"/"plan-b")`、即返名（`send_message(agent="plan-a")` 同实例续话）；缺省**串行**（单线探索），阶段 1 前未给则问 |
+| `--model <阶段>=<provider>/<模型>` | 规划键（lineA/lineB/panel/design）模型覆盖，**随 fresh 子代理派发生效**；缺省读映射文件（第八节） |
 
 展开内容按**消费时机**外移（按下表按需读取，读到的与正文同等权威）：
 
 | 消费时机 | 读什么 |
 | --- | --- |
-| 阶段 1 开始前 | **按编排读其一**：[parallel.md](mode/parallel.md)（并行手册——team 派发、回退判据、模板、回执核对）或 [serial.md](mode/serial.md)（串行手册——explore 契约、grill-me 收敛） |
+| 阶段 1 开始前 | **按编排读其一**：[parallel.md](mode/parallel.md)（并行手册——具名派发、模板、回执核对）或 [serial.md](mode/serial.md)（串行手册——explore 契约、grill-me 收敛） |
 | 并行阶段 1.5 | [convergence.md](refs/convergence.md) —— 七步判据（含探索审视） |
 | 派发子代理前 | [routing.md](refs/routing.md) —— 规划键路由、三档回退、白名单、图片能力、自检 |
 | 阶段 1.7 / 1.75 / 落档 | [planning.md](refs/planning.md) —— 前置检查展开、设计契约、界面演示 gate、落档细节 |
@@ -53,7 +53,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ## 四、阶段 1 规划编排（并行双线 / 串行单线）
 
-**并行（`--parallel`）**：两条**方向不同、各自完整**的规划线，**不是分工**——**A 线**（需求与价值、范围与边界）与 **B 线**（实现与约束、反例与风险）各自把需求**完整**规划一遍，让盲区在阶段 1.5 交叉比对中互相暴露；产物 `line-a.md`/`line-b.md`。**派发默认 team 驱动**：每线一个具名 fresh 成员（`spawn_teammate`），不可行时按线回退 subagent；每条线产出**同一套 7 字段**的完整轻量草案（目标与非目标 / 范围与边界 / 方案与取舍 / 任务拆分 / 验证思路 / 风险与未知 / 假设清单），两线同构、完备度一致。
+**并行（`--parallel`）**：两条**方向不同、各自完整**的规划线，**不是分工**——**A 线**（需求与价值、范围与边界）与 **B 线**（实现与约束、反例与风险）各自把需求**完整**规划一遍，让盲区在阶段 1.5 交叉比对中互相暴露；产物 `line-a.md`/`line-b.md`。**派发**：同一条消息并发 `subagent(name="plan-a"/"plan-b")`，每线一个具名 fresh 子代理、即返名；每条线产出**同一套 7 字段**的完整轻量草案（目标与非目标 / 范围与边界 / 方案与取舍 / 任务拆分 / 验证思路 / 风险与未知 / 假设清单），两线同构、完备度一致。
 
 **串行（缺省）**：**单线**——主会话加载 `openspec-explore` 探索并产出单份 7 字段草案 `explore.md`（另立待决问题节），**不产第二条线**；待决项留阶段 1.5 收敛。
 
@@ -65,23 +65,23 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 - **信息不足时自行查证或上浮**：查不到的写进「假设清单」「风险与未知」；**需用户拍板的不得自行假设**。
 - **两条线的提示除「方向」外完全等形**。
 
-### 待决问题的中转交互协议（成员/子代理 ↔ 用户）
+### 待决问题的中转交互协议（子代理 ↔ 用户）
 
-**适用范围**：并行规划线、复算线与阶段 1.7 设计线（team 成员与被拥有的子代理同受此限）；**串行单线由主会话直问用户，不经中转**。
+**适用范围**：并行规划线、复算线与阶段 1.7 设计线（被派生的具名子代理同受此限）；**串行单线由主会话直问用户，不经中转**。
 
 **平台事实**：被父代理拥有的子代理**不能直接向用户提问**——调用提问工具被 `DELEGATED_CALLER` 拒绝。**这是平台设计，不是故障**。协议：
 
 1. **① 上浮**：决策**不得自行假设**；写进产物「待决问题」节（**问题、选项、推荐、影响面**）并列回执 TOP 项后结束回合；**不得为等答复阻塞、空转、轮询**。
 2. **② 代问**：主会话**立即**代问，**不积压、不另开通道**——并行规划线上浮项**并入阶段 1.5 统一提问**；设计线（阶段 1.7）上浮项**并入落档分歧点提问**。
 3. **③ 记录**：并行期写 `diff-matrix.md`；设计期并入落档分歧点。
-4. **④ 回送**：**team** 用 `send_message` 回**同一成员**（同实例多轮）；**subagent** 以上轮回执摘要 + 答复**接续重派**（**非同一实例**）。
+4. **④ 回送**：**同实例续话**（`send_message(agent="plan-a")`，保留上下文）；实例不可恢复才冷兜底重派 `-r2`（附上轮回执摘要）。
 5. **⑤ 终止**：待决项清空，或用户授权**「按假设清单推进」**（标注**「已授权的假设清单」**）。
 
 **两条禁令**：**不得把待决项静默变成假设**；**不得让子代理为等答复而阻塞或轮询**。
 
-**上行通道**（并行规划线/设计线）：subagent 可 `send_message` 直报主会话，仅待决/异常、单发不候复、无租约无前奏、不改提问节奏；见 coordination.md §7。
+**上行通道**（并行规划线/设计线）：子代理可 `send_message(agent="lead")` 直报主会话，仅待决/异常、单发不候复、无租约无前奏、不改提问节奏；见 coordination.md §7。
 
-派发细节（team 成员规约与 5 条回退判据、subagent 并行模板、回执核对）见 [parallel.md](mode/parallel.md)；串行探索契约与收敛接线见 [serial.md](mode/serial.md)。
+派发细节（具名派发规约、双线模板、回执核对）见 [parallel.md](mode/parallel.md)；串行探索契约与收敛接线见 [serial.md](mode/serial.md)。
 
 ## 五、收敛与分歧复算（阶段 1.5）
 
@@ -93,7 +93,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ## 六、代码设计（1.7）与界面演示 gate（1.75）
 
-1.5 收敛后、落档前：**恒派 fresh 子代理**（`design` 路由，不随阶段 1 编排模式变化）产出 `code-design.md`——深度契约**六字段**（触达面清单——**逐条注明所属仓** / 证据锚 / 接口与数据形状 / 决策记录 / 逐任务组实现要点 / 设计假设与未决项）+ **二行为约束**，**三档分降** L2/L1/L0（trivial 豁免派遣、inline 一行断言落档）。**派发前主会话做栈识别**，设计子代理**须先加载栈对应 writer skill**（未命中问用户三选一，**不静默跳过**）；**栈识别结论（writer 名与证据）须写入落档 design.md 决策记录。****输入材料按编排**：并行 = 需求原文+`line-a.md`+`line-b.md`+`diff-matrix.md`；串行 = 需求原文+`explore.md`+`decisions.md`。模板、深度契约与回执核对见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
+1.5 收敛后、落档前：**恒派 fresh 子代理**（`design` 路由，不随阶段 1 编排模式变化）产出 `code-design.md`——深度契约**六字段**（触达面清单——**逐条注明所属仓** / 证据锚 / 接口与数据形状 / 决策记录 / 逐任务组实现要点 / 设计假设与未决项）+ **二行为约束**，**三档分降** L2/L1/L0（trivial 豁免派遣、inline 一行断言落档）。**派发前主会话做栈识别**，设计子代理**须先加载栈对应 writer skill**（**纯文档/技能类分支**：触达面零应用代码、全 markdown/技能 → 默认 `writing-skills`，不问三选一；其余未命中问用户三选一，**不静默跳过**）；**栈识别结论（writer 名与证据）须写入落档 design.md 决策记录。****输入材料按编排**：并行 = 需求原文+`line-a.md`+`line-b.md`+`diff-matrix.md`；串行 = 需求原文+`explore.md`+`decisions.md`。模板、深度契约与回执核对见 [planning.md](refs/planning.md)『附：代码设计环节（阶段 1.7）』。
 
 ### 阶段 1.75 界面演示 gate（1.7 后、落档前）
 
@@ -107,7 +107,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 
 ## 八、模型路由
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由仅适用于 subagent 派发**：**team 成员无模型参数**——team 编排下 `lineA`/`lineB` **不应用**（留痕告知）；**串行单线无派发，规划键不消费**；`panel`/`design` 恒为 subagent 派发，不受编排影响；**显式 `--model lineA|lineB` → 该线以 subagent 派发兑现路由**（不静默丢弃显式覆盖）。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由恒适用**：并行规划线/复算线/设计线恒为具名 fresh 子代理派发（`subagent(name=…)`）；**fork 不支持模型选择**，故不用 fork；**串行单线无派发，规划键不消费**。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
 
 红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——按**映射文件该键当前路由**核对图片输入能力（判定方法见 routing.md，本 skill 不记忆任何具体模型的能力快照）；路由不支持图片时报 `does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
 
@@ -118,7 +118,7 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 | 情形 | 处置 |
 | --- | --- |
 | 无 openspec 根（`root: null`） | 问 init / store / 放弃，**绝不副作用创建** `openspec/`（第二节） |
-| 子代理/成员需用户决策、直接提问被拒（`DELEGATED_CALLER`） | 走第四节中转协议：上浮 → 主会话**立即代问** → team 回送**同一成员**、subagent 接续重派。**`DELEGATED_CALLER` 是平台设计，不是故障** |
+| 子代理需用户决策、直接提问被拒（`DELEGATED_CALLER`） | 走第四节中转协议：上浮 → 主会话**立即代问** → **同实例续话**、实例不可恢复才冷重派。**`DELEGATED_CALLER` 是平台设计，不是故障** |
 | 设计草案与收敛结论矛盾 | 上浮待决并入落档分歧点提问，**不重开收敛**（第六节） |
 
 **绝不做**：不自行 `openspec init`；不在落档后继续执行或选择执行模式；不动目标项目的 CI、密钥、生产配置；不把子代理上浮的待决项**静默变成假设**；不把 `/tmp/spec-flow/` 临时材料当进度承诺（落档后以变更目录两材料为权威）；工件未过 `--strict` 校验不提交。
@@ -128,4 +128,4 @@ description: spec 驱动工作流的规划半程——并行双线（team 驱动
 - 本 skill 中向用户的**全部**追问（含纠错与异常处置）一律经**宿主结构化提问工具**（DSH 为 `ask_user_question`）发起，不得裸文本提问。
 - 每问必须附**背景**（为什么问、答复影响什么）与**详细解释**，表述清晰易懂、不含糊。
 - 存在多个方案/选项时，列出各选项的**详细区别**；涉代码、配置或结构时**举例**说明。
-- 子代理/成员不直接提问，仍按第四节上浮；`grill-me` 轮次的承载见其 `Carrier by host` 段。
+- 子代理不直接提问，仍按第四节上浮；`grill-me` 轮次的承载见其 `Carrier by host` 段。

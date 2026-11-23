@@ -19,13 +19,13 @@ parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 | 键 | 应用点 |
 | --- | --- |
-| `lineA` | 阶段 1 A 线规划派发——**仅 subagent 派发时应用**（team 编排下不应用；串行单线不消费） |
-| `lineB` | 阶段 1 B 线规划派发——适用范围同 `lineA` |
-| `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发；恒为 subagent，不受编排影响） |
-| `design` | 阶段 1.7 代码设计子代理（恒派 fresh 子代理，深度契约见 [planning.md](planning.md)；恒为 subagent，不受编排影响） |
+| `lineA` | 阶段 1 A 线规划派发——`plan-a` 具名 fresh 子代理，**恒适用**（串行单线无派发、不消费） |
+| `lineB` | 阶段 1 B 线规划派发——`plan-b` 具名 fresh 子代理，适用范围同 `lineA` |
+| `panel` | 阶段 1.5 分歧复算子代理（第三条线，仅存在需复算的分歧时派发；恒派 fresh 子代理） |
+| `design` | 阶段 1.7 代码设计子代理（恒派 fresh 子代理，深度契约见 [planning.md](planning.md)） |
 | `vision` | **读图覆盖（能力键，不改变阶段划分）**：某阶段子代理需要图片输入（截图、设计稿、渲染结果、fixture 图片）而**该阶段路由不支持图片**时，忽略阶段路由、改用本键派发；阶段路由本身支持图片时保持阶段路由 |
 
-**编排适用性速查**：路由**仅适用于 subagent 派发**——并行 team 成员无模型参数（`lineA`/`lineB` 不应用，映射值忽略并留痕告知）；串行单线无派发（规划键不消费）；`panel`/`design` 恒为 subagent 派发，不受编排影响；显式 `--model lineA|lineB` 覆盖 → 该线以 subagent 派发兑现路由（不静默丢弃显式覆盖）。
+**编排适用性速查**：规划键**恒适用**——两条规划线即具名 fresh 子代理（`plan-a`/`plan-b`，与执行侧同一 `subagent` 机制）；`panel`/`design` 同以 fresh 子代理派发；串行单线无派发、不消费规划键；显式 `--model lineA|lineB|panel|design` 覆盖照常生效（不静默丢弃）。
 
 > 执行键 `apply`、`engine`/`parallelism` 由 **spec-apply** 消费，`verify` 由 **spec-done** 复用；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。四段共用同一映射文件与白名单。
 
@@ -36,7 +36,10 @@ parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 不支持图片的路由遇到读图会报 `model "<model>" does not declare image input; switch to an image-capable model to read images`——这是**能力事实不是工具故障**：不要重试，改走 `vision` 路由。
 
-**路由自检**（派发前可选；退出码非 0 = 有路由不在白名单；打印「跳过」= 依赖缺失未校验，**不等于通过**）：
+**路由自检**（派发前可选；两层：第 1 层首选，第 2 层兜底）：
+
+1. **首选 `list_subagent_models`**（零依赖，反映**当前会话真实授权面**）：无参调用取授权 provider 清单，再按 `provider=<id>`（可加 `model=<id>`）取该 provider 的模型与 reasoning effort；把输出与映射文件的 `models`（含各 `fallback`）**逐条人工比对**——映射必须是授权面的**子集**，任一不在即该路由不可派发。工具不可见或报错 → 走第 2 层，**不得**据「工具不可用」推定通过。
+2. **脚本兜底**（退出码非 0 = 有路由不在白名单；打印「跳过」= 依赖缺失**未校验 ≠ 通过**，须回第 1 层人工核对后再派发）：
 
 ```bash
 node -e '
@@ -61,7 +64,7 @@ console.log("OK 全部路由 ⊆ 白名单");'
 
 - **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
 - **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
-- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 与 `spawn_teammate` 均不支持模型选择（fork 保持与父会话一致以复用 KV cache；team 成员锁定 Lead 模型）——需要阶段路由时**不要用 fork**；team 编排下 `lineA`/`lineB` 不应用（同 spec-apply team 引擎忽略 `apply` 键先例），显式 `--model lineA|lineB` 覆盖的线改以 subagent 派发兑现路由。
+- **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 不支持模型选择（保持与父会话一致以复用 KV cache）——需要阶段路由时**不要用 fork**（规划线一律 fresh 具名子代理）。
 - **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是「该会话未生效」而非工具损坏，换新会话即可。
 - **主会话阶段（落档）的模型由用户自行切换**，本 skill 只提示；本 skill 无法修改主会话模型。
 - 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），报告一次后继续。

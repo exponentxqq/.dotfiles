@@ -21,7 +21,7 @@ description: spec 驱动工作流的终末半程——验证归档（项目验�
 
 ## 二'、验证门与归档(未归档且任务全完成时先走)
 
-1. **项目验证门**：先读项目声明的验证方式（AGENTS.md/CLAUDE.md → README、scripts、CI），**干净窗口**执行（两步法：无并发构建、真实 executed 无 SKIPPED/FROM-CACHE；**执行目录按②执行环境块判定**——隔离 = worktree 路径、非隔离 = 主工作区）；可派 fresh 子代理（按 `/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml` 的 `verify` 路由）；**真实密钥只经参数传入进程**。不通过 → **不归档**：报告证据，问用户修复（回 spec-apply 派修复）或显式批准跳过并记已知缺口。
+1. **项目验证门**：先读项目声明的验证方式（AGENTS.md/CLAUDE.md → README、scripts、CI），**干净窗口**执行（两步法：无并发构建、真实 executed 无 SKIPPED/FROM-CACHE；**执行目录按②执行环境块判定**——隔离 = worktree 路径、非隔离 = 主工作区）；可派 fresh 子代理 `verify-<n>`（按 `/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml` 的 `verify` 路由）；**真实密钥只经参数传入进程**。不通过 → **不归档**：报告证据，问用户修复（回 spec-apply 派修复）或显式批准跳过并记已知缺口。
 2. **归档前校验**：加载 `openspec-verify-change`（任务全勾、spec 覆盖映射、design 一致性）；缺漏先修复重校（补勾、补 delta），不绕过校验归档。
 3. **归档**：`tasks.md` 全部勾选 → `openspec-archive-change` 归档并同步主规格；报错贴原文并停，**不手工搬移目录**。**例外分支**：主线 spec 已随代码批次执行期直改且 `openspec validate --all --strict` 绿 → archive 用 `--skip-specs` 只移目录，不二次合并（前置：直改已随批次提交）。
 4. **归档单独提交一次**（`docs(openspec): 归档 <change>`），不与批次改动混提。**归档暂存纪律**（同仓并行会话防误吞）：只 `git add` 源变更目录与 `archive/` 目标两个精确路径，**禁止按 `openspec/changes` 父目录整体 add**；提交前断言暂存区纯 rename、0 内容变更（`git diff --cached --stat` 无 +/− 行），混入内容变更 → soft reset 逐条排查误伤后重提。
@@ -36,7 +36,7 @@ description: spec 驱动工作流的终末半程——验证归档（项目验�
 
 1. **发起**：用户 `/spec-done <变更名>` 或等价指令；先跑第二节+第三节。
 2. **fetch + rebase**：worktree 内 `git fetch origin && git rebase origin/<主分支>`。**冲突 → `git rebase --abort` 回退**，呈证冲突文件清单、双方意图、建议解法，问用户三选一：**授权代解 / 用户自解后继续 / 放弃 rebase** 换策略——不自行解冲突。
-3. **全量复验**：rebase 改写全部提交链 → 该仓**全量测试**（项目声明验证方式优先；干净窗口两步法：无并发、真实 executed 无 SKIPPED/FROM-CACHE）。可派 fresh 子代理（`verify` 路由）。失败 → 停下报告，不带病推送。
+3. **全量复验**：rebase 改写全部提交链 → 该仓**全量测试**（项目声明验证方式优先；干净窗口两步法：无并发、真实 executed 无 SKIPPED/FROM-CACHE）。可派 fresh 子代理 `verify-<n>`（`verify` 路由）。失败 → 停下报告，不带病推送。
 4. **push**：探测可行 → `git push -u origin feature/<change>`；被拒（远端主分支又前进）→ fetch+rebase 一次后重试，仍拒报告；探测不可行 → 给宿主命令并等回告。
 5. **用户 codereview + 平台合并**：人工环节，等回告——不催、不代并、不代做合并决策。
 6. **删 worktree（含本地环境处置）**：**硬门槛 = 用户确认已推送+已合并**；动作前以 git 事实复核（fetch 后 origin/<主分支> 含 feature 提交）而非仅凭口述 → **本地环境处置**：入库配置改动按执行环境块清单还原（`git checkout -- <文件>`），独立 database 清单（执行环境块）呈证问用户 **DROP**（给命令或按推送探测口径代跑）还是**保留** → **外部依赖扫描**：grep 本机配置对 worktree 路径的引用（dsh profile `package.json` 的 `link:`、crontab、shell rc 等）——发现引用先切到主检出等价目标并经装载方指纹验证（worktree.md 装载指纹），再删 worktree；悬空 link 会在下次重启时静默炸插件加载 → `git status --porcelain` 确认 worktree 干净 → `git worktree remove <路径>` → `git worktree list` 复核未波及其他 worktree。**脏 → 停下呈证，不 force**。

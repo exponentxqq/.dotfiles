@@ -79,6 +79,12 @@
 **D13 delta 形态（用户裁定）**
 - 含废弃 Scenario 的 Requirement 一律 `REMOVED` 整条 + `ADDED` 新名（validator 禁止 MODIFIED 省略现有 Scenario）；其余用 `MODIFIED` 并保留全部现有 Scenario 名。归档后主规格 5 处 Requirement 名变化。
 
+**D14 衔接裁定与执行环境（执行期，用户裁定）**
+- 模式 `auto`（参数未预置，衔接点询问后选定）；引擎 `subagent`（映射文件 `engine`，未传 `--engine`）；模型覆盖无（未传 `--model`）：`apply` 键 `opencode-go/deepseek-v4.1-flash` 本会话授权已核可用；`verify` 键 `zcode-plan` 本会话未授权 → 走 fallback `opencode-go/deepseek-v4.1-flash`，按 spec-apply 自检规则留痕。
+- 任务 6.1 处置：`openspec/specs` 子项**归档后复验**——主规格仅由归档同步，执行期 grep 范围收为 `agent/skills dsh/commands dsh/spec-workflow.yaml dsh/README.md`（「接续重派」的 `openspec/specs` 子项同此处置）；该子项移交 spec-done 归档后复验门，追加断言 `grep -rn 'spawn_teammate\|Team member limit\|agent_id\|互不可达\|run_in_background' openspec/specs` 无输出。
+- 执行环境：直用主工作区。布局：无 worktree，全部触达面在根仓主检出 `/home/xuqinqin/develop/dotfiles` @ `master`；装配：无（零应用代码、纯 markdown，无装载单元）；环境错开：无；装载指纹：无；创建于 2026-11-23
+- 脏改动隔离纪律（R10 落地）：每批次提交以**显式路径**暂存本变更文件（17 项触达面 + `openspec/changes/<change>/` 工件），`dsh/profiles/web/*` 与 `dsh/spec-workflow.yaml` 四文件零触碰、不入暂存区。
+
 ## Risks / Trade-offs
 
 | # | 风险 | 对策 |

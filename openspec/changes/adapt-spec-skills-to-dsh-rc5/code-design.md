@@ -300,6 +300,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 **1.2** 补入面锚核对（只读）：`sed -n '41,42p' agent/skills/spec-plan/refs/planning.md`、`sed -n '27p' …/convergence.md`、`sed -n '142p;155p;161p;173,174p' dsh/README.md`（触达 #11/#10/#14）。
 验证：上述输出分别含 `agent_id`、`回送同一成员或接续重派`、`spawn`/`Team member limit 8`/`接续重派`；`grep -c 'writing-skills' dsh/README.md` = 0。
 
+**执行实测（2026-11-23T16:08，G1 收尾）**：RED 六词计数 `spawn_teammate` 8 / `Team member limit` 5 / `agent_id` 7 / `互不可达` 2 / `run_in_background` 1 / `接续重派` 9（32 行、12 文件）；四入口长度与 ①1.3 逐项全等（±0），coordination 4996 cp、注入段 628 cp/10 行；1.2 锚 A1–A4 全 PASS、零行号漂移（:142 为 failure-modes 行不含三词，payload 按 :155/:161/:173/:174 四锚判定）；`dsh/commands/*` 与 `dsh/spec-workflow.yaml` 零命中。证据：`/tmp/spec-flow/<change>/red-baseline-v2.txt`（206 行，sha256 `8832319…4b029`）。
+
 ### 组 2 · spec-apply 协议内核（协议源）
 **2.1** `coordination.md` 改写（触达 #1，全部节按 ③.1/3.3/3.4/3.5）。
 验证：`python3` 断言 `3800 ≤ len(s) ≤ 5000`、`'agent_id' not in s`、`'互不可达' not in s`、`s.count('send_message(agent="lead")') ≥ 2`、`'成=' not in s`、注入段 `7 ≤ 行数 ≤ 15`；`grep -c '完成前奏'` = 0。
@@ -309,6 +311,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 验证：`python3 -c` 「正文+343 ≤ 8192」退出 0；`grep -c 'agent_id'` = 0；`grep -n 'coordination.md §9'` 命中；`grep -c '接续重派'` = 0。
 **2.4** `spec-apply/refs/routing.md` + `refs/failure-modes.md`（触达 #4/#5）。
 验证：`grep -c 'team 引擎忽略' routing.md` = 0；`grep -c 'list_subagent_models' routing.md` ≥1；`grep -c '下行.*不可达' failure-modes.md` = 0；`grep -c '三类' failure-modes.md` = 0。
+
+**执行实测（2026-11-23T16:16，G2 收尾）**：coordination.md 134→127 行 / **4990 cp**（窗口 4930–4990），注入段 598 cp / 10 行且与 ③.3 定稿逐字符一致，§9 与 ③.5 逐字符一致；execution.md 68 行 / 6955 cp（team_task_update 按 tool-catalog 真值落地，见 R13）；spec-apply/SKILL.md 正文 3604 / 渲染 3947（lead 复核修 2 处措辞）；routing.md 66 行 / 4367 cp（自检改两层：`list_subagent_models` 首选 + 脚本兜底）；failure-modes.md 25 行 / 2231 cp。四条验证句全过。偏差留痕：§1 实际 594 cp 超 D4 预算（锚点行未计入，总账仍在窗口）；§2 未嵌 ③.1 示例行（省 ~100 cp，字段表/命名规约/写者规则/重叠判据全在）。
 
 ### 组 3 · spec-plan 消费面
 **3.1** `mode/parallel.md` 重写（触达 #7）。
@@ -320,6 +324,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 **3.4** `refs/convergence.md:27` + `refs/planning.md:23/:41–42/:77`（触达 #10/#11）。
 验证：`grep -c '回送同一成员或接续重派' convergence.md` = 0；`grep -c 'agent_id' planning.md` = 0；`grep -c 'spring-writer / nuxt-writer' planning.md` = 0；`grep -c '纯文档' planning.md` ≥1 且 `grep -c 'writing-skills' planning.md` ≥2（分支 + 模板）；`grep -c 'spring-boot' planning.md` ≥1（既有判据未删）；`python3 -c` planning.md cp ≤7900。
 
+**执行实测（2026-11-23T16:27，G3 收尾）**：parallel.md 57→38 行 / **2371 cp**（模板收敛单版，无后台参数/无 fork）；SKILL.md body 7507→**7452**（净 −55，渲染 7795），16 处行内替换、全文 `team` 零残留；refs/routing.md 73 行 / 4722 cp（规划键恒适用 + 双层自检）；refs/failure-modes.md 22 行 / 3115 cp；convergence.md 2679 cp（回送=同实例续话）；planning.md 7734 cp（净 +89 ≤100，纯文档分支 + 模板 writer 点名 + `agent="lead"`；lead 恢复「超出则拆组」半句）。四条验证句全过。留痕：T3.4 自行修掉派发稿中悬空锚点「§1.45」→「上文栈识别判据」（可解析引用）；`spec-plan` 全目录 `agent_id`/`接续重派`/`spawn_teammate` 清零（跨文件同步到位）。
+
 ### 组 4 · 编排层与仓文档
 **4.1** `spec-workflow/SKILL.md`（触达 #12）。
 验证：`grep -n '登记簿（v3'` 命中；`grep -c '接续重派'` = 0；`grep -n 'Team 模式'` 命中；`python3 -c` 正文+343 ≤8192。
@@ -328,6 +334,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 **4.3** `dsh/README.md` 四处（触达 #14）。
 验证：`grep -c 'spawn_teammate\|Team member limit\|接续重派'` = 0；`grep -c 'writing-skills'` ≥1；`grep -c '纯文档'` ≥1；`grep -n 'team_task_create'` 命中。
 
+**执行实测（2026-11-23T16:33，G4 收尾）**：spec-workflow/SKILL.md 99 行 / 正文 6358→**6560**（+202，渲染 6903；实际 +4/−4 行、净 0 行；`登记簿（v3` 命中、`Team 模式`×2、回送统一为同实例续话）；spec-done/SKILL.md 74 行 / 正文 5886（渲染 6229，`verify-<n>`×2）；dsh/README.md 349 行 / 5+5 行改动（:142/:155/:161/:173–174）+ lead 复核补修 2 行（:169/:230，见 R15）。四条验证句全过，README 全文 `spawn` 零命中。留痕：spec-workflow 正文 +202 与设计估「净 0」不符（整句替换所致），渲染仍余 1289，无门禁风险。
+
 ### 组 5 · 三主规格 delta（新建）
 **5.1** `specs/spec-apply/spec.md`（触达 #16，名集见 ③.6B）。
 验证：`openspec validate <change> --strict` 退出 0；`python3` 断言每个 Requirement 正文 ≤500、`REMOVED` 名在主规格逐一存在、MODIFIED 的 Scenario 名集 ⊇ 主规格同名集合。
@@ -335,6 +343,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 验证：同 5.1（capability=spec-plan）；另断言 3 个 REMOVED 名与主规格 `openspec/specs/spec-plan/spec.md` 逐字一致（含全角括号）；MODIFIED `栈识别与 writer skill 加载（设计侧）` 的 7 个现有 Scenario 名逐字存在于 delta、正文 ≤500、新增名 `纯文档类默认 writing-skills` 不在主规格。
 **5.3** `specs/spec-workflow/spec.md`（触达 #17，③.6C）。
 验证：同 5.1（capability=spec-workflow）；MODIFIED 名与主规格 `:167` 逐字一致（全角括号）。
+
+**执行实测（2026-11-23T16:35，G5 收尾）**：三份 delta 随落档提交（632c750）已在位，本组按三方对齐**只跑验证句、未重写**：`openspec validate adapt-spec-skills-to-dsh-rc5 --strict` → exit 0（is valid、issues 空）；结构性断言全过——spec-plan ADDED 正文 289/364/294 cp、3 个 REMOVED 名与主规格逐字一致、MODIFIED 487 cp 保留 7 个旧 Scenario + 新增 `纯文档类默认 writing-skills`（不在主规格）；spec-apply ADDED 375/296 cp、2 个 REMOVED 在主规格、MODIFIED 500/498/333 cp 且 5/3/5 个旧 Scenario 零缺失；spec-workflow MODIFIED 349 cp 保留 4 个旧名 + 新增 `同实例续话优先`，名与主规格 :167 逐字一致（全角括号）。delta 关键词锚：`agent="lead"` 各 1–2 处、`spawn`/`agent_id` 零命中、spec-apply 含 `team_task_create`/`write_scopes`。
 
 ### 组 6 · 终检（只读，全量门）
 **6.1** 死名清零（触达 #1–#17）。
@@ -345,6 +355,8 @@ subagent(name="plan-a" | "apply-<g>-<t>" | …, description="3–5 词", prompt=
 验证：`openspec validate <change> --strict` 退出 0 且 `--json` 输出 `summary.warnings == 0`（单变更口径；`--all --strict` 不作门，主规格既有告警另账）。
 **6.4** 指针与红线锚。
 验证：`test -f` 逐个核对跨文件指针（`spec-plan/SKILL.md` → `coordination.md`、`execution.md`、`refs/*`；`spec-workflow` → `spec-apply` refs；`spec-done` → `worktree.md`/`routing.md`）；`grep -c 'DELEGATED_CALLER'` 三处入口各 ≥1；`grep -n '审核确认前提交\|绝不重跑\|干净窗口\|三方对齐'` 均命中。
+
+**执行实测（2026-11-23T16:38，G6 收尾）**：6.1 死名 grep 无输出（`spawn_teammate`/`Team member limit`/`agent_id`/`互不可达`/`run_in_background` 全清零），`接续重派` 零出现（无需语境豁免）；6.2 四 SKILL 渲染 7795/3947/6903/6229（spec-plan 正文 7452 ≤7507）、coordination 4990、注入段 10 行 / 598 cp、planning 7734、其余 refs 全 ≤8192；6.3 `--strict` exit 0（issues 空）；6.4 16 个 skill markdown 相对链接零断链、12 个必需指针文件全在、`DELEGATED_CALLER` 三入口 2/1/1、四条红线锚全命中。`openspec/specs` 子项按 D14 移交归档后复验。
 
 **组间依赖理由**：G1→G2 基线冻结（cp/grep 数值成为后续断言常量）；G2→G3 协议源先于消费面（`parallel.md:47`/`SKILL.md:82` 指路 §7）；G3→G4 编排层复述最终术语（含 §六 栈判据分支）；**G3.2/3.4 的判据分支句是 G5.2 MODIFIED 正文来源**（delta 与 skill 必须同批语义，G5.2 不得先于 G3 改写判据）；G4→G5 delta 的 THEN 句逐字引用最终机制表述；G5→G6 终检对象齐备。**执行期狗粮约束**：G2 提交后，G3+ 派发注入段必须从已提交的 `coordination.md §4` 现读，不得凭旧记忆粘贴；执行本变更不得使用已删的「成」事件与 `agent_id`。
 

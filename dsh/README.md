@@ -139,7 +139,7 @@ openspec archive <change>           # 评审通过后归档
 | `agent/skills/spec-apply/SKILL.md` | 执行半程本体（执行手册），skill 名 `spec-apply`；阶段 3 批次执行：双引擎/三模式/核对与审核-提交分离 |
 | `agent/skills/spec-apply/refs/execution.md` | 执行引擎编排与三模式、**审核-提交分离**、干净窗口验收两步法、执行期留痕与工件维护、分仓提交、凭据纪律、提示模板（**含 writer skill 加载指令**）、回执格式、team 任务板——**首次派发前读取** |
 | `agent/skills/spec-apply/refs/routing.md` | 执行键（apply/verify/vision）路由、白名单、三档回退、自检脚本——**派发子代理前读取** |
-| `agent/skills/spec-apply/refs/failure-modes.md` | 执行侧失败处置（含 team 成员上限降级、凭据缺失明确失败）——**异常时读取** |
+| `agent/skills/spec-apply/refs/failure-modes.md` | 执行侧失败处置（Team 模式未开启回退、具名派发失败/卡死、凭据缺失明确失败）——**异常时读取** |
 | `dsh/commands/spec-flow.md` / `dsh/commands/spec-plan.md` | 两个命令薄壳，加载对应 skill 并把 `$ARGUMENTS` 代入正文 |
 | `dsh/commands/spec-apply.md` | 执行半程命令薄壳，加载对应 skill 并把 `$ARGUMENTS` 代入正文 |
 | `dsh/spec-workflow.yaml` | 阶段模型路由与引擎偏好（四段共用单一文件，见下） |
@@ -152,13 +152,13 @@ openspec archive <change>           # 评审通过后归档
 
 ### 规划半程（spec-plan 承载）
 
-1 独立双线规划（**两条方向不同、各自完整的独立规划线，不是分工**：A 线 = 需求与价值、范围与边界；B 线 = 实现与约束、反例与风险；各自产出**同一套 7 字段完整轻量草案**——目标与非目标、范围与边界、方案与取舍、任务拆分草案、验证思路、风险与未知项、假设清单；**互不读取对方产物、不共享中间结论**；待决问题经中转协议上浮）→ 1.5 差异收敛与分歧复算（**共识 / 分歧 / 单边遗漏**三分类，单边项逐项核验不丢弃；可查证分歧自行裁定不问用户；影响走向且无法查证的分歧派第三条独立子代理复算（键 `panel`，不以既有草案为输入）；决策项按 **`grill-me` 设计树/前沿法**提问——只问前沿、≤5 问/轮附推荐、答完重算前沿，前沿为空或用户确认共识才收敛）→ 1.7 代码设计（**恒派 fresh 子代理**（键 `design`），不随阶段 1 编排模式变化；派发前主会话做栈识别（`pom.xml`/`build.gradle*` 含 `spring-boot` 判 Spring、`nuxt.config.*` 或 package.json 依赖含 `nuxt` 判 Nuxt，monorepo 子包一并探测，双命中全加载），设计子代理**先加载栈对应 writer skill**（`spring-writer`/`nuxt-writer`），未命中问用户三选一；产出 `/tmp/spec-flow/<change>/code-design.md` 深度契约六字段（触达面清单 / file:line 证据锚 / 接口与数据形状 / 决策记录附被否反例 / 逐任务组实现要点 / 假设与未决项）+ 二行为约束；**栈识别结论写入落档 design.md 决策记录**——执行侧从工件读取，接续恢复不丢失）→ 2 落档（`openspec-propose` 产四件套、`openspec validate --strict` 零告警、工件单独提交；**tasks 分组 = 执行审核批次**，组内单任务合法、分组兼顾审核节奏；落档即停，不涉及执行模式，告知 `/spec-flow continue` 接续）。
+1 独立双线规划（**两条方向不同、各自完整的独立规划线，不是分工**：A 线 = 需求与价值、范围与边界；B 线 = 实现与约束、反例与风险；各自产出**同一套 7 字段完整轻量草案**——目标与非目标、范围与边界、方案与取舍、任务拆分草案、验证思路、风险与未知项、假设清单；**互不读取对方产物、不共享中间结论**；待决问题经中转协议上浮）→ 1.5 差异收敛与分歧复算（**共识 / 分歧 / 单边遗漏**三分类，单边项逐项核验不丢弃；可查证分歧自行裁定不问用户；影响走向且无法查证的分歧派第三条独立子代理复算（键 `panel`，不以既有草案为输入）；决策项按 **`grill-me` 设计树/前沿法**提问——只问前沿、≤5 问/轮附推荐、答完重算前沿，前沿为空或用户确认共识才收敛）→ 1.7 代码设计（**恒派 fresh 子代理**（键 `design`），不随阶段 1 编排模式变化；派发前主会话做栈识别（`pom.xml`/`build.gradle*` 含 `spring-boot` 判 Spring、`nuxt.config.*` 或 package.json 依赖含 `nuxt` 判 Nuxt，monorepo 子包一并探测，双命中全加载），设计子代理**先加载栈对应 writer skill**（纯文档/技能类默认 `writing-skills`；Spring/Nuxt 按判据点名），未命中问用户三选一；产出 `/tmp/spec-flow/<change>/code-design.md` 深度契约六字段（触达面清单 / file:line 证据锚 / 接口与数据形状 / 决策记录附被否反例 / 逐任务组实现要点 / 假设与未决项）+ 二行为约束；**栈识别结论写入落档 design.md 决策记录**——执行侧从工件读取，接续恢复不丢失）→ 2 落档（`openspec-propose` 产四件套、`openspec validate --strict` 零告警、工件单独提交；**tasks 分组 = 执行审核批次**，组内单任务合法、分组兼顾审核节奏；落档即停，不涉及执行模式，告知 `/spec-flow continue` 接续）。
 
 **代码设计三档分降**（阶段 1.7 派发前判定）：**L2 全深度**（默认）六字段与二行为约束全部执行；**L1**（触达面 ≤2 文件且无新接口）字段 ③④⑤ 与验证映射单行简述，①⑥ 与二行为约束恒成立；**L0**（trivial：单文件 + 无接口变更 + 无逻辑分支变化）豁免 fresh 派遣，主会话 inline 一行断言落档并标注「未触 writer 约束」，涉分层/拆分/接口即升档；`code-design.md` 产物 schema 恒在。
 
 ### 执行半程（spec-apply 承载）
 
-执行双引擎：`subagent`（默认）每任务派 fresh 子代理（提示自包含：任务原文、design 该组实现要点**逐字引用**、验证句、写范围、**栈对应 writer skill 加载指令**——从落档 design.md 决策记录点名，无从取得则重识别一次），组内并发（上限 `parallelism`）、组间串行，主会话按验证句 + diff 核对通过才勾选任务；`team`（需 `--engine team` 或映射文件显式启用，依赖实验性 Agent Teams）由 Lead 把批次发到共享任务板、spawn ≤ 任务数的 implementer 认领（**任务卡含同款加载指令**），审核反馈走消息保留上下文；**成员上限 8 达限（`Team member limit 8 reached`）或创建失败降级 subagent** 并留痕；**引擎允许批次间切换（含 team↔subagent），切换与原因留痕**。
+执行双引擎：`subagent`（默认）每任务具名 fresh 子代理（`subagent(name="apply-<组>-<任务>")`——即返名、完成通知自动递送；提示自包含：任务原文、design 该组实现要点**逐字引用**、验证句、写范围、**栈对应 writer skill 加载指令**——从落档 design.md 决策记录点名，无从取得则重识别一次），组内并发（上限 `parallelism`）、组间串行，主会话按验证句 + diff 核对通过才勾选任务；`team`（可选，需根会话开启 Team 模式）Lead 用 `team_task_create` 发布任务板（`blocked_by`/`write_scopes`），具名 implementer CAS 认领（**任务卡含同款加载指令**），审核反馈走消息保留上下文；**无成员上限概念**（并发受 `maxActiveSubagents`/映射 `parallelism` 约束）；**未开启或创建失败回退 subagent 并留痕**；**引擎允许批次间切换（含 team↔subagent），切换与原因留痕**。
 
 **执行纪律（component:ai 实证沉淀）**：①**审核点与提交点分离**——任何模式完成后不自动提交，停留呈证（批次号/任务号/改动文件/验证输出摘要/diff stat）等用户审核确认，确认后才提交（用户明确豁免审核时除外；主会话核对通过 ≠ 审核通过）；②**干净窗口验收两步法**——确认无并发构建进程 + 验证任务无 SKIPPED 且真实 executed（如 gradle 口径 `N actionable tasks: N executed`），不以 BUILD SUCCESSFUL 字样判定通过；③**分仓提交**——嵌套独立 git 子仓的代码改动与根仓工件改动分别提交、不跨仓混提；④**真实凭据只经参数/环境变量传入进程**，绝不写入入库文件/日志/提交信息，凭据缺失以明确报错失败；⑤**执行期留痕与工件维护**——组收尾把 `code-design.md` 对应组段更新为终形态、运行规则以 R<n> 编号条目留痕（tasks.md 附录或 diff-matrix 执行期章）、证据落 `/tmp/<项目>-evidence/` 易失目录不入库。
 
@@ -166,12 +166,12 @@ openspec archive <change>           # 评审通过后归档
 
 ### 子代理 ↔ 用户交互（中转协议）
 
-平台约束：子代理与 Agent Teams 的 teammate **都不能直接向用户提问**——其调用提问工具会被 `DELEGATED_CALLER` 拒绝（官方文档要求「在最终结果中包含尚未解决的决定」）。**中转**是让子代理**事实上能与用户交互**的官方可行路径：子代理把需用户拍板的决策（问题 + 选项 + 推荐 + 影响面）写入产物「待决问题」节并在回执中**上浮**，不自行假设 → 主会话收到后**立即代问用户**（≤5 问/轮，每题附推荐答案）→ 按引擎**两档回送**：
+平台约束：子代理（含 Team 模式成员）**都不能直接向用户提问**——其调用提问工具会被 `DELEGATED_CALLER` 拒绝（官方文档要求「在最终结果中包含尚未解决的决定」）。**中转**是让子代理**事实上能与用户交互**的官方可行路径：子代理把需用户拍板的决策（问题 + 选项 + 推荐 + 影响面）写入产物「待决问题」节并在回执中**上浮**，不自行假设 → 主会话收到后**立即代问用户**（≤5 问/轮，每题附推荐答案）→ 按引擎**两档回送**：
 
 | 引擎 | 回送路径 | 子代理上下文 |
 | --- | --- | --- |
-| `team` | 经 team 引擎用 `send_message` 把答复回送**同一成员**（仅 `spawn_teammate` 的具名队友可寻址；tool-subagent 的子代理报 `active teammate … not found`） | 保留，可多轮往返 |
-| `subagent` | 把上一轮回执摘要 + 用户答复并入新提示**接续重派** | 重建 |
+| `team` | 经 `send_message(agent="<name>")` 把答复回送**同一成员**（同实例续话） | 保留，可多轮往返 |
+| `subagent` | `send_message(agent="<name>")` **同实例续话**（保留上下文），实例不可恢复才冷兜底重派 `-r2` | 保留；不可恢复时重建 |
 
 上浮时机按半程分流：规划线上浮**并入阶段 1.5 统一提问**、设计线上浮**并入落档分歧点提问**（spec-plan 承载）；执行期上浮**当批次即时代问**（spec-apply 承载）。用户明确授权「按假设清单推进」时跳过代问，并在产物中标注已授权假设。
 
@@ -227,7 +227,7 @@ parallelism: 8      # 同组并行上限 / 落档分组上限
 
 图片输入能力（出处：dsh 内置 pi-ai provider 数据的 `input` 字段）：`zai-coding-cn/glm-5.3` 与 `opencode-go/deepseek-v4-pro` **不支持图片**；`zai-coding-cn/glm-5.3-flash`、`opencode-go/deepseek-v4.1-flash`、`deepseek-official/deepseek-flash` 支持。规划/设计主路由（1017）原生支持读图，**无需改道**；**执行主路由 `glm-5.3` 是纯文本**——执行期子任务需读图（截图、设计稿、渲染结果）时改走 `vision`（`glm-5.3-flash`）；落到其他不支持图片的路由遇到读图会报 `does not declare image input`（能力事实非故障，不重试、改路由）。
 
-落档与归档在主会话进行，模型由用户自行切换。**主会话分段切换建议**：规划段保持 `deepseek-official/deepseek-flash`（默认串行规划、1.5 收敛、落档判断都在主会话，用质量锚点）；到衔接点提示「如需切换主会话模型请现在切换」时切到 `zai-coding-cn/glm-5.3` 跑执行半程与收尾（team 引擎执行时 teammate 继承 Lead 模型，也会跟着走套餐）。
+落档与归档在主会话进行，模型由用户自行切换。**主会话分段切换建议**：规划段保持 `deepseek-official/deepseek-flash`（默认串行规划、1.5 收敛、落档判断都在主会话，用质量锚点）；到衔接点提示「如需切换主会话模型请现在切换」时切到 `zai-coding-cn/glm-5.3` 跑执行半程与收尾（team 成员即具名子代理，`apply` 键两引擎均适用——成员按映射路由选模型，不受 Lead 模型锁定）。
 
 **执行质量升级开关**：某批次反复验证失败/返工时，本轮用 `--model apply=deepseek-official/deepseek-flash` 覆盖为 1017（整轮生效）；或临时改映射文件后重派。
 

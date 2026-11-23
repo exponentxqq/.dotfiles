@@ -19,7 +19,7 @@ description: spec 驱动工作流的执行半程——落档后批次执行：�
 
 ## 二、入口与前置检查
 
-①**已落档**：变更目录四件套存在且 `tasks.md` 非空——未落档指回规划（`/spec-plan` 或 `/spec-flow`）；②**进度重建**：恢复/接续进入先按 spec-workflow 恢复协议（编排层路由至此）；独立进入自查三方对齐（勾选态 + 提交历史 + 现存 diff，勾选但无验证证据 → 对现存 diff 跑验证句，通过保持勾选不重派）；③**模式与引擎**：`auto`/`step-task`/`step-group`；引擎 `subagent`（默认）/`team`——已预置不重问；④**执行环境**：落档 `design.md` 决策记录执行环境块——隔离 → 子代理项目根与验证目录 = worktree 路径，代码提交落 `feature/<change>`、工件落根仓主工作区；直用主工作区 → 常规落点。worktree 布局与装配手册 = **skill spec-workflow 的 `refs/worktree.md`（唯一权威源，本 skill 跨引用不复制）**；⑤**能力自检**：栈识别结论（writer skill 名）从 design.md 决策记录读取，加载失败按 [failure-modes.md](refs/failure-modes.md) 处置顺序处理。
+①**已落档**：变更目录四件套存在且 `tasks.md` 非空——未落档指回规划（`/spec-plan` 或 `/spec-flow`）；②**进度重建**：恢复/接续进入先按 spec-workflow 恢复协议（编排层路由至此）；独立进入自查三方对齐（勾选态 + 提交历史 + 现存 diff，勾选但无验证证据 → 对现存 diff 跑验证句，通过保持勾选不重派）；③**模式与引擎**：`auto`/`step-task`/`step-group`；引擎 `subagent`（默认）/`team`（可选，**需用户在根会话菜单开启 Team 模式**，模型不能自开；未开启或创建失败按执行失败回退 `subagent` 并留痕）——已预置不重问；④**执行环境**：落档 `design.md` 决策记录执行环境块——隔离 → 子代理项目根与验证目录 = worktree 路径，代码提交落 `feature/<change>`、工件落根仓主工作区；直用主工作区 → 常规落点。worktree 布局与装配手册 = **skill spec-workflow 的 `refs/worktree.md`（唯一权威源，本 skill 跨引用不复制）**；⑤**能力自检**：栈识别结论（writer skill 名）从 design.md 决策记录读取，加载失败按 [failure-modes.md](refs/failure-modes.md) 处置顺序处理。
 
 **压缩后恢复速查（红线级）**：进度只认三方对齐；绝不重跑已完成任务，从最小编号未完成组继续。
 
@@ -29,24 +29,24 @@ description: spec 驱动工作流的执行半程——落档后批次执行：�
 while 存在未勾选任务:
     组 = 编号最小的未完成组
     if 引擎 == subagent: 组内每任务派一个 fresh 子代理（同一条消息并发，上限 parallelism）
-    else:                组内任务发布到共享任务板，spawn ≤ 组内任务数的 implementer 认领
+    else:                组内任务 team_task_create(subject, description, blocked_by[], write_scopes[]) 发布，具名 implementer（subagent(name=…)）经 team_task_update(id, owner, revision) CAS 认领
     主会话逐任务核对（验证句 + 读改动 + git diff）→ 通过才勾选 tasks.md
     组收尾：勾选核对（本组任务全 [x]）→ 工件维护（code-design 组段终形态化、R<n> 留痕）→ 按模式停留呈证 → 用户确认后才提交
 ```
 
 **共同纪律**：主会话必须自己按**验证句 + diff** 核对，**核对通过才勾选**；**验收须干净窗口**（无并发构建、验证任务真实 executed 无 SKIPPED——展开见 [execution.md](refs/execution.md)）。
 
-**协调纪律（仅 subagent 引擎）**：派发前读登记簿全表——他人 `state=active` 的写范围与升级判据（coordination.md §9：同任务审核被拒 ≥2 次/需检查点间即时叫停/任务间多轮互商/预计 >2 轮澄清 → 提示用户建议 `--engine team`，只提示不自动切）；组内并发派发前先登记全批条目并回填会话 id；每个 fresh 子代理的提示须粘贴 coordination.md §4 注入段全文。
+**协调纪律（仅 subagent 引擎）**：派发前读登记簿全表——他人 `state=active` 的写范围一律让路；升级判据见 `coordination.md §9`（单条；只提示不自动切）；组内并发派发前先登记全批条目并回填 `name`；每个 fresh 子代理的提示须粘贴 coordination.md §4 注入段全文。
 
-展开内容按消费时机外移 **refs/**：**派发前（两引擎）读 [execution.md](refs/execution.md)**（编排、模式与提交、干净窗口、留痕、提示模板、回执格式）；**仅 subagent 派发前读 [routing.md](refs/routing.md)**（执行键路由、三档回退、白名单、读图、自检）；**仅 subagent 引擎派发前另读 [coordination.md](refs/coordination.md)**（登记簿、检查点、上行格式、注入段与升级判据）；**异常先读 [failure-modes.md](refs/failure-modes.md)**。
+展开内容按消费时机外移 **refs/**：**派发前（两引擎）读 [execution.md](refs/execution.md)**（编排、模式与提交、干净窗口、留痕、提示模板、回执格式）；**派发前读 [routing.md](refs/routing.md)**（执行键路由、三档回退、白名单、读图、自检）；**仅 subagent 引擎派发前另读 [coordination.md](refs/coordination.md)**（登记簿、检查点、上行格式、注入段与升级判据）；**异常先读 [failure-modes.md](refs/failure-modes.md)**。
 
 ## 四、执行期待决中转
 
-执行子代理**不能直接向用户提问**（`DELEGATED_CALLER`，平台设计不是故障）——它在产物与回执**上浮**待决项 → 主会话**当批次即时代问**（≤5 问/轮附推荐）→ **subagent** 以上轮回执摘要+答复**接续重派**；**team** 用 `send_message` 回**同一成员**。**不得把待决项静默变成假设**，不得为等答复阻塞轮询。展开见 [execution.md](refs/execution.md)。**上行通道**：subagent 引擎下子代理可 `send_message(agent_id=父会话 id)` 直报主会话（单发不候复，决/异/成三类，格式见 coordination.md §5），与回执上浮并行——上行不替代回执、不候答复。
+执行子代理**不能直接向用户提问**（`DELEGATED_CALLER`，平台设计不是故障）——它在产物与回执**上浮**待决项 → 主会话**当批次即时代问**（≤5 问/轮附推荐）→ 回送策略：**同实例续话优先**（`send_message(agent="<name>")` 续轮），冷目标走**冷兜底重派**（新名 `-r2`）。**不得把待决项静默变成假设**，不得为等答复阻塞轮询。展开见 [execution.md](refs/execution.md)。**上行通道**：子代理可 `send_message(agent="lead")` 直报主会话（单发不候复，决/异两类，格式见 coordination.md §5），与回执上浮并行——上行不替代回执、不候答复。
 
 ## 五、模型路由（执行侧）
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径，与规划半程共用）：本 skill 消费 `apply`（执行任务子代理）、`vision`（读图）、`engine`、`parallelism`；`verify` 由 spec-done 复用。优先级 `--model` > 映射文件 > 继承会话模型；**三档回退**（fallback 重派一次 → 继承会话模型一次 → 报告暂停，不反复重试）与**读图改道 vision** 展开唯一权威源 = [routing.md](refs/routing.md)（仅 subagent 引擎派发前读）。
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径，与规划半程共用）：本 skill 消费 `apply`（执行任务子代理，**两引擎均适用**——fresh 子代理才支持模型选择）、`vision`（读图）、`engine`、`parallelism`；`verify` 由 spec-done 复用。优先级 `--model` > 映射文件 > 继承会话模型；**三档回退**（fallback 重派一次 → 继承会话模型一次 → 报告暂停，不反复重试）与**读图改道 vision** 展开唯一权威源 = [routing.md](refs/routing.md)（派发前读）。
 
 ## 六、全部任务完成后
 

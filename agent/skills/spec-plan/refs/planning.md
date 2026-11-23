@@ -20,7 +20,7 @@
 
 **输入材料按编排**（提示内逐字读全）：并行 = 需求原文 + `/tmp/spec-flow/<change>/line-a.md` + `line-b.md` + `diff-matrix.md`；串行 = 需求原文 + `/tmp/spec-flow/<change>/explore.md` + `decisions.md`。
 
-**栈识别与 writer skill 接线（派发前，主会话）**：只读探测目标项目（含 monorepo 子包）——`pom.xml`/`build.gradle(.kts)` 含 `spring-boot` 判 **Spring**；`nuxt.config.{ts,js,mjs}` 存在或 package.json 依赖含 `nuxt` 判 **Nuxt**；**双命中则两者都加载**。命中后核对聚合层 `~/.agents/skills/<name>/` 存在，不可加载按 [failure-modes.md](failure-modes.md) 处置顺序修复，仍失败**报告问用户**（**不允许静默降级**，区别于 `grill-me` 缺失降级）。**皆未命中 → 问用户三选一**：①指认现有 skill（可点名任一聚合层 skill）／②明确豁免本次加载并如实标注（仅本次有效）／③终止流程——**不静默跳过**。结论与证据记入阶段摘要，**并写入落档 `design.md` 决策记录**——spec-apply 执行侧与接续恢复从工件读取该结论，不再依赖本会话记忆；**阶段 3 沿用同一结论**（spec-apply 侧无从取得时重识别一次）。提示必须**自包含**，模板如下：
+**栈识别与 writer skill 接线（派发前，主会话）**：只读探测目标项目（含 monorepo 子包）——`pom.xml`/`build.gradle(.kts)` 含 `spring-boot` 判 **Spring**；`nuxt.config.{ts,js,mjs}` 存在或 package.json 依赖含 `nuxt` 判 **Nuxt**；**双命中则两者都加载**。**纯文档/技能类**（触达面全为 markdown 文档/技能、零应用代码）→ 默认命中 `writing-skills`，不问三选一；命中后核对聚合层 `~/.agents/skills/<name>/` 存在，不可加载按 [failure-modes.md](failure-modes.md) 处置顺序修复，仍失败**报告问用户**（**不允许静默降级**，区别于 `grill-me` 缺失降级）。**皆未命中 → 问用户三选一**：①指认现有 skill（可点名任一聚合层 skill）／②明确豁免本次加载并如实标注（仅本次有效）／③终止流程——**不静默跳过**。结论与证据记入阶段摘要，**并写入落档 `design.md` 决策记录**——spec-apply 执行侧与接续恢复从工件读取该结论，不再依赖本会话记忆；**阶段 3 沿用同一结论**（spec-apply 侧无从取得时重识别一次）。提示必须**自包含**，模板如下：
 
 ```
 你的角色：**代码设计线（阶段 1.7）**——产出**代码级蓝图**（触达哪些文件、怎么改、接口与数据形状、为什么这么定）；双线=需求级轻重与风险（串行单线=需求级调研），设计线=代码级蓝图，**不要把上游结论复读一遍**
@@ -38,8 +38,8 @@
 行为约束（二条，恒成立）：
   - 验证映射落**具体命令或断言**，禁止「已实现」「工作正常」这类空话
   - **不推翻**收敛留痕（diff-matrix.md / decisions.md）的已定结论；发现矛盾**上浮待决，不重开收敛**
-先加载 skill：<按栈识别点名：spring-writer / nuxt-writer / 两者>，其规范（分层方向、复用优先、任务拆分粒度等）是本次设计的**硬约束**；加载失败按待决问题上浮，**不静默跳过**。
-设计线上行精简段（仅决/异两类，节奏不变）：send_message(agent_id=父会话 id) 直报父会话，单发不候复、不在此等待答复；失败降级为回执上浮；上浮项并入落档分歧点提问。格式见 spec-apply 的 refs/coordination.md §7：决/异：[上行][<change>][设计][决|异] 问题=<…> / 选项=<a|b> / 推荐=<a>。
+先加载 skill：<按栈识别点名；本仓纯文档/技能类为 writing-skills，其他栈按上文栈识别判据或用户指认>，其规范（分层方向、复用优先、任务拆分粒度等）是本次设计的**硬约束**；加载失败按待决问题上浮，**不静默跳过**。
+设计线上行精简段（仅决/异两类，节奏不变）：send_message(agent="lead") 直报根会话，单发不候复、不在此等待答复；失败降级为回执上浮；上浮项并入落档分歧点提问。格式见 spec-apply 的 refs/coordination.md §7：决/异：[上行][<change>][设计][决|异] 问题=<…> / 选项=<a|b> / 推荐=<a>。
 另立「待决问题」节（在六字段之外）：每条含 问题 / 选项 / 你的推荐 / 影响面；无待决项时写「无」。
 硬约束：只允许写你自己的那一份产物；不得写项目文件、不得改 openspec/；不得读取、引用或等待其他子代理。
 ```
@@ -74,7 +74,7 @@
    - 已加载 writer skill 时，任务拆分粒度**同时满足该 skill 的拆分规定**（**引名不复述数值**，防双源漂移）。
    - 每任务一行 `- [ ] N.M <一句可执行描述>；验证：<验证句>`；描述须**引用该任务触达文件在 `code-design.md` 触达面清单中的条目编号**（硬契约，「组内不写同一文件」据此机械化核对）。
    - **验证句**必须是第三方可核对的（具体命令、文件路径+断言、可观察输出），禁止「已实现」「工作正常」这类空话。例：`验证：python3 -c "import yaml;d=yaml.safe_load(open('x.yaml'));assert 'models' in d"` 退出码 0；或 `验证：grep -n 'spec-plan' agent/skills/README.md 命中且表格行存在`。
-   - 单组任务数以映射文件 `parallelism`（默认 3）为上限，超出则拆组。
+   - 同组并行 ≤ 映射文件 `parallelism`（缺键按 3），超出则拆组；两引擎同受在线并发上限约束。
 3. **分歧点提问**：工件之间存在取舍、design 有多种方案、需求有歧义时，一次问清；不自行拍板。**阶段 1.7 设计线上浮的待决项并入此处**（见「附：代码设计环节（阶段 1.7）」的上浮接线），不新开通道。
 4. **校验（两段式）**：先机械断言两份落档材料已在变更目录——`test -f openspec/changes/<change>/code-design.md` 与 `test -f openspec/changes/<change>/diff-matrix.md`（串行 `decisions.md`），任一缺失回到第 1 步补复制（`openspec validate` 只认工件结构，不覆盖附加文件）；再跑 `openspec validate <change> --strict`，必须退出码 0 且无 error/warning。任一不通过则修工件重跑，**不得带病落档**。
    - **界面演示产物断言（条件项）**：`code-design.md` 含「阶段 1.75 界面演示」附录时，`test -d openspec/changes/<change>/demos && test -n "$(ls -A openspec/changes/<change>/demos/)"` 退出码 0，且该目录随第 7 步一并 `git add`；未触发则跳过本行并在 `design.md` 决策记录留未触发判定。

@@ -28,7 +28,7 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 | `continue <变更名>` | 接续未完成变更（第八节） |
 | `--parallel` | 规划编排参数，**原样转发 spec-plan** |
 | `--auto` / `--step-task` / `--step-group` | 执行模式；落档摘要后问 |
-| `--engine team` | 执行引擎；映射 `engine` → `subagent`；与模式同问 |
+| `--engine team` | 执行引擎（映射文件 `engine` 键，缺省 `subagent`）；`team` 为可选引擎，**需用户在根会话菜单开启 Team 模式**（模型不能自开），未开启或成员创建失败 → 回退 `subagent` 并留痕；与模式同问 |
 | `--worktree` | 执行环境预置**隔离**（衔接点跳过询问）；缺省衔接点按判据问（第五节） |
 | `--model <阶段>=<provider>/<模型>` | 执行键覆盖（`apply` 随衔接交接 spec-apply、`verify` 随终末委托交接 spec-done）；**规划键（lineA/lineB/panel/design）原样转发 spec-plan** |
 
@@ -56,13 +56,13 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 
 ## 五、衔接与恢复协议
 
-**衔接（落档提交后、执行前）**：①**确认执行模式与引擎**（未预置时）：`auto` / `step-task` / `step-group` / **暂不执行**；引擎（参数 `--engine` > 映射文件 `engine` > 默认 `subagent`）；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文，然后说继续。」**③**执行环境决策**（`--worktree` 预置跳过）：按 [worktree.md](refs/worktree.md) 判据推荐**整批隔离**（全部触达代码仓建 worktree）或直用主工作区，一次问清；选定后创建+装配，**执行环境块写入落档 design.md 决策记录**（随衔接后首个批次提交）；衔接三步完成即**委托 spec-apply 进入执行**。被打断的会话按恢复协议重建进度。
+**衔接（落档提交后、执行前）**：①**确认执行模式与引擎**（未预置时）：`auto` / `step-task` / `step-group` / **暂不执行**；引擎（参数 `--engine` > 映射文件 `engine` > 默认 `subagent`）——**选 `team` 需先在根会话菜单开启 Team 模式**，我会在执行前自检，未开则回退 `subagent` 并告知；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文，然后说继续。」**③**执行环境决策**（`--worktree` 预置跳过）：按 [worktree.md](refs/worktree.md) 判据推荐**整批隔离**（全部触达代码仓建 worktree）或直用主工作区，一次问清；选定后创建+装配，**执行环境块写入落档 design.md 决策记录**（随衔接后首个批次提交）；衔接三步完成即**委托 spec-apply 进入执行**。被打断的会话按恢复协议重建进度。
 
 **恢复协议（任何时刻生效：新轮次、`/compact` 之后、会话重启之后、用户说「继续」）**：
 
 1. 先重建进度：`openspec status --change <change> --json`（该版本 `status` 不接受位置参数；裸 `--json` 无效，用 `--all --json` 兜底）。
 2. 读 `tasks.md` 勾选态（`- [x]` = 完成）与 `git log --oneline` 的批次提交。
-3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。**subagent 登记簿核对**：`/tmp/spec-flow/<change>/progress.md` 登记簿（v2，见 spec-apply refs/execution.md 与 spec-apply refs/coordination.md §2）有在途条目且未勾选 → 以**登记簿条目状态 + 写范围落盘事实**判「在途/已丢」：`state=active` 且写范围内预期文件已出现 = 在途；零落盘且无上行无回执 = 已丢（stalled，先跑验证句：过则补勾、未过重派）；在途等回执、已丢才重派，禁止盲目重派造成双写（`job_list` 不得作为在途判据）。
+3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。**subagent 登记簿核对**：`/tmp/spec-flow/<change>/progress.md` 登记簿（v3，见 spec-apply refs/execution.md 与 spec-apply refs/coordination.md §2）有在途条目且未勾选 → 以**登记簿条目状态 + 写范围落盘事实**判「在途/已丢」：`state=active` 且写范围内预期文件已出现 = 在途；零落盘且无上行无回执 = 已丢（stalled，先跑验证句：过则补勾、未过重派）；在途等回执、已丢才重派，禁止盲目重派造成双写（`job_list` 不得作为在途判据）。
 4. **落档副本存在性检查**：`code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）须在变更目录——缺失且 `/tmp/spec-flow/<change>/` 原件在 → 从原件**补复制入变更目录并留痕**（随下次批次提交）；两者皆无 → 报告问用户，**不以 /tmp 幸存为默认**。
 5. **执行环境核对**：design.md 决策记录有执行环境块（隔离）时 → `git worktree list` 比对——worktree 在 → 续用（含装配核对，缺则补）；缺失但分支在 → 按 [worktree.md](refs/worktree.md) 重建+装配+三方对齐核对；均无 → 问用户。
 6. **判段路由**：重建进度后判定当前段——未落档 → 回规划（再加载 spec-plan 改工件）；已落档未完 → 路由 spec-apply（从最小编号未完成组继续）；已归档 → 路由 spec-done（收尾）。
@@ -93,7 +93,7 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 | 情形 | 处置 |
 | --- | --- |
 | 无 openspec 根（`root: null`） | 问 init / store / 放弃，**绝不副作用创建** `openspec/`（第二节） |
-| 执行子代理需用户决策 / 直接提问被拒（`DELEGATED_CALLER`） | 走执行期待决中转（spec-apply 承载）：上浮 → 主会话**当批次即时代问** → team 回送**同一成员**、subagent 接续重派。**DELEGATED_CALLER 是平台设计，不是故障** |
+| 执行子代理需用户决策 / 直接提问被拒（`DELEGATED_CALLER`） | 走执行期待决中转（spec-apply 承载）：上浮 → 主会话**当批次即时代问** → 回送统一为**同实例续话**（`send_message(agent="<name>")`），实例不可恢复才冷兜底重派 `-r2`；team 与 subagent 同一语义。**DELEGATED_CALLER 是平台设计，不是故障** |
 | 计划彻底失效（工件与实现矛盾） | `auto` 硬停条件之一（四条件细则归 spec-apply 的 execution.md）：停下让用户决定重做落档（回规划 = 再加载 spec-plan 改工件）或终止 |
 
 **绝不做**：不自行 `openspec init`；**不在用户审核确认前提交实现改动**（任何模式；用户明确豁免审核时除外）；不提交未过验证的内容；不动目标项目的 CI、密钥、生产配置（**真实密钥只经参数传入进程**，绝不写入入库文件/日志/提交信息）；不替用户切换主会话模型；不在 `auto` 之外的模式下跳过审核停留；不把子代理上浮的待决项**静默变成假设**；不把 `/tmp/spec-flow/` 临时材料当进度依据；执行级红线（审核前不提交、auto 硬停、凭据纪律、分仓提交）归 spec-apply；收尾红线归 spec-done；本 skill 不 force push、不删 worktree。
