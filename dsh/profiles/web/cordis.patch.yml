@@ -13,7 +13,7 @@
   name: "@deepseek-ai/dsh-agent-default-model"
   config:
     provider: zcode-plan
-    model: glm-5.3
+    model: glm-5.4
 # 模型提供商；key 由 compose env_file 从宿主 ~/.secrets 注入容器（优先于 credentials.yaml，
 # zcode-plan 例外：凭证由插件全生命周期自管，apiKeyEnv 仅兜底）
 - id: llm-deepseek
@@ -42,6 +42,35 @@
       zai-coding-cn:
         apiKeyEnv: ZAI_CODING_CN_API_KEY
         reasoning: max
+        # 内置 pi-ai 目录（随 dsh 版本发布）落后于套餐新模型：目录外新模型只能显式声明
+        # （models 整体替换内置目录；只写 id 的条目从同 id 内置条目继承
+        # name / input / 图片限制等字段）。该端点 compat 自动探测把
+        # supportsReasoningEffort 判成 false，故新旗舰必须显式 compat，否则不下发
+        # reasoning_effort。升级 dsh / pi-ai 后复核本列表（新增模型不会自动出现）。
+        models:
+          - id: glm-5.4
+            name: GLM-5.4
+            contextWindow: 1000000
+            maxTokens: 131072
+            input:
+              - text
+              - image
+            reasoningEfforts:
+              off: null
+              low: low
+              medium: high
+              high: high
+              max: max
+            compat:
+              thinkingFormat: zai
+              supportsReasoningEffort: true
+              supportsStore: false
+              supportsDeveloperRole: false
+              supportsStrictMode: true
+              maxTokensField: max_tokens
+              zaiToolStream: true
+          - id: glm-5.3-flash
+          - id: glm-4.6v
       zcode-plan:
         displayName: GLM Coding Plan (ZCode PAT)
         apiKeyEnv: ZCODE_PLAN_PAT
@@ -58,12 +87,13 @@
             - TRANSPORT
             - INVALID_CREDENTIAL
         models:
-          - id: glm-5.3
-            name: GLM-5.3
+          - id: glm-5.4
+            name: GLM-5.4
             contextWindow: 1000000
             maxTokens: 131072
             input:
               - text
+              - image
             reasoningEfforts:
               off: null
               low: low
@@ -225,15 +255,13 @@
     enabled: true
     allowedModels:
       - provider: zai
-        model: glm-5.3
-      - provider: zai
         model: glm-5.3-flash
       - provider: zai-coding-cn
-        model: glm-5.3
+        model: glm-5.4
       - provider: zai-coding-cn
         model: glm-5.3-flash
       - provider: zcode-plan
-        model: glm-5.3
+        model: glm-5.4
       - provider: zcode-plan
         model: glm-5.3-flash
       - provider: opencode-go
