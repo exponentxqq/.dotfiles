@@ -9,10 +9,10 @@ echo --------------------------------------------------------
 echo ---- install i3 and config in $BASEDIR...... ----
 echo --------------------------------------------------------
 
-# 1) 依赖包（i3lock-color 提供锁屏着色参数；dex XDG 自启动；tdrop 下拉终端；
+# 1) 依赖包（i3lock-color 提供锁屏着色参数；tdrop 下拉终端；
 #    fcitx5 输入法；albert/copyq/flameshot/dmenu 快捷启动/剪贴板/截图；
 #    pipewire-pulse+pavucontrol 音频栈；python-requests 天气脚本依赖）
-sh $BASEDIR/../tool.sh i3-wm i3lock-color xss-lock dex dmenu \
+sh $BASEDIR/../tool.sh i3-wm i3lock-color xss-lock dmenu \
   fcitx5 picom dunst polybar variety \
   pipewire-pulse pavucontrol python-requests
 
