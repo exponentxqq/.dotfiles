@@ -130,7 +130,7 @@ spec-plan SHALL 在阶段 1.5 收敛后、落档前执行代码设计线：SHALL
 
 ### Requirement: 落档工件与执行批次契约
 
-spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design、tasks 四件套）；落档输入 SHALL 含代码设计草案（第 5 材料）；design SHALL 继承其深度并逐项断言核对通过；tasks SHALL 按编号分组表达执行批次——组即执行审核批次，组内单任务是合法常态，分组 SHALL 兼顾用户审核节奏；每任务 SHALL 携带可核验验证说明并引用代码设计触达面条目编号；落档 SHALL 校验通过后才交付执行。落档时 SHALL 把 `code-design.md` 与 `diff-matrix.md`（串行：`decisions.md`）复制入变更目录随工件提交；落档校验 SHALL 含两份材料副本存在性的机械断言（`test -f` 逐文件），任一缺失 SHALL 回到复制步补齐后再跑 `openspec validate <change> --strict`；落档副本 SHALL 为执行期维护与接续恢复的权威，`/tmp` 侧原件自此不再维护。落档展示摘要 SHALL 含触达仓清单（根仓工件与各代码子仓），作为执行侧执行环境决策与多仓分立提交的输入。
+spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design、tasks 四件套）；落档输入 SHALL 含代码设计草案（第 5 材料）；design SHALL 继承其深度并逐项断言核对通过；tasks SHALL 按编号分组表达执行批次——组即执行审核批次，分组 SHALL 兼顾用户审核节奏；每任务 SHALL 携带可核验验证说明并引用代码设计触达面条目编号；落档 SHALL 校验通过后才交付执行。落档 SHALL 把规划材料副本（code-design、diff-matrix；串行为 decisions）复制入变更目录随工件提交，并执行含副本存在性的机械校验；落档副本 SHALL 为执行期维护与接续恢复的权威。落档展示摘要 SHALL 含触达仓清单。阶段 1.75 界面演示已触发 SHALL 同时整目录复制演示产物入变更目录 `demos/` 并入机械校验，未触发 SHALL 在代码设计草案留未触发判定。
 
 #### Scenario: 分组内任务并行执行
 
@@ -176,6 +176,11 @@ spec-plan SHALL 通过 OpenSpec 变更工件落档（proposal、specs、design�
 
 - **WHEN** 落档展示摘要输出
 - **THEN** 摘要含触达仓清单（根仓工件/各代码子仓），供执行侧衔接点执行环境决策与多仓分立提交按仓展开
+
+#### Scenario: 落档复制界面演示产物
+
+- **WHEN** 阶段 1.75 界面演示已触发且用户已确认
+- **THEN** 落档把易失区 demos/ 整目录复制入变更目录（目录存在且非空随机械校验断言），随工件提交；未触发时变更目录不建 demos/
 
 ### Requirement: 阶段级模型路由（规划键）
 
@@ -388,3 +393,27 @@ spec-plan SHALL 把向用户发起的全部追问（含前置检查、参数与�
 
 - **WHEN** 追问改经工具承载
 - **THEN** 1.75 三选项语义（确认/要改/降档或豁免）、grill-me ≤5 问/轮与只问前沿、未修改 Requirement 的行为语义均不变
+
+### Requirement: 阶段 1.75 界面演示 gate
+
+阶段 1.7 回执核对通过后、阶段 2 落档前，spec-plan SHALL 加载 skill `ui-demo` 判定（C1∧C2∧C3 且不命中排除表）：命中 SHALL 由主会话 inline 产出演示（先落易失区）并取得用户明确确认后才落档，用户否决 SHALL 改稿重出不进入落档；未命中 SHALL 在代码设计草案追加一行未触发事实与判据。演示产物落档时 SHALL 整目录复制入变更目录 `demos/`（空目录视为缺失）。`ui-demo` 不可加载 SHALL 按失败处置顺序修复，仍失败 SHALL 报告问用户，不静默跳过。
+
+#### Scenario: 命中判定进入演示 gate
+
+- **WHEN** 阶段 1.75 判定三条件成立且不命中排除表
+- **THEN** 主会话按 ui-demo 产出分级生成演示、自检后以三选一问法交用户确认
+
+#### Scenario: 未确认不得落档
+
+- **WHEN** 用户未答复确认或选择「要改」
+- **THEN** 不进入落档步；改稿重出直至确认或取得书面豁免留痕
+
+#### Scenario: 未命中记未触发事实
+
+- **WHEN** 判定不成立或命中排除表
+- **THEN** 代码设计草案追加一行「1.75 未触发：<判据事实>」，供执行侧与接续恢复审计
+
+#### Scenario: ui-demo 不可加载不静默跳过
+
+- **WHEN** 加载 skill ui-demo 失败
+- **THEN** 按失败处置顺序修复，仍失败报告并问用户三选一，不静默降级跳过演示
