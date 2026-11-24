@@ -54,7 +54,7 @@ console.log("OK 全部路由 ⊆ 白名单");'
 
 硬约束：
 
-- **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。
+- **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。（此白名单是 DSH 的**会话级授权**，非本工作流自设的约束——机制与两态语义见 `dsh/README.md`「白名单一致性」段。）
 - **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
 - **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 不支持模型选择（保持与父会话一致以复用 KV cache），需要阶段路由时**不要用 fork**。
 - **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是「该会话未生效」而非工具损坏，换新会话即可。

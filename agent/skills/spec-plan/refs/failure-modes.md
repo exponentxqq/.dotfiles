@@ -12,7 +12,7 @@
 | `openspec-explore` 不可加载（串行阶段 1 / 并行阶段 1.5 第 4 步审视；「必须」级） | 按 `grill-me` 行同款顺序修复（聚合层与登记核对 → `/commands-reload` → 重启兜底）；仍失败**问用户三选一**（降级裸调研 / 改并行 / 终止），**不静默降级**（mode/serial.md） |
 | 栈识别未命中 writer skill（阶段 1.7 派发前） | **问用户三选一**：①指认现有 writer skill（可点名任一聚合层 skill）／②明确豁免本次加载并**如实标注**（仅本次有效）／③终止流程；**不静默跳过**、不自行假设 |
 | 栈对应 writer skill 加载失败（派发前核对或子代理回执） | 按 `openspec-propose` 加载失败同款顺序修复（核对聚合层与登记 → `/commands-reload` → 重启兜底），仍失败则**报告问用户**；**不静默降级**（「必须」级，区别于 `grill-me` 降级） |
-| 显式模型路由不在**白名单**（报 `is not allowed for this Session`） | 按第八节**三档回退**：先 `fallback` 重派一次 → 再无则回退继承会话模型 → 仍失败报告并暂停（**不反复重试**） |
+| 显式模型路由不在**白名单**（报 `is not allowed for this Session`） | 按第八节**三档回退**：先 `fallback` 重派一次 → 再无则回退继承会话模型 → 仍失败报告并暂停（**不反复重试**）；白名单是 DSH 会话级授权而非本工作流自设（见 dsh/README.md） |
 | 子代理需读图而阶段路由不支持图片（报 `does not declare image input`） | 改用 `vision` 路由重新派发（第八节）；该错误是能力事实，**不重试原路由** |
 | 旧会话报 `child model selection is disabled for this tool instance` | 该会话在**组合期**未读到开关与白名单（配置改动只对新会话生效）：**新建会话**重试，必要时重启 dsh 兜底；**不要判定工具损坏** |
 | 用户中断（说停、切换话题、新指令） | 立即停在安全检查点；未落盘材料与未提交工件保持原状并汇报位置（`/tmp/spec-flow/<change>/` 有哪些、四件套到哪一步），不擅自 stash / revert / 补提交；重进按入口「压缩后恢复速查」重建——**按现存文件名辨编排与阶段**（`explore.md`/`decisions.md`=串行，`line-*.md`=并行），落档后 `code-design.md`/`diff-matrix.md`/`decisions.md` 从变更目录取（落档副本为权威） |

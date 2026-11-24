@@ -10,7 +10,7 @@
 | 审核被拒 | 按意见修正后**重审**：不勾选、不提交；修正范围超出本变更 → 回用户确认 scope |
 | 任务失败（重试一次仍失败） | 暂停本批次并报告（任务号、错误、进度、建议），不中断其余批次 |
 | 勾选态与证据矛盾 | 以证据为准：先对现存 diff 跑该任务验证句（未提交属预期），通过保持勾选不重派；不通过才回退并报告 |
-| 显式路由不在白名单（`is not allowed for this Session`） | 按三档回退：fallback 重派一次 → 继承会话模型 → 仍失败报告暂停，不反复重试（routing.md） |
+| 显式路由不在白名单（`is not allowed for this Session`） | 按三档回退：fallback 重派一次 → 继承会话模型 → 仍失败报告暂停，不反复重试（routing.md）；白名单是 DSH 会话级授权而非本工作流自设（见 dsh/README.md） |
 | 需读图而路由不支持（`does not declare image input`） | 改用 `vision` 路由重新派发；能力事实，不重试原路由 |
 | 旧会话报 `child model selection is disabled` | 配置只对新会话生效：新建会话重试；不判定工具损坏 |
 | team 成员创建失败 / Team 模式未开启 | Team 模式未开启 → 提示用户在根会话菜单开启后重试，否则回退 subagent 并留痕；成员创建失败同样回退并留痕；**无成员上限概念**（受 `maxActiveSubagents` 与映射 `parallelism` 约束）；控制手段 = 软废止令（登记簿该条目改 `state=void` + `reason`，仅检查点生效）+ `send_message` 下行通知，本配置无硬中断 |

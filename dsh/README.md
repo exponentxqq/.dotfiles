@@ -204,6 +204,8 @@ openspec archive <change>           # 评审通过后归档
 
 > **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
 >
+> **出处（这是 DSH 的会话级授权，不是本工作流自设的约束）**：机制在 `@deepseek-ai/dsh-tool-subagent` 的 Host 设置 `subagent-model-selection-settings`——会话创建时把 `allowedModels` 写成 `subagent/model-selection-policy` 投影事件，派发时 `assertAllowedModelSelection` 逐一比对精确路由。只有两态：名单启用 = 只允许精确列表；名单关闭或未挂载 = **只允许父会话当前 provider/model**（无 allow-all 形态，核查至上游 0.2.3-alpha.2 仍如此）。因此删掉名单不会解除限制、只会退化成仅父路由——保留名单并手工维护是当前唯一合理形态；把新模型加进 profile 路由后要被子代理显式选中，仍需同步加进 `allowedModels`（会话创建时读取，新会话生效）。
+>
 > **生效时机**：开关与白名单在**会话创建时**读取——改完配置**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**（旧会话里派发报 `child model selection is disabled for this tool instance`，换新会话即可）。映射路由 ⊆ 白名单的自检命令见两 skill 各自的 `refs/routing.md`。
 
 ### 宿主操作（新增命令 / skill 后各一次）
