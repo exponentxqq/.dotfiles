@@ -21,22 +21,23 @@ description: spec 驱动工作流的执行半程——落档后批次执行：�
 
 ①**已落档**：变更目录四件套存在且 `tasks.md` 非空——未落档指回规划（`/spec-plan` 或 `/spec-flow`）；②**进度重建**：恢复/接续进入先按 spec-workflow 恢复协议（编排层路由至此）；独立进入自查三方对齐（勾选态 + 提交历史 + 现存 diff，勾选但无验证证据 → 对现存 diff 跑验证句，通过保持勾选不重派）；③**模式与引擎**：`auto`/`step-task`/`step-group`；引擎 `subagent`（默认）/`team`（可选，**需用户在根会话菜单开启 Team 模式**，模型不能自开；未开启或创建失败按执行失败回退 `subagent` 并留痕）——已预置不重问；④**执行环境**：落档 `design.md` 决策记录执行环境块——隔离 → 子代理项目根与验证目录 = worktree 路径，代码提交落 `feature/<change>`、工件落根仓主工作区；直用主工作区 → 常规落点。worktree 布局与装配手册 = **skill spec-workflow 的 `refs/worktree.md`（唯一权威源，本 skill 跨引用不复制）**；⑤**能力自检**：栈识别结论（writer skill 名）从 design.md 决策记录读取，加载失败按 [failure-modes.md](refs/failure-modes.md) 处置顺序处理。
 
-**压缩后恢复速查（红线级）**：进度只认三方对齐；绝不重跑已完成任务，从最小编号未完成组继续。
+**压缩后恢复速查（红线级）**：进度只认三方对齐；**路由只认 `/tmp/spec-flow/<change>/routing.md` 快照**（缺失先按映射文件重建，重建前不派发）；绝不重跑已完成任务，从最小编号未完成组继续。
 
 ## 三、批次循环骨架
 
 ```
 while 存在未勾选任务:
     组 = 编号最小的未完成组
-    if 引擎 == subagent: 组内每任务派一个 fresh 子代理（同一条消息并发，上限 parallelism）
-    else:                组内任务 team_task_create(subject, description, blocked_by[], write_scopes[]) 发布，具名 implementer（subagent(name=…)）经 team_task_update(id, owner, revision) CAS 认领
-    主会话逐任务核对（验证句 + 读改动 + git diff）→ 通过才勾选 tasks.md
-    组收尾：勾选核对（本组任务全 [x]）→ 工件维护（code-design 组段终形态化、R<n> 留痕）→ 按模式停留呈证 → 用户确认后才提交
+    读 /tmp/spec-flow/<change>/routing.md 路由快照（缺则先重建，重建前不派发）
+    if 引擎 == subagent: 组内每任务派一个 fresh 子代理（同一条消息并发，上限 parallelism；provider/model 必传）
+    else:                组内任务 team_task_create(subject, description, blocked_by[], write_scopes[]) 发布（卡含路由键+快照+自证句），具名 implementer（subagent(name=…, provider=…, model=…)）经 team_task_update(id, owner, revision) CAS 认领
+    主会话逐任务核对（验证句 + 读改动 + git diff + 回执首行 ROUTE-ACK）→ 通过才勾选 tasks.md
+    组收尾：路由核对 → 勾选核对（本组任务全 [x]）→ 工件维护（code-design 组段终形态化、R<n> 留痕）→ 按模式停留呈证 → 用户确认后才提交
 ```
 
 **共同纪律**：主会话必须自己按**验证句 + diff** 核对，**核对通过才勾选**；**验收须干净窗口**（无并发构建、验证任务真实 executed 无 SKIPPED——展开见 [execution.md](refs/execution.md)）。
 
-**协调纪律（仅 subagent 引擎）**：派发前读登记簿全表——他人 `state=active` 的写范围一律让路；升级判据见 `coordination.md §9`（单条；只提示不自动切）；组内并发派发前先登记全批条目并回填 `name`；每个 fresh 子代理的提示须粘贴 coordination.md §4 注入段全文。
+**协调纪律（仅 subagent 引擎）**：派发前读登记簿全表与 `routing.md` 路由快照——他人 `state=active` 的写范围一律让路；升级判据见 `coordination.md §9`（单条；只提示不自动切）；组内并发派发前先登记全批条目（含 `route=<快照值>`）并回填 `name`；每个 fresh 子代理的提示须粘贴 coordination.md §4 注入段全文。
 
 展开内容按消费时机外移 **refs/**：**派发前（两引擎）读 [execution.md](refs/execution.md)**（编排、模式与提交、干净窗口、留痕、提示模板、回执格式）；**派发前读 [routing.md](refs/routing.md)**（执行键路由、三档回退、白名单、读图、自检）；**仅 subagent 引擎派发前另读 [coordination.md](refs/coordination.md)**（登记簿、检查点、上行格式、注入段与升级判据）；**异常先读 [failure-modes.md](refs/failure-modes.md)**。
 
@@ -46,7 +47,7 @@ while 存在未勾选任务:
 
 ## 五、模型路由（执行侧）
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径，与规划半程共用）：本 skill 消费 `apply`（执行任务子代理，**两引擎均适用**——fresh 子代理才支持模型选择）、`vision`（读图）、`engine`、`parallelism`；`verify` 由 spec-done 复用。优先级 `--model` > 映射文件 > 继承会话模型；**三档回退**（fallback 重派一次 → 继承会话模型一次 → 报告暂停，不反复重试）与**读图改道 vision** 展开唯一权威源 = [routing.md](refs/routing.md)（派发前读）。
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径，与规划半程共用）：本 skill 消费 `apply`（执行任务子代理，**两引擎均适用**——fresh 子代理才支持模型选择）、`vision`（读图）、`engine`、`parallelism`；`verify` 由 spec-done 复用。优先级 `--model` > 映射文件 > 继承会话模型。**路由快照（防压缩丢失）**：阶段开工把解析结果写入 `/tmp/spec-flow/<change>/routing.md`；每次派发显式传 `provider`/`model` 并在登记行记 `route`；子代理自证模型不符即停手（`ROUTE-MISMATCH`）。**三档回退**（fallback 重派一次 → 继承会话模型一次 → 报告暂停，不反复重试）与**读图改道 vision** 展开唯一权威源 = [routing.md](refs/routing.md)（派发前读）。
 
 ## 六、全部任务完成后
 
@@ -54,4 +55,4 @@ while 存在未勾选任务:
 
 ## 七、边界与失败（红线）
 
-**绝不做**：不在用户审核确认前提交实现改动（用户明确豁免审核时除外）；不提交未过验证的内容；不把待决项静默变成假设；不把 `/tmp` 材料当进度依据；不重跑已完成任务；不动 CI、密钥、生产配置（真实密钥只经参数传入进程）；多仓分立提交不跨仓混提；不 force push。**auto 硬停四条件**（不可逆/安全敏感/工作区外副作用/计划彻底失效）与任务失败重试一次纪律见 [execution.md](refs/execution.md)；其余异常处置见 [failure-modes.md](refs/failure-modes.md)，**遇异常先读它**。
+**绝不做**：不在用户审核确认前提交实现改动（用户明确豁免审核时除外）；不提交未过验证的内容；不把待决项静默变成假设；不把 `/tmp` 规划材料当进度依据（**登记簿与 `routing.md` 路由快照是明确的恢复凭据，不在此列**）；**不以会话记忆代替路由快照——派发省略 `provider`/`model` 即静默继承父会话模型，属违规**；不重跑已完成任务；不动 CI、密钥、生产配置（真实密钥只经参数传入进程）；多仓分立提交不跨仓混提；不 force push。**auto 硬停四条件**（不可逆/安全敏感/工作区外副作用/计划彻底失效）与任务失败重试一次纪律见 [execution.md](refs/execution.md)；其余异常处置见 [failure-modes.md](refs/failure-modes.md)，**遇异常先读它**。

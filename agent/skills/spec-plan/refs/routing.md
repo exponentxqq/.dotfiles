@@ -29,7 +29,13 @@ parallelism: 8      # 落档分组上限（SKILL.md 第七节②）消费此键
 
 > 执行键 `apply`、`engine`/`parallelism` 由 **spec-apply** 消费，`verify` 由 **spec-done** 复用；本 skill 只读规划键、`vision` 与 `parallelism`（分组上限）。四段共用同一映射文件与白名单。
 
-**图片输入能力**（判定方法，**快照表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
+### 派发显式化与压缩恢复（规划侧）
+
+- **派发必带路由**：任何规划子代理调用 SHALL 显式传 `provider=<provider>, model=<model>`（`--model` 覆盖 > 映射文件）；提示首行写 `路由键=<lineA|lineB|panel|design>` + 路由值与映射文件路径。省略 = 继承主会话模型（平台静默语义），属违规。
+- **子代理自证**：开工取系统提示 `powered by <模型> model` 与提示路由行比对；不一致 → 停手上行 `[上行][<change>][<线>][异] 路由漂移 expected=… actual=… / 阻塞：是`，回执首行 `ROUTE-MISMATCH`；提示缺路由行 → 按提示中的路由键读映射文件该键值再比对，仍无法判定则报告，不静默执行。
+- **压缩后重进**：先重读映射文件与 `--model` 覆盖，再派发，不凭会话记忆。规划期不建路由快照文件（无派发台账、变更名可能未定）；权威仍是映射文件。
+
+**图片输入能力**（判定方法，**能力速查表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
 
 > **版本口径与套餐策略**：单一来源 = 映射文件**头部注释**（随文件更新，本文件不复述）；衔接点的主会话模型分段切换建议见 `dsh/README.md`。
 

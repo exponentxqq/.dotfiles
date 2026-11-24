@@ -8,6 +8,7 @@
 | 需要宿主操作（重启容器兜底、skctl、装依赖） | 给出确切命令交给用户执行，**本 skill 不代劳**；**推送例外**——先探测（fetch 成功 / `ssh -T` 可达），可行则按用户指示代推，不可行才给宿主命令 |
 | worktree 分支已被其他 worktree 检出（创建/重建时） | git 约束一分支一 worktree：换 worktree 路径或问用户，**不强拆他人检出**（worktree.md） |
 | 恢复时 worktree 缺失或脏 | 按 worktree.md「恢复核对」处置：缺失但分支在 → 重建+装配+三方对齐核对；均无 → 问用户；脏 → 呈证问处置，不擅自清理 |
+| 压缩后路由漂移 / 路由快照缺失（`ROUTE-MISMATCH`/`ROUTE-LEGACY`） | 恢复协议先读 `/tmp/spec-flow/<change>/routing.md`；缺失或与阶段不符 → 按映射文件 + 笔记覆盖重建并写回，**重建完成前不派发**；执行侧细处置见 spec-apply 的 refs/failure-modes.md |
 | 执行期失败（任务失败/审核被拒/路由回退/team 降级/凭据缺失） | 处置权威源 = skill spec-apply 的 refs/failure-modes.md，本 skill 不复述 |
 | 归档与收尾期失败（验证失败/verify-change 缺漏/rebase 冲突/push 被拒/删 worktree 门槛） | 处置权威源 = skill spec-done 正文红线表，本 skill 只指路 |
 

@@ -48,7 +48,7 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 
 ## 三、模式收集
 
-**唯一规则：一次只问该阶段需要的选项，已由参数预置的不再问，绝不自行假设。**规划期参数（`--parallel`、规划键 `--model`）转发 spec-plan 后视同已预置；执行模式与引擎在落档摘要后问（第五节）。答复写进进度笔记（变更名、模式、引擎、模型覆盖）。
+**唯一规则：一次只问该阶段需要的选项，已由参数预置的不再问，绝不自行假设。**规划期参数（`--parallel`、规划键 `--model`）转发 spec-plan 后视同已预置；执行模式与引擎在落档摘要后问（第五节）。答复写进进度笔记（变更名、模式、引擎、**执行侧 `--model` 覆盖逐字原样**，无则「未预置」）。
 
 ## 四、规划阶段（1→2）：委托 spec-plan
 
@@ -56,18 +56,18 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 
 ## 五、衔接与恢复协议
 
-**衔接（落档提交后、执行前）**：①**确认执行模式与引擎**（未预置时）：`auto` / `step-task` / `step-group` / **暂不执行**；引擎（参数 `--engine` > 映射文件 `engine` > 默认 `subagent`）——**选 `team` 需先在根会话菜单开启 Team 模式**，我会在执行前自检，未开则回退 `subagent` 并告知；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文，然后说继续。」**③**执行环境决策**（`--worktree` 预置跳过）：按 [worktree.md](refs/worktree.md) 判据推荐**整批隔离**（全部触达代码仓建 worktree）或直用主工作区，一次问清；选定后创建+装配，**执行环境块写入落档 design.md 决策记录**（随衔接后首个批次提交）；衔接三步完成即**委托 spec-apply 进入执行**。被打断的会话按恢复协议重建进度。
+**衔接（落档提交后、执行前）**：①**确认执行模式与引擎**（未预置时）：`auto` / `step-task` / `step-group` / **暂不执行**；引擎（参数 `--engine` > 映射文件 `engine` > 默认 `subagent`）——**选 `team` 需先在根会话菜单开启 Team 模式**，我会在执行前自检，未开则回退 `subagent` 并告知；②提示用户（原话模板）：**「如需切换主会话模型请现在切换，也可 /compact 压缩上下文（建议在批次边界），然后说继续；压缩后按恢复协议继续（含路由快照重建）。」**③**执行环境决策**（`--worktree` 预置跳过）：按 [worktree.md](refs/worktree.md) 判据推荐**整批隔离**（全部触达代码仓建 worktree）或直用主工作区，一次问清；选定后创建+装配，**执行环境块写入落档 design.md 决策记录**（随衔接后首个批次提交）；衔接三步完成即**委托 spec-apply 进入执行**。被打断的会话按恢复协议重建进度。
 
 **恢复协议（任何时刻生效：新轮次、`/compact` 之后、会话重启之后、用户说「继续」）**：
 
 1. 先重建进度：`openspec status --change <change> --json`（该版本 `status` 不接受位置参数；裸 `--json` 无效，用 `--all --json` 兜底）。
 2. 读 `tasks.md` 勾选态（`- [x]` = 完成）与 `git log --oneline` 的批次提交。
-3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。**subagent 登记簿核对**：`/tmp/spec-flow/<change>/progress.md` 登记簿（v3，见 spec-apply refs/execution.md 与 spec-apply refs/coordination.md §2）有在途条目且未勾选 → 以**登记簿条目状态 + 写范围落盘事实**判「在途/已丢」：`state=active` 且写范围内预期文件已出现 = 在途；零落盘且无上行无回执 = 已丢（stalled，先跑验证句：过则补勾、未过重派）；在途等回执、已丢才重派，禁止盲目重派造成双写（`job_list` 不得作为在途判据）。
+3. 三方对齐：**工件 + 勾选态 + 提交历史**；勾选但无验证证据 → 回退为未完成并报告；**提交对不上时以现存 diff 为准**（`auto` 收尾才提交，未提交**属预期**）：跑该任务验证句，通过即**保持勾选**、不重派。**subagent 登记簿核对**：`/tmp/spec-flow/<change>/progress.md` 登记簿（v4；v3 仍可读、legacy 不阻断，见 spec-apply refs/execution.md 与 spec-apply refs/coordination.md §2）有在途条目且未勾选 → 以**登记簿条目状态 + 写范围落盘事实**判「在途/已丢」：`state=active` 且写范围内预期文件已出现 = 在途；零落盘且无上行无回执 = 已丢（stalled，先跑验证句：过则补勾、未过重派）；在途等回执、已丢才重派，禁止盲目重派造成双写（`job_list` 不得作为在途判据）。**路由快照核对（v4）**：读 `/tmp/spec-flow/<change>/routing.md`；缺失或与当前阶段不符 → 由当前半程按映射文件 + 笔记覆盖重建并写回，**重建完成前不派发**；派发一律从快照取 `provider`/`model`，不凭会话记忆。
 4. **落档副本存在性检查**：`code-design.md` 与 `diff-matrix.md`（串行 `decisions.md`）须在变更目录——缺失且 `/tmp/spec-flow/<change>/` 原件在 → 从原件**补复制入变更目录并留痕**（随下次批次提交）；两者皆无 → 报告问用户，**不以 /tmp 幸存为默认**。
 5. **执行环境核对**：design.md 决策记录有执行环境块（隔离）时 → `git worktree list` 比对——worktree 在 → 续用（含装配核对，缺则补）；缺失但分支在 → 按 [worktree.md](refs/worktree.md) 重建+装配+三方对齐核对；均无 → 问用户。
 6. **判段路由**：重建进度后判定当前段——未落档 → 回规划（再加载 spec-plan 改工件）；已落档未完 → 路由 spec-apply（从最小编号未完成组继续）；已归档 → 路由 spec-done（收尾）。
 7. **绝不重跑已完成任务**；从「最小编号的未完成组」继续。
-8. 恢复后先输出一行进度摘要（`change / 已完成 N/M / 当前组 / 引擎 / 模式 / 当前段 / 下一步`）。
+8. 恢复后先输出一行进度摘要（`change / 已完成 N/M / 当前组 / 引擎 / 模式 / 路由 apply=<route> / 当前段 / 下一步`）。
 9. 上下文一律从工件现读（specs、design、tasks），**不依赖对话记忆**。
 
 ## 六、执行半程（委托 spec-apply）
@@ -84,7 +84,7 @@ description: 固定 spec 驱动开发工作流的统一编排入口——四段�
 
 ## 九、模型路由
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径）为四段共用的唯一路由配置：**规划键（lineA/lineB/panel/design）由 spec-plan 消费；执行键 `apply` 与 `engine`/`parallelism` 由 spec-apply 消费；能力键 `vision`（读图覆盖）由 spec-plan 与 spec-apply 共用；`verify` 由 spec-done 复用**。值 { provider, model }，可选 fallback；优先级 `--model` > 映射文件 > 继承会话模型；命令中的规划键覆盖原样转发，`apply`/`verify` 覆盖随对应半程委托交接。
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（绝对路径）为四段共用的唯一路由配置：**规划键（lineA/lineB/panel/design）由 spec-plan 消费；执行键 `apply` 与 `engine`/`parallelism` 由 spec-apply 消费；能力键 `vision`（读图覆盖）由 spec-plan 与 spec-apply 共用；`verify` 由 spec-done 复用**。值 { provider, model }，可选 fallback；优先级 `--model` > 映射文件 > 继承会话模型；命令中的规划键覆盖原样转发，`apply`/`verify` 覆盖随对应半程委托交接。**压缩持久性**：执行/验证侧路由由 spec-apply 落盘为 `/tmp/spec-flow/<change>/routing.md` 快照（已解析副本，值权威仍是映射文件）；派发必传 `provider`/`model` 并由子代理按系统提示模型名自证，失配以 `ROUTE-MISMATCH` 停手上报（v3/无快照 `ROUTE-LEGACY` 放行）；细则见 spec-apply refs/routing.md。
 
 ## 十、边界与失败
 

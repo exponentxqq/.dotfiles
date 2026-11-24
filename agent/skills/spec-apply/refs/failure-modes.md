@@ -13,6 +13,12 @@
 | 显式路由不在白名单（`is not allowed for this Session`） | 按三档回退：fallback 重派一次 → 继承会话模型 → 仍失败报告暂停，不反复重试（routing.md）；白名单是 DSH 会话级授权而非本工作流自设（见 dsh/README.md） |
 | 需读图而路由不支持（`does not declare image input`） | 改用 `vision` 路由重新派发；能力事实，不重试原路由 |
 | 旧会话报 `child model selection is disabled` | 配置只对新会话生效：新建会话重试；不判定工具损坏 |
+| 压缩后派发漏路由 / 子代理报 `ROUTE-MISMATCH` | 停派；按 `/tmp/spec-flow/<change>/routing.md` 重建/核对路由后显式重派；已停手任务重派，不重跑已合格任务（routing.md） |
+| `routing.md` 缺失或与阶段不符 | 按映射文件 + 登记簿笔记覆盖重建并写回，**重建前不派发**；旧路径子代理走 `ROUTE-LEGACY` 不阻断（routing.md） |
+| `ROUTE-MISSING` / 回执无自证行 | 键缺失 → 停手，补快照键后重派；无自证行 → 记 `ACK-MISSING`，后续要求自证；不因此重跑已合格任务 |
+| 系统提示无模型声明 | 跳过自证，回执注明；照常按验证句核对 |
+| 假失配（同一模型不同显示名） | lead 判定同一模型后放行，登记行 `reason=ACK-ADJUDICATED`；判不准则按失配处置 |
+| 快照值与映射文件不一致（非覆盖/回退） | 以映射文件为准重建快照并在呈证报告；不按错快照继续派发 |
 | team 成员创建失败 / Team 模式未开启 | Team 模式未开启 → 提示用户在根会话菜单开启后重试，否则回退 subagent 并留痕；成员创建失败同样回退并留痕；**无成员上限概念**（受 `maxActiveSubagents` 与映射 `parallelism` 约束）；控制手段 = 软废止令（登记簿该条目改 `state=void` + `reason`，仅检查点生效）+ `send_message` 下行通知，本配置无硬中断 |
 | `send_message` 到 subagent/成员（下行）与子代理直报主会话（上行） | 按方向分别处置：**下行**（lead→subagent/成员）**可达**——`send_message(agent="<name>")`：运行中目标在下一步骤边界收 steer、闲置目标起一轮新轮次、冷目标恢复；**上行**（subagent→lead）用 `send_message(agent="lead")` 直报根会话，单发不候复，事件限**两类（决/异）**；派发事实以 `/tmp/spec-flow/<change>/progress.md` 登记簿为准，不因此重复派发 |
 | 上下文压缩丢失派发记录/回执 | 按 spec-workflow 恢复协议 + 登记簿：以登记簿条目状态 + 写范围落盘事实判定——`state=active` 且写范围内预期文件已出现=在途（等回执，不重派、不轮询）；零落盘且无上行无回执=stalled（先对现存 diff 跑验证句：过则补勾 `done`，未过才重派 `@r2`，原行留存，恢复后不新建重复行）。`job_list` 不得作为在途判据（不含 subagent，真实运行中实测为空），防误判「已丢」造成双写 |

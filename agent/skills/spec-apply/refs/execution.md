@@ -2,13 +2,13 @@
 
 **subagent 引擎（默认）**：
 
-- **具名派发（fresh）**：每任务一个 fresh 子代理——`subagent(name="apply-<组>-<任务>", description=…, prompt=…)`，`name` 按 [coordination.md](coordination.md) §2 命名规约在派发前即可推导。调用**立即返回名**，回执文本 `started subagent <name>` 与 `name` 核对一致才算已派发；不用 fork（继承上下文且不支持模型选择）；派发只走 `name`/`description`/`prompt`（可选 `cwd`）与路由字段，无后台运行参数。
+- **具名派发（fresh）**：每任务一个 fresh 子代理——`subagent(name="apply-<组>-<任务>", description=…, prompt=…, provider=<快照 provider>, model=<快照 model>)`，`name` 按 [coordination.md](coordination.md) §2 命名规约在派发前即可推导。**路由字段必传**（取值见 [routing.md](routing.md)「路由快照」；仅快照值为 `inherit` 时省略并在登记行记 `route=inherit`）。调用**立即返回名**，回执文本 `started subagent <name>` 与 `name` 核对一致才算已派发；不用 fork（继承上下文且不支持模型选择）；派发只走 `name`/`description`/`prompt`（可选 `cwd`）与路由字段，无后台运行参数。
 - **完成通知自动递送**：子代理结束时父级在线即自动收到通知（含最终回答，除非它结束前刚发过消息）——据此推进，**不轮询** `list_agents`：其 running/inactive「不表示任务完成、成功或失败」，也不落盘，替代不了登记簿。
-- 提示自包含（缺一不可）：**项目根绝对路径**（隔离执行时 = worktree 路径，见 spec-workflow 的 refs/worktree.md（唯一权威源））、**任务原文（含编号）**、**design.md 中该任务所属组的实现要点逐字引用**（不得转述）、验收标准=**验证句原文**、写范围（允许改的文件/目录，须含该任务触达面条目所列文件）、禁止事项（不 `git add`/`git commit`、不改 `tasks.md` 勾选、不改写范围外文件、不跑破坏性或不可逆命令）、**栈对应 writer skill 加载指令**——**从落档 `design.md` 决策记录读取**栈识别结论后点名 skill 名（豁免时注明依据；**记录无从取得则重识别一次**并更新落档记录——加载失败按待决问题上浮，不静默跳过）。**受控嵌套并入本项**：本 profile `maxDepth: 2` 使孙代理可达 → 只许派**只读孙代理**（检索/分析/复核），不得派可写子代理；孙代理提示同样自包含、写明「**只读：不写文件、不 git**」并转述本任务的硬约束，产出由派发者核对。
+- 提示自包含（缺一不可）：**项目根绝对路径**（隔离执行时 = worktree 路径，见 spec-workflow 的 refs/worktree.md（唯一权威源））、**任务原文（含编号）**、**design.md 中该任务所属组的实现要点逐字引用**（不得转述）、验收标准=**验证句原文**、写范围（允许改的文件/目录，须含该任务触达面条目所列文件）、**路由键与路由快照路径**（`路由键：apply`，读图任务 `vision`；快照 `/tmp/spec-flow/<change>/routing.md`）、禁止事项（不 `git add`/`git commit`、不改 `tasks.md` 勾选、不改写范围外文件、不跑破坏性或不可逆命令）、**栈对应 writer skill 加载指令**——**从落档 `design.md` 决策记录读取**栈识别结论后点名 skill 名（豁免时注明依据；**记录无从取得则重识别一次**并更新落档记录——加载失败按待决问题上浮，不静默跳过）。**受控嵌套并入本项**：本 profile `maxDepth: 2` 使孙代理可达 → 只许派**只读孙代理**（检索/分析/复核），不得派可写子代理；孙代理提示同样自包含、写明「**只读：不写文件、不 git**」并转述本任务的硬约束，产出由派发者核对。
 - 组内并发派发、**组间串行**；并行上限以映射文件 `parallelism` 为准（键缺失按 3）。
-- **派发台账（防压缩丢失，v3 登记簿）**：完成通知与回执都只在对话里，压缩会一并丢掉。登记簿 `/tmp/spec-flow/<change>/progress.md` 为**单源**（派发台账+租约+废止令）：写者仅主会话，子代理**只读**；条目含 `T`/`scope`/`agent`/`state`/`at`/`src`/`reason`，状态机 `active→done|void|stalled`，**先登记全批再并发派发**，更新一律 `Edit` 定点改、**禁止 `Write` 整文件覆盖**。v3 的 `agent` 记 **name**——name 是派发即得、模型面可寻址的唯一稳定身份（Session id 仍是执行身份）；`list_agents` 的 running/inactive 不含完成语义、树枚举随会话存活，**不能替代落盘台账**。schema 全表与派发序见 [coordination.md](coordination.md) §2/§3，恢复协议与 failure-modes 据此核查。
+- **派发台账（防压缩丢失，v4 登记簿）**：完成通知与回执都只在对话里，压缩会一并丢掉。登记簿 `/tmp/spec-flow/<change>/progress.md` 为**单源**（派发台账+租约+废止令）：写者仅主会话，子代理**只读**；条目含 `T`/`scope`/`agent`/`state`/`at`/`src`/`route`/`reason`，状态机 `active→done|void|stalled`，**先登记全批再并发派发**，更新一律 `Edit` 定点改、**禁止 `Write` 整文件覆盖**。v4 的 `route` 记本次派发实际路由（取值来自 `/tmp/spec-flow/<change>/routing.md` 路由快照，**派发源是快照、不是本行**）；`inherit` 仅映射为空/回退②并记原因。v3 的 `agent` 记 **name**——name 是派发即得、模型面可寻址的唯一稳定身份（Session id 仍是执行身份）；`list_agents` 的 running/inactive 不含完成语义、树枚举随会话存活，**不能替代落盘台账**。schema 全表与派发序见 [coordination.md](coordination.md) §2/§3，恢复协议与 failure-modes 据此核查。
 - **协调注入（仅 subagent 引擎）**：每个 fresh 子代理提示粘该文件 §4 注入段**全文**（连 `coord-inject` 标记）——三处检查点（动手前/每次写文件前/跑验证句前）、上行格式与冲突裁决纪律都在段内，不摘要、不转述。
-- 回执格式要求：改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按 [routing.md](routing.md) 给任务子代理应用 `apply` 路由（**两引擎通用**；任务需读图时改用 `vision`）。**检查点命中废止/停滞时回执首行 `VOIDED`/`STALLED`**。
+- 回执格式要求：**首行自证标记之一**（`ROUTE-ACK model=<模型>` / `ROUTE-MISMATCH expected=<路由> actual=<模型>` / `ROUTE-LEGACY` / `ROUTE-MISSING key=<键>`），正文含改动文件清单、验证命令与输出摘要、偏差与未完成项、**待决问题（TOP 待决项）**。按 [routing.md](routing.md) 给任务子代理应用 `apply` 路由（**两引擎通用**；任务需读图时改用 `vision`）；提示首行写 `路由键：apply`（或 `vision`）与快照路径。**检查点命中废止/停滞时回执首行 `VOIDED`/`STALLED`**。
 - **待决问题中转**（第四节协议）：子代理遇需用户拍板的决策不得自行假设，在产物与回执中上浮 → 主会话**立即代问用户**（≤5 问/轮）→ **同实例续话优先**：`send_message(agent="<name>")` 把「上一轮回执摘要 + 用户答复」回给同一实例续轮（闲置即起轮、运行中在步骤边界收 steer，上下文保留）。这是让 subagent 事实上能与用户交互的机制（子代理自身不能提问，`DELEGATED_CALLER`）。
 - **冷兜底重派**：仅当目标已不可恢复（实例丢失/路由失败）才新派——新名追 `-r2`，提示并入上一轮回执摘要 + 用户答复；**任务失败重试同样派 fresh**（同一提示 + 上次失败输出摘要），不复用实例补跑。
 - **上行直报**：紧急项可 `send_message(agent="lead")`（根名寻址，单发不候复，决/异两类，格式见 [coordination.md](coordination.md) §5）；发送失败即降级为回执上浮，不重试、不阻塞。
@@ -17,9 +17,9 @@
 **team 引擎（可选，Team 模式）**：
 
 - **前置检查（缺一不可）**：①`--engine team` 或映射文件 `engine` 显式启用；②**根会话菜单已开启 Team 模式**（模型不能自开）——工具面自检 = 当前会话可见 `team_task_*` 任务板工具。任一不满足 → **不启用 team**，回退 subagent 完成该任务，并把「未开启/不可用 + 退因 + 实际引擎」写入留痕；该不该升级见 [coordination.md](coordination.md) §9（单条判据，只提示不自动切——并发量不构成理由，两引擎同受在线上限）。
-- 主会话作为 Lead：`team_task_create(subject, description, blocked_by[], write_scopes[])` 把组内每个任务发布到**共享任务板**（表挂 subagent 树的根 Session）——卡片含任务原文、**验证句原文**、写范围、产出要求，以及**与 subagent 引擎同款的栈对应 writer skill 加载指令**（从落档 design.md 决策记录点名 skill 名）。
+- 主会话作为 Lead：`team_task_create(subject, description, blocked_by[], write_scopes[])` 把组内每个任务发布到**共享任务板**（表挂 subagent 树的根 Session）——卡片含任务原文、**验证句原文**、写范围、产出要求、**路由键与路由快照路径 + 自证句**，以及**与 subagent 引擎同款的栈对应 writer skill 加载指令**（从落档 design.md 决策记录点名 skill 名）。
 - `blocked_by` 填组内依赖任务 id（就绪性由任务板判定）；`write_scopes` 填仓内相对路径前缀（写范围重叠由任务板告警）——两者与登记簿 `scope` 同源，不另造口径。
-- **具名 implementer**：以同名 `subagent(name="apply-<组>-<任务>", …)` 派发（立即返回名），成员数与任务数同阶，不再另建成员。
+- **具名 implementer**：以同名 `subagent(name="apply-<组>-<任务>", …, provider=<快照 provider>, model=<快照 model>)` 派发（立即返回名），成员数与任务数同阶，不再另建成员；成员按卡片路由键读快照自证，失配停手上行。
 - **CAS 认领**：implementer 先 `team_task_get` 取最新 `revision`，再 `team_task_update(task_id, action="claim", expected_revision=<rev>)` 认领——**CAS 失败即重读 revision 重试，不硬写**；认领后 owner 即其 name，按卡片执行。
 - **审核反馈回同一 implementer**：`send_message` 把修改要求发给负责该任务的 implementer，由其在同一上下文内修复（反馈不重派新成员）。
 - **待决问题中转**（第四节协议）：implementer 上浮的待决项由 Lead **立即代问用户**，再用 `send_message` 把答复**回送同一 implementer**（上下文保留、可多轮往返澄清）——与审核反馈同一条通道，也是被拥有的 implementer 与用户交互的唯一通路（成员同样不能直接提问）。
@@ -45,16 +45,18 @@
 - **多仓分立提交**：代码、工件、生成物各归其仓——嵌套独立子仓（如根仓承载 openspec 工件、子仓承载代码）与工作区外独立仓（用户明示参与后）同循此则：**N 仓各自形成完整提交、不跨仓混提**；隔离执行时代码仓的检出即 worktree（`feature/<change>` 分支）——代码提交仍在该 worktree 内做、工件提交仍在根仓主工作区，布局与装配见 spec-workflow 的 refs/worktree.md（唯一权威源）。
 - **外部仓外溢口径**：执行期需求波及工作区外独立仓 = 规划外 scope 变化 → 停下回用户（呈证点呈报或按硬停条件③）；用户明示后改动随该仓提交、R<n> 留痕注明外溢。
 - **真实凭据纪律**：验证/冒烟需要的真实密钥**只经命令行参数或环境变量传入进程**，绝不写入任何入库文件、工件、日志或提交信息；凭据缺失时以明确报错失败（如提示缺少参数），**不静默跳过、不伪造结果**。
-- **中途恢复（`auto` 尤甚）**：勾选任务的改动**尚在工作区、未提交属预期**（收尾经用户确认才提交）；**先对现存 diff 跑该任务验证句**——通过即**保持勾选、不重派子代理**，未通过才回退该勾选并报告。
+- **中途恢复（`auto` 尤甚）**：勾选任务的改动**尚在工作区、未提交属预期**（收尾经用户确认才提交）；**先读 `/tmp/spec-flow/<change>/routing.md` 重建路由**（缺失则先重建，重建前不派发），再对现存 diff 跑该任务验证句——通过即**保持勾选、不重派子代理**，未通过才回退该勾选并报告。
 - `auto` 模式的**硬停条件**（必须停下来问用户，不得自行推进）：①不可逆操作（删除/覆盖/force push/数据迁移/发布上线）；②安全敏感（凭据、密钥、权限、生产配置）；③工作区外副作用（改宿主文件、其他仓库、重启容器或服务）；④计划彻底失效（实现与 design/spec 前提矛盾）。除此之外 auto 不在批次之间询问「是否继续」。
 - 任务失败：**重试一次**（同一提示 + 上次失败输出摘要）；仍失败则**暂停本批次并报告**（任务号、错误摘要、已完成/未完成清单、建议），不中断整个流程、不擅自动其他批次。
 
 ## 附：执行期留痕与工件维护（组收尾必做）
 
+- **路由核对（v4）**：本批回执首行与登记行 `route` 逐任务比对——`ROUTE-ACK` 一致 → 正常；`ROUTE-MISMATCH`/`ROUTE-MISSING` → 该任务未完成，按 [failure-modes.md](failure-modes.md) 重派；回执无自证行 → 记 `ACK-MISSING`；**漂移但任务验证句与 diff 已独立核对通过** → 该行 `reason=ROUTE-DRIFT actual=<模型>` 留痕、不重跑、呈证报告。
 - **勾选核对**：本组任务全部 `- [x]` 才进工件维护与呈证——发现未勾先补跑该任务验证句核对再勾；勾选与工件维护、提交同为组收尾必做。
 - **`code-design.md` 组段终形态化**：每组核对完成后，把该任务组对应的组段更新为**终形态**——含实测事实（框架 API 行为、环境约束）、被否方案与理由、验收数据；后续组与接续恢复以工件为准。**维护目标是变更目录内的落档副本（`openspec/changes/<change>/code-design.md`，spec-plan 落档时复制入库），更新随批次提交入库；`/tmp` 侧原件不再维护**。**前提——落档副本在变更目录**：缺失按 spec-workflow SKILL.md 恢复协议补复制或问用户，**不得以 /tmp 原件替代维护**。
 - **运行规则编号留痕**：执行中新证实的项目级运行规则（构建工具怪癖、目录约定、验收口径等）以 **R<n> 编号条目**追加到 `tasks.md` 附录或 `diff-matrix.md` 执行期章（**`diff-matrix.md` 亦为变更目录内落档副本**，更新随批次提交），供后续组与接续引用；条目须自包含（规则 + 依据 + 适用范围 + **连锁面**——该规则联动需同步的工件 / spec Scenario / 代码 / 测试清单）；推翻前裁定时前条标注「被 R<n'> 推翻」并对其连锁面重跑同步。
 - **证据目录**：过程证据（验证输出、探针记录、复核报告）落 `/tmp/<项目>-evidence/`——易失、不入库、不进提交，**结论摘要进留痕**；`git status` 不得出现证据文件。
+- **压缩友好输出**：每批收尾的「下一批」预告一行写 `下一批 <组>，路由 apply=<route>（/tmp/spec-flow/<change>/routing.md）`——compact 摘要倾向保留「下一步」，该行是快照之外的第二道提示，但不替代快照。
 
 ## 附：干净窗口验收（两步法）
 

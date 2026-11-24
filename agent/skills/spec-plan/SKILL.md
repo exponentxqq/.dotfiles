@@ -107,7 +107,7 @@ description: spec 驱动工作流的规划半程——并行双线或串行单�
 
 ## 八、模型路由
 
-映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由恒适用**：并行规划线/复算线/设计线恒为具名 fresh 子代理派发（`subagent(name=…)`）；**fork 不支持模型选择**，故不用 fork；**串行单线无派发，规划键不消费**。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。**
+映射文件 **`/home/xuqinqin/develop/dotfiles/dsh/spec-workflow.yaml`**（**绝对**路径）：规划键 `lineA`/`lineB`/`panel`/`design` → 阶段 1 A/B 线、1.5 复算线、1.7 设计线；能力键 `vision` = **读图覆盖**。**路由恒适用**：并行规划线/复算线/设计线恒为具名 fresh 子代理派发（`subagent(name=…)`）；**fork 不支持模型选择**，故不用 fork；**串行单线无派发，规划键不消费**。执行键（`apply`）、`engine`/`parallelism` 由 spec-apply 消费，`verify` 由 spec-done 复用；`parallelism` 用于第七节分组上限。**优先级：`--model` > 映射文件 > 继承会话模型。** **派发必显式传 `provider`/`model`** 并让子代理按系统提示模型名自证（压缩后重读映射，不凭记忆；细则见 [routing.md](refs/routing.md)）。
 
 红线要点（**展开唯一权威源 = [routing.md](refs/routing.md)——派发前先读它**）：**三档回退**（顺序固定，不反复重试）——①有 `fallback` → 备用**重派一次**；②无或备用也失败 → **回退继承会话模型**一次；③仍失败 → 报告并暂停。**读图**——按**映射文件该键当前路由**核对图片输入能力（判定方法见 routing.md，本 skill 不记忆任何具体模型的能力快照）；路由不支持图片时报 `does not declare image input` 是**能力事实不是故障** → 改走 `vision`。
 

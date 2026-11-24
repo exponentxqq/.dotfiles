@@ -202,7 +202,15 @@ openspec archive <change>           # 评审通过后归档
 
 **reasoning effort**：subagent 路由不携带 effort、取 provider 默认。profile 已显式配置 `llm-deepseek.reasoningEffort: max` 与 pi-ai `providers.{zai,zai-coding-cn,zcode-plan,opencode-go}.reasoning: max`（**pi-ai 的字段名是 `reasoning`**，此前误写为 `reasoningEffort` 不生效，已修正）——**profile 改动需重启 dsh 生效**；映射文件（本 YAML）改动在下一次派发即生效。
 
-> **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。
+**压缩后的路由持久性（执行/验证，实测沉淀）**：`/compact` 后若下一轮由子代理消息或用户「继续」触发，skill 不会重载、compact 摘要又可能把派发示形压成**无路由的简写**——而 `subagent` 省略 `provider`/`model` 时会**静默继承主会话模型**（白名单只校验显式路由，不拦继承）。工作流因此把路由持久化：
+
+- **路由快照**：spec-apply 开工把已解析路由写入 `/tmp/spec-flow/<change>/routing.md`（`apply`/`apply_fallback`/`vision`/`verify`/`engine`/`parallelism` + 来源）；映射文件仍是唯一权威，快照只是本次运行的已解析副本，**不是第二真源**。
+- **派发必填**：每次派发显式传 `provider`/`model`，提示含路由键与快照路径；仅映射为空/回退②才按 `inherit` 派发并在登记行留痕。
+- **子代理自证**：子代理开工读快照本键、比对系统提示 `powered by <model> model`；失配即停手（`ROUTE-MISMATCH`）而不是错模型跑完；v3/无快照走 `ROUTE-LEGACY` 放行（不阻断在途变更）。
+- **漂移留痕**：登记簿 v4 逐行记 `route=`；已漂移但验证合格的任务不重跑，`reason=ROUTE-DRIFT actual=…` 留痕并在呈证报告。
+- 实证锚：benchmark T7.3 一个变更内 47 次派发中 **30 次**因压缩丢路由（2026-11-24T17:10+08:00 复算）、子会话实际跑在主会话模型上（`apply-6-2` 起连续缺失）——该机制即为此而设。
+
+> **白名单一致性**：显式路由（含 `fallback`）必须已在 web profile `cordis.patch.yml` 的 `subagent-model-selection-settings.allowedModels` 内，映射文件键值须始终是其子集；不在白名单时调用报 `child LLM route "…" is not allowed for this Session`。按**三档回退**处置：`fallback` 重派一次 → 回退继承会话模型 → 报告并暂停（不反复重试）。启用只需覆盖 `subagent-model-selection-settings` 一条（`enabled: true` + `allowedModels`）；`tool-subagent` 的 `modelSelectionSettings` 由各 agent 预设层自带 `true`，profile 补丁再覆盖只会落到被禁用的宿主行、无实际效果。**注意：省略 `provider`/`model` 的派发不走这份校验**（直接继承父路由）——白名单只约束显式路由，工作流侧必须显式传并由子代理自证（见上段「压缩后的路由持久性」）。
 >
 > **出处（这是 DSH 的会话级授权，不是本工作流自设的约束）**：机制在 `@deepseek-ai/dsh-tool-subagent` 的 Host 设置 `subagent-model-selection-settings`——会话创建时把 `allowedModels` 写成 `subagent/model-selection-policy` 投影事件，派发时 `assertAllowedModelSelection` 逐一比对精确路由。只有两态：名单启用 = 只允许精确列表；名单关闭或未挂载 = **只允许父会话当前 provider/model**（无 allow-all 形态，核查至上游 0.2.3-alpha.2 仍如此）。因此删掉名单不会解除限制、只会退化成仅父路由——保留名单并手工维护是当前唯一合理形态；把新模型加进 profile 路由后要被子代理显式选中，仍需同步加进 `allowedModels`（会话创建时读取，新会话生效）。
 >

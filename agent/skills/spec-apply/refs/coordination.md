@@ -1,6 +1,6 @@
 # coordination.md · 协调协议
 
-> `spec-apply/SKILL.md` §三「协调纪律」外移（唯一权威源）；回入口引用「SKILL.md §三」，消费方只指路。
+> `spec-apply/SKILL.md` §三「协调纪律」外移（唯一权威源）；回入口引用「SKILL.md §三」，消费方只指路。登记簿 v4 与路由快照（`/tmp/spec-flow/<change>/routing.md`）为执行期唯一派发凭据。
 
 ## §1 平台事实（不得违反）
 
@@ -9,12 +9,13 @@
 - **sibling 技术可达**（跨分支）：仍禁止私商写冲突，冲突归主会话（subagent:198；catalog:2298）。
 - **本配置无硬中断**：`interrupt_agent` 未挂载（preset `interrupt:false`）；按工具面自检，不写「平台不可用」（rc.1 interrupt）。
 - **委派即返名**：完成通知自动递送、结束后可续话（catalog:2237/2269）。
+- **省略路由 = 继承父会话**：`subagent` 未传 `provider`/`model` 时按父会话路由派生；白名单只校验显式路由、**不拦继承**（`dsh-tool-subagent` 的 `requestedAgentOptions` 与 `assertAllowedModelSelection`）——静默失效是平台语义，工作流必须显式传路由并由子代理自证。
 
 锚点（`docs/` 下）：`subagent`=`subsystems/subagent.zh.md`；`catalog`=`tool-catalog.zh.md`；`rc.1 interrupt`=`upgrade-guide/v0.2.2-rc.1/subagent-interrupt-default`。版本快照只写本块。
 
 ## §2 登记簿 schema 与状态机
 
-登记簿 = `/tmp/spec-flow/<change>/progress.md`（v3）；必填，`reason` 仅 `void`/`stalled`。
+登记簿 = `/tmp/spec-flow/<change>/progress.md`（**v4**）；路由快照 = 同目录 `routing.md`（**唯一派发源**，字段与解析见 spec-apply refs/routing.md）。必填，`reason` 为 `void`/`stalled` 依据或漂移留痕。
 
 | 字段 | 取值 | 语义与约束 |
 |---|---|---|
@@ -24,9 +25,12 @@
 | `state` | `active\|done\|void\|stalled` | 状态机不变 |
 | `at` | ISO8601 带时区 | 最后状态变更 |
 | `src` | `dispatch\|receipt\|void\|recover` | 状态来源 |
-| `reason` | 自由文本 | 废止/停滞依据 |
+| `route` | `<provider>/<model>` / `inherit` | **v4 新增**：本次派发实际路由（审计记录，不驱动派发——驱动派发的是 `routing.md`）；`inherit` 仅映射为空或三档回退②，须在 `reason` 记原因 |
+| `reason` | 自由文本 | `void`/`stalled` 依据；或 `ROUTE-DRIFT actual=<模型>` / `ACK-ADJUDICATED` 留痕 |
 
 **状态机**（不变）：`active --回执通过--> done`｜`active --用户叫停/lead 放弃--> void`（软废止令）｜`active --零落盘+无上行+无回执--> stalled`｜`stalled --重派--> 新行 @r2`。
+
+**v3 → v4 兼容**：v3 登记簿不强制升级；v4 新行必须带 `route`；终态行不改写。**只有 `routing.md` 存在时子代理才强制自证**——v3/无快照按 `ROUTE-LEGACY` 放行，不阻断在途变更。
 
 **命名规约（v3）**：`name = <角色>-<序号>`——`plan-a`/`plan-b`/`panel-<n>`/`design`/`apply-<组>-<任务>`/`verify-<n>`；重派追 `-r<n>`（如 `apply-2-1-r2`）。硬约束：全名 **≤32 字符、小写 kebab、字母开头、非保留名 `lead`**（catalog:2251–2253）。重名被拒 → 追加变更短码 `-<变更名首段截6字符><变更名长度十进制>`（`adapt-spec-skills-to-dsh-rc5` → `-adapt28`）重试一次；再拒即上行 `异`，不循环。
 
@@ -36,9 +40,10 @@
 
 ## §3 派发前登记序（lead 操作序）
 
-1. **先登记全批再并发**：按 §2 逐任务一行，`agent=pending`；`scope` 从触达面抄，目录以 `/` 结尾。
-2. 派发返回 `started subagent <name>` 后按命名规约核对回填 `agent=<name>`；回执通过 → `state=done`（`at`/`src=receipt`）；未到按 §8。
-3. 注入段（§4 全文连标记）粘进每个 fresh 子代理提示；team 不注入。
+1. **先读快照**：读 `/tmp/spec-flow/<change>/routing.md` 取本批路由键值（缺失先按 refs/routing.md 重建，重建前不派发）。
+2. **先登记全批再并发**：按 §2 逐任务一行，`agent=pending`、`route=<快照值>`；`scope` 从触达面抄，目录以 `/` 结尾。
+3. 派发返回 `started subagent <name>` 后按命名规约核对回填 `agent=<name>`；回执通过 → `state=done`（`at`/`src=receipt`）；未到按 §8。
+4. 注入段（§4 全文连标记）粘进每个 fresh 子代理提示；team 不注入。
 
 ## §4 协调协议注入段模板
 
@@ -47,6 +52,7 @@
 ```
 <!-- coord-inject:start -->
 【协调协议·本任务强制】
+0. 路由自证（开工第一动作）：读 /tmp/spec-flow/<change>/routing.md 的本任务键（默认 apply；读图任务 vision）得 R；与系统提示「powered by <模型> model」比对：一致或 R=inherit → 开工，回执首行 ROUTE-ACK model=<实际>；不一致 → 停手（不写文件、不 git），send_message(agent="lead") 报 [上行][<change>][T<n.m>][异] 路由漂移 expected=<R> actual=<模型> / 阻塞：是，回执首行 ROUTE-MISMATCH；routing.md 缺失 → 开工并回执首行 ROUTE-LEGACY；键缺失 → 停手，回执首行 ROUTE-MISSING。
 1. 登记簿（唯一协调源）：/tmp/spec-flow/<change>/progress.md。开工第一动作读全表，记下他人 state=active 的 scope。
 2. 让路：他人 scope 与你的写范围前缀相交 → 交集路径一律不写；整任务无法避让 → 按第 4 条上行为「决」。
 3. 检查点（读你自己条目，共三处）：①动任何文件前 ②每次写文件前 ③跑验证句前。条目 state=void|stalled 或 agent 非你的 name → 停手：不再改动、不 git 操作，回执首行写 VOIDED；收到下行废止通知也以登记簿为准。
@@ -121,7 +127,7 @@
 
 ## §10 长度与维护
 
-- 硬界：`len()` 3800–5000 cp；注入段 7–15 行。
+- 硬界：`len()` 3800–**6400** cp（v4 增路由字段与自证段后上调；仍低于单文件 8192 上限）；注入段 7–15 行。
 - 单一权威源：变更只改本文件；消费方（`spec-apply`、`refs/*`、`spec-plan`）只指路。
-- 消费方 grep 常量：`active→done|void|stalled`、`VOIDED`、`coord-inject`、`send_message(agent="lead")`。
+- 消费方 grep 常量：`active→done|void|stalled`、`VOIDED`、`coord-inject`、`send_message(agent="lead")`、`route=`、`ROUTE-ACK`、`ROUTE-MISMATCH`、`ROUTE-LEGACY`、`routing.md`。
 - 措辞遵循 writing-skills：配方加槽（U3，④D12）。

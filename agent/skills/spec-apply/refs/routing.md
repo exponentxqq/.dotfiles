@@ -25,7 +25,29 @@ parallelism: 8      # 同组并行上限
 
 > **规划键归属**：`lineA` / `lineB` / `panel` / `design`（规划三线与设计线）由 **spec-plan** 消费（其 `refs/routing.md` 为该侧唯一权威源）；`--model` 参数中的规划键由编排层 **spec-workflow 原样转发** spec-plan，本 skill 不消费。四段共用同一映射文件与白名单。
 
-**图片输入能力**（判定方法，**快照表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
+### 路由快照与压缩恢复（执行侧唯一派发源）
+
+阶段开工解析后 SHALL 写入 `/tmp/spec-flow/<change>/routing.md`（与登记簿同目录、易失不入库；映射文件仍是唯一权威，快照只是本次运行的已解析副本）：
+
+```markdown
+# 路由快照（<change>；唯一权威=映射文件 dsh/spec-workflow.yaml；本文件=已解析副本）
+- written=<ISO8601+08:00> stage=<apply|done> source=<mapping|--model|fallback①|fallback②>
+- apply=<provider>/<model>          # inherit = 映射为空或三档回退②
+- apply_fallback=<provider>/<model>
+- vision=<provider>/<model>
+- verify=<provider>/<model>         # spec-done 复用
+- engine=<subagent|team> parallelism=<n>
+- 派发必传 provider/model（省略=静默继承父会话）；子代理读本文件自证；改路由先改本文件并记 history
+- 自证契约：开工读本键，与系统提示「powered by <模型> model」比对；不符 → 停手 + 上行 + 回执首行 ROUTE-MISMATCH；快照缺失 → ROUTE-LEGACY；键缺失 → ROUTE-MISSING
+```
+
+- **写入/刷新**：spec-apply 开工写入；回退①/②、读图改道或 `--model` 变更时先改本文件（旧值进 `history`）再重派；快照缺失时按映射文件 + 登记簿笔记覆盖重建，**重建前不派发**。
+- **派发必填**：`subagent(..., provider=<provider>, model=<model>)`；提示含 `路由键：apply`（读图任务 `vision`）与快照路径；仅快照值为 `inherit` 时按继承派发并在登记行留痕（`route=inherit` + reason）。漏传即改写平台默认语义（继承父会话），属违规。
+- **子代理自证**：开工读本文件任务键得 R，与系统提示 `powered by <模型> model` 比对——一致/`inherit` → 回执首行 `ROUTE-ACK`；不一致 → 停手 + 上行 + `ROUTE-MISMATCH`；快照缺失 → `ROUTE-LEGACY`；键缺失 → 停手 `ROUTE-MISSING`。注入段见 [coordination.md](coordination.md) §4。
+- **回退与读图**：三档回退以本文件为记录点——① 把 `apply` 更新为 fallback 并记 source；② `apply=inherit` 并记原因；读图改道只走 `vision`，不动 `apply`。
+- **压缩之后**：识别到压缩检查点或新轮次 → 先读快照重建路由再派发，不凭会话记忆；这是本机制存在的唯一理由。
+
+**图片输入能力**（判定方法，**能力速查表不在此维护**——模型迭代后即漂移，一切以映射文件 + 内置数据为准）：某键需读图时，取**映射文件该键当前路由**，查 dsh 内置 pi-ai provider 数据 `…/pi-ai/dist/providers/data/{zai,opencode-go,deepseek}.json` 的 `input` 字段是否含 `image`；支持则保持阶段路由直读，不支持则改走 `vision` 键。改白名单时同步核对。
 
 > **版本口径与套餐策略**：单一来源 = 映射文件**头部注释**（随文件更新，本文件不复述）。**质量升级开关**：某批次反复验证失败时，整轮用 `--model apply=<provider>/<model>` 显式覆盖为白名单内更强模型（选哪个、怎么取舍见映射文件头部注释）。
 
@@ -57,10 +79,11 @@ console.log("OK 全部路由 ⊆ 白名单");'
 - **白名单**：显式路由（含 `fallback`）必须已在 profile 的 `subagent-model-selection-settings`（`dsh/profiles/web/cordis.patch.yml` 中的 `allowedModels`）内；映射文件的键值必须始终是该**白名单**的子集。（此白名单是 DSH 的**会话级授权**，非本工作流自设的约束——机制与两态语义见 `dsh/README.md`「白名单一致性」段。）
 - **三档回退（顺序固定，不反复重试同一路由）**：① 有 `fallback` → 用**备用路由重派一次**；② 无 `fallback` 或备用也失败 → **回退继承会话模型**派发一次；③ 仍失败 → 报告该路由与错误原文并暂停。触发条件：`child LLM route "<provider>/<model>" is not allowed for this Session`（不在白名单）、provider 报错、模型不可用或限流。提示用户改映射文件或把该路由加进白名单（后者属于宿主操作）。
 - **只有 fresh 子代理支持模型选择**（`subagent` 的 `provider` / `model` 字段）；`subagent_fork` 不支持模型选择（保持与父会话一致以复用 KV cache），需要阶段路由时**不要用 fork**。
+- **省略路由即继承**：`subagent` 不传 `provider`/`model` 时按父会话路由派生，且不受白名单校验——工作流一律显式传路由；子代理按快照自证，失配停手（`ROUTE-MISMATCH`）。
 - **开关与白名单在会话创建时读取**：改动 profile 配置后**新建会话**即生效（实测无需重启 dsh）；**既有会话不会中途获得该能力**——在旧会话里派发会报 `child model selection is disabled for this tool instance`，那是「该会话未生效」而非工具损坏，换新会话即可。
 - **两引擎均应用 `apply` 键**（`team` 引擎的成员即具名子代理，fresh 支持模型选择）；路由字段随 preset 启用，未启用时报错不硬闯——按三档回退处置。
 - **主会话阶段的模型由用户自行切换**，衔接点提示由编排层 spec-workflow 承载、终末提示由 spec-done 承载；本 skill 无法修改主会话模型。
-- 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），报告一次后继续。
+- 映射文件缺失、读不到或 YAML 非法 → 视为空映射（全部继承），快照 `apply=inherit`，报告一次后继续。
 - 参数语法错误（阶段名非法、缺 `provider/model`）→ 报错并列出合法键（含 `vision`），要求更正后重发，不猜。
 
-> 注：入口 SKILL.md 第五节保留摘要段（执行键表 + 三档回退顺序 + vision 要点）；展开细节以本文件为唯一权威源（防双源漂移）。
+> 注：入口 SKILL.md 第五节保留摘要段（执行键表 + 三档回退顺序 + 路由快照 + vision 要点）；展开细节以本文件为唯一权威源（防双源漂移）。

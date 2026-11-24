@@ -2,16 +2,17 @@
 
 ## 并行模式（`--parallel`，具名 fresh 子代理）
 
-**派发**：**同一条消息**内并发两次 `subagent`——`subagent(name="plan-a", description="…", prompt="…")` 与 `subagent(name="plan-b", …)`，两线并行执行。调用**立即返回**，回执 `started subagent <name>`，完成通知自动递送——**没有后台派发参数**；**不用** `subagent_fork`（继承本会话上下文，破坏两线独立性，且不能按线选模型）。
+**派发**：**同一条消息**内并发两次 `subagent`——`subagent(name="plan-a", description="…", prompt="…", provider=<lineA.provider>, model=<lineA.model>)` 与 `subagent(name="plan-b", …, provider=<lineB.provider>, model=<lineB.model>)`，两线并行执行。调用**立即返回**，回执 `started subagent <name>`，完成通知自动递送——**没有后台派发参数**；**不用** `subagent_fork`（继承本会话上下文，破坏两线独立性，且不能按线选模型）。
 
 **命名**：`plan-a` / `plan-b`；全名 **≤32 字符、小写 kebab、字母开头、非保留名 `lead`**。重名被拒 → 追加变更短码重试一次（`adapt-spec-skills-to-dsh-rc5` → `plan-a-adapt28`），再拒即上行 `异`，不循环；重派追 `-r<n>`（`plan-a-r2`）。
 
-**模型路由**：两线分别按 `lineA`/`lineB` 键应用（显式 `--model` 覆盖优先；三档回退见 SKILL.md 第八节与 [../refs/routing.md](../refs/routing.md)）。**规划键恒适用**——具名子代理支持模型选择，无编排例外。
+**模型路由**：两线分别按 `lineA`/`lineB` 键应用（显式 `--model` 覆盖优先；三档回退见 SKILL.md 第八节与 [../refs/routing.md](../refs/routing.md)）。**规划键恒适用**——具名子代理支持模型选择，无编排例外。**派发必带路由**：调用显式传 `provider`/`model`，提示首行写 `路由键=lineA`（B 线 `lineB`）与路由值；子代理开工按系统提示模型名自证，失配停手上行（`ROUTE-MISMATCH`），缺路由行时按路由键读映射文件并报告。
 
 ### 提示模板（单版；两条线除「方向」外逐字等形，字段缺一不可）
 
 ```
 项目根（绝对路径）：<project root>
+本任务路由：<provider>/<model>（路由键=lineA；权威=映射文件 dsh/spec-workflow.yaml；开工先比对系统提示「powered by <模型> model」，不一致即停手并上行 ROUTE-MISMATCH）
 需求原文：<用户需求，逐字>
 你的规划方向：<A：需求与价值、范围与边界——要解决什么、为谁解决、边界在哪 | B：实现与约束、反例与风险——怎么做、会怎么错、代价是什么>
 你的产物路径：/tmp/spec-flow/<change>/line-a.md   （B 线为 line-b.md）
